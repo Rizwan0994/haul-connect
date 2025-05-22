@@ -125,11 +125,47 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
 
     try {
       if (isNew) {
-        // Create new carrier
-        createCarrier({
+        // Create new carrier with all form fields
+        const carrierData = {
           ...formValues,
-          status: "active", // Default status for new carriers
-        } as Omit<import("@/lib/carriers-data").Carrier, "id" | "created_at">);
+          status: "active",
+          agent_name: formValues.agent_name || '',
+          mc_number: formValues.mc_number,
+          us_dot_number: formValues.us_dot_number || '',
+          company_name: formValues.company_name,
+          owner_name: formValues.owner_name,
+          phone_number: formValues.phone_number,
+          email_address: formValues.email_address,
+          address: formValues.address || '',
+          ein_number: formValues.ein_number || '',
+          truck_type: formValues.truck_type,
+          dock_height: formValues.dock_height || 'No',
+          dimensions: formValues.dimensions || '',
+          doors_type: formValues.doors_type || '',
+          door_clearance: formValues.door_clearance || '',
+          accessories: formValues.accessories || '',
+          max_weight: formValues.max_weight || '',
+          temp_control_range: formValues.temp_control_range || '',
+          agreed_percentage: formValues.agreed_percentage || '',
+          insurance_company_name: formValues.insurance_company_name || '',
+          insurance_company_address: formValues.insurance_company_address || '',
+          insurance_agent_name: formValues.insurance_agent_name || '',
+          insurance_agent_number: formValues.insurance_agent_number || '',
+          insurance_agent_email: formValues.insurance_agent_email || '',
+          factoring_company_name: formValues.factoring_company_name || '',
+          factoring_company_address: formValues.factoring_company_address || '',
+          factoring_agent_name: formValues.factoring_agent_name || '',
+          factoring_agent_number: formValues.factoring_agent_number || '',
+          factoring_agent_email: formValues.factoring_agent_email || '',
+          notes_home_town: formValues.notes_home_town || '',
+          notes_days_working: formValues.notes_days_working || '',
+          notes_preferred_lanes: formValues.notes_preferred_lanes || '',
+          notes_additional_preferences: formValues.notes_additional_preferences || '',
+          notes_parking_space: formValues.notes_parking_space || '',
+          notes_average_gross: formValues.notes_average_gross || ''
+        };
+        
+        await createCarrier(carrierData);
 
         toast({
           title: "Carrier created",

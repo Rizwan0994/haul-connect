@@ -55,7 +55,23 @@ export async function getCarrierById(id: string) {
   return response.data.data;
 }
 
-export async function createCarrier(data: any) {
+export async function createCarrier(data: Partial<Carrier>) {
+  // Ensure required fields are present
+  const requiredFields = [
+    'mc_number',
+    'company_name', 
+    'owner_name',
+    'phone_number',
+    'email_address',
+    'truck_type',
+    'status'
+  ];
+
+  const missingFields = requiredFields.filter(field => !data[field]);
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
+
   const response = await backendApiClient.post('/carriers', data);
   return response.data.data;
 }

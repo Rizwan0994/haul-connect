@@ -43,6 +43,19 @@ export function LoginForm() {
         password
       });
 
+      if (response.data.token) {
+        // Store token in cookie
+        document.cookie = `token=${response.data.token}; path=/`;
+        router.push('/carrier-management');
+      } else {
+        setError('Invalid login response');
+      }
+    } catch (error: any) {
+      setError(error?.response?.data?.message || 'Failed to login');
+    } finally {
+      setIsLoading(false);
+    }
+
       if (response.data.status === 'success') {
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));

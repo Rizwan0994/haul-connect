@@ -1,6 +1,13 @@
-import { redirect } from "next/navigation";
+
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  // Redirect to the dashboard
-  redirect("/carrier-management");
+  const token = cookies().get('token');
+  
+  if (!token) {
+    redirect('/(auth)/login');
+  } else {
+    redirect('/carrier-management');
+  }
 }

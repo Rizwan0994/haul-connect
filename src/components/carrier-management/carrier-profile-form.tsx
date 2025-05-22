@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import * as React from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -229,8 +230,9 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+  return React.createElement(
+    'form',
+    { onSubmit: handleSubmit, className: "space-y-6" },
       {!isNew && formData?.created_at && (
         <div className="text-sm text-muted-foreground text-right">
           Created on {new Date(formData.created_at).toLocaleDateString()}

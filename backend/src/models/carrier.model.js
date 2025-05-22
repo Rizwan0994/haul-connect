@@ -1,4 +1,3 @@
-
 'use strict';
 const { Model, DataTypes } = require('sequelize');
 
@@ -6,12 +5,12 @@ module.exports = (sequelize) => {
   class CarrierProfile extends Model {
     static associate(models) {
       // Define associations
-      CarrierProfile.belongsTo(models.User, { 
+      CarrierProfile.belongsTo(models.user, { 
         foreignKey: 'agent_name',
         targetKey: 'username',
         as: 'agent' 
       });
-      CarrierProfile.hasMany(models.Dispatch, { 
+      CarrierProfile.hasMany(models.dispatch, { 
         foreignKey: 'carrier_id',
         as: 'dispatches' 
       });

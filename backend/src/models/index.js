@@ -1,3 +1,4 @@
+
 "use strict";
 const dbConfig = require("../config/db");
 const fs = require("fs");
@@ -30,8 +31,8 @@ const sequelize = new Sequelize(
 
 const db = {};
 
-// Read model files and initialize them
-fs.readdirSync(path.join(__dirname))
+// Import all models
+fs.readdirSync(__dirname)
   .filter(file => {
     return (
       file.indexOf(".") !== 0 &&
@@ -46,7 +47,7 @@ fs.readdirSync(path.join(__dirname))
     db[model.name] = model;
   });
 
-// Initialize associations after all models are loaded
+// Set up associations after all models are loaded
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

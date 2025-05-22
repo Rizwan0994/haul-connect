@@ -43,7 +43,8 @@ export function LoginForm() {
       });
 
       if (response.data.status === 'success') {
-        localStorage.setItem('token', response.data.data.token);
+        // Set token as HTTP-only cookie
+        document.cookie = `token=${response.data.data.token}; path=/`;
         router.push('/carrier-management');
       }
       

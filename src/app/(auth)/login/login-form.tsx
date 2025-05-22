@@ -19,6 +19,8 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/loading-spinner";
+import { AuthAlert } from "@/components/auth/auth-alert";
+import backendApiClient from "@/services/backendApi/client";
 
 export function LoginForm() {
   const router = useRouter();
@@ -31,22 +33,23 @@ export function LoginForm() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
     const password = formData.get("password") as string;
     const remember = formData.get("remember") === "on";
 
     try {
-      // This is where you would handle authentication logic
-      console.log("Login attempt:", { email, password, remember });
+      const response = await backendApiClient.post('/api/auth/login', {
+        username,
+        password
+      });
 
-      // Simulate login delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // For demo purposes - redirect to dashboard
-      router.push("/");
-    } catch (error) {
-      setError("Invalid email or password. Please try again.");
-      console.error("Login error:", error);
+      if (response.data.status === 'success') {
+        localStorage.setItem('token', response.data.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -60,34 +63,28 @@ export function LoginForm() {
 
   return (
     <Card className="border-border/80 bg-background/60 dark:bg-gray-900/40 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl overflow-hidden">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-        <CardDescription>
-          Sign in to access your Haul Connect BPO dashboard
-        </CardDescription>
-      </CardHeader>
       <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardDescription>
+            Sign in to access your Haul Connect BPO dashboard
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
           {error && (
-            <div
-              className="bg-destructive/10 text-destructive border border-destructive/30 p-3 rounded-md text-sm flex items-center space-x-2 animate-in fade-in slide-in-from-top-1 duration-300"
-              role="alert"
-            >
-              <AlertCircle className="h-4 w-4" aria-hidden="true" />
-              <span>{error}</span>
-            </div>
+            <AuthAlert type="error" message={error} />
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="name@example.com"
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Enter your username"
               required
               disabled={isLoading}
-              autoComplete="email"
-              aria-describedby="email-error"
+              autoComplete="username"
+              aria-describedby="username-error"
             />
           </div>
           <div className="space-y-2">

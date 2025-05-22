@@ -230,9 +230,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     }
   };
 
-  return React.createElement(
-    'form',
-    { onSubmit: handleSubmit, className: "space-y-6" },
+  return (
+    <form onSubmit={handleSubmit, } className="space-y-6">
       {!isNew && formData?.created_at && (
         <div className="text-sm text-muted-foreground text-right">
           Created on {new Date(formData.created_at).toLocaleDateString()}
@@ -908,10 +907,9 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="notes_home_town">Home Town</Label>
+                  <Label htmlFor="notes_home_town">HomeTown</Label>
                   <Input
-                    id```python
-="notes_home_town"
+                    id="notes_home_town"
                     value={formData.notes_home_town}
                     onChange={handleInputChange}
                     placeholder="Carrier's home location"

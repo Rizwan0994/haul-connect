@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { columns, Carrier } from "./columns";
 import { DataTable } from "@/components/ui/data-table";

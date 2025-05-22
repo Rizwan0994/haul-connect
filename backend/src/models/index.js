@@ -18,11 +18,11 @@ const sequelize = new Sequelize(
       process.env["NODE_ENV"] === "development"
         ? {}
         : {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false,
+            // ssl: {
+            //   require: true,
+            //   rejectUnauthorized: false,
+            // },
           },
-        },
     // replication: dbConfig.replication,
     pool: {
       max: dbConfig.pool.max,
@@ -31,7 +31,7 @@ const sequelize = new Sequelize(
       idle: dbConfig.pool.idle,
     },
     logging: false,
-  }
+  },
 );
 
 const db = {};
@@ -46,13 +46,18 @@ sequelize
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
-      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js" && file !== 'associate.js' && file !== 'associates' && file !== 'config.js'
+      file.indexOf(".") !== 0 &&
+      file !== basename &&
+      file.slice(-3) === ".js" &&
+      file !== "associate.js" &&
+      file !== "associates" &&
+      file !== "config.js"
     );
   })
   .forEach((file) => {
     const model = require(path.join(__dirname, file))(
       sequelize,
-      Sequelize.DataTypes
+      Sequelize.DataTypes,
     );
     db[model.name] = model;
   });

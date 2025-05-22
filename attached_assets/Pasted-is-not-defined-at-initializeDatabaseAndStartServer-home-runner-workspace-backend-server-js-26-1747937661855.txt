@@ -1,0 +1,66 @@
+is not defined
+    at initializeDatabaseAndStartServer (/home/runner/workspace/backend/server.js:26:5)
+    at Object.<anonymous> (/home/runner/workspace/backend/server.js:34:1)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:12)
+    at node:internal/main/run_main_module:28:49
+🚀 Server is running on port 5000
+::ffff:172.31.128.84 - - - [22/May/2025:18:13:00 +0000] - "GET / HTTP/1.1" - 200 - 33 B -  3.200 ms
+[nodemon] restarting due to changes...
+[nodemon] starting `node server.js`
+❌ Unable to connect to the database: ReferenceError: sequelize is not defined
+    at initializeDatabaseAndStartServer (/home/runner/workspace/backend/server.js:26:5)
+    at Object.<anonymous> (/home/runner/workspace/backend/server.js:34:1)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:12)
+    at node:internal/main/run_main_module:28:49
+🚀 Server is running on port 5000
+[nodemon] restarting due to changes...
+[nodemon] starting `node server.js`
+❌ Unable to connect to the database: ReferenceError: sequelize is not defined
+    at initializeDatabaseAndStartServer (/home/runner/workspace/backend/server.js:26:5)
+    at Object.<anonymous> (/home/runner/workspace/backend/server.js:34:1)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:12)
+    at node:internal/main/run_main_module:28:49
+🚀 Server is running on port 5000
+[nodemon] restarting due to changes...
+[nodemon] starting `node server.js`
+❌ Unable to connect to the database: ReferenceError: sequelize is not defined
+    at initializeDatabaseAndStartServer (/home/runner/workspace/backend/server.js:26:5)
+    at Object.<anonymous> (/home/runner/workspace/backend/server.js:34:1)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:12)
+    at node:internal/main/run_main_module:28:49
+🚀 Server is running on port 5000
+[nodemon] restarting due to changes...
+[nodemon] starting `node server.js`
+/home/runner/workspace/backend/node_modules/sequelize/lib/associations/mixin.js:63
+      throw new Error(`${source.name}.${_.lowerFirst(Type.name)} called with something that's not a subclass of Sequelize.Model`);
+      ^
+
+Error: carrier_profile.belongsTo called with something that's not a subclass of Sequelize.Model
+    at carrier_profile.<anonymous> (/home/runner/workspace/backend/node_modules/sequelize/lib/associations/mixin.js:63:13)
+    at carrier_profile.associate (/home/runner/workspace/backend/src/models/carrier.model.js:8:22)
+    at /home/runner/workspace/backend/src/models/index.js:66:19
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/runner/workspace/backend/src/models/index.js:64:17)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19)
+
+Node.js v20.18.1

@@ -1,3 +1,4 @@
+
 import { Metadata } from "next";
 import { LoginForm } from "./login-form";
 import { AuthTemplate } from "@/components/auth/auth-template";

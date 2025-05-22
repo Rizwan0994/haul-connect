@@ -1,6 +1,5 @@
 
 import { Metadata } from "next";
-import { AuthTemplate } from "@/components/auth/auth-template";
 
 export const metadata: Metadata = {
   title: "Authentication | Haul Connect BPO",

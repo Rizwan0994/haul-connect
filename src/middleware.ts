@@ -7,10 +7,17 @@ export function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isApiRoute = request.nextUrl.pathname.startsWith('/api')
 
-  if (!token && !isAuthPage && !isApiRoute) {
+  // Allow API routes to pass through
+  if (isApiRoute) {
+    return NextResponse.next()
+  }
+
+  // Redirect to login if no token and trying to access protected routes
+  if (!token && !isAuthPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
+  // Redirect to dashboard if has token and trying to access auth pages
   if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/carrier-management', request.url))
   }

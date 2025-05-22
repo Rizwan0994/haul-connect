@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
 });
 
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/invoices", invoiceRoutes);
-
+const authRoutes = require("./routes/authRoutes");
+app.use('/api/auth', authRoutes);
+app.use('/api/carriers', require('./routes/carrierRoutes'));
 module.exports = app;

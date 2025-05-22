@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -43,9 +42,11 @@ export function LoginForm() {
         password
       });
 
-      if (response.data.token) {
+      if (response.data.status === 'success') {
+        localStorage.setItem('token', response.data.data.token);
         router.push('/carrier-management');
       }
+      
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred during login');
     } finally {

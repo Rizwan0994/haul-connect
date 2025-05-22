@@ -12,7 +12,11 @@ const backendApiClient = axios.create({
 });
 
 backendApiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  // Get token from cookie
+  const cookies = document.cookie.split(';');
+  const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
+  const token = tokenCookie ? tokenCookie.split('=')[1].trim() : null;
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

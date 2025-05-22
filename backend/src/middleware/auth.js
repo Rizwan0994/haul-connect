@@ -1,25 +1,24 @@
-
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const jwt = require("jsonwebtoken");
+const { user: User } = require("../models");
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    
+    const token = req.headers.authorization?.split(" ")[1];
+
     if (!token) {
       return res.status(401).json({
-        status: 'error',
-        message: 'No token provided'
+        status: "error",
+        message: "No token provided",
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findByPk(decoded.id);
-    
+
     if (!user) {
       return res.status(401).json({
-        status: 'error',
-        message: 'User not found'
+        status: "error",
+        message: "User not found",
       });
     }
 
@@ -27,8 +26,8 @@ const authMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(401).json({
-      status: 'error',
-      message: 'Invalid token'
+      status: "error",
+      message: "Invalid token",
     });
   }
 };

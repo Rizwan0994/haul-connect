@@ -26,6 +26,6 @@ app.get("/", (req, res) => {
 });
 
 const authRoutes = require("./routes/authRoutes");
-app.use('/api/auth', authRoutes);
-app.use('/api/carriers', require('./routes/carrierRoutes'));
+app.use("/api/auth", authRoutes);
+app.use("/api/carriers", require("./routes/carrierRoutes"));
 module.exports = app;

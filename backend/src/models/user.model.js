@@ -5,10 +5,7 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class User extends Model {
     static associate(models) {
-      User.hasMany(models.CarrierProfile, { foreignKey: 'agent_name', as: 'managedCarriers' });
-      User.hasMany(models.Dispatch, { foreignKey: 'user_id', as: 'dispatches' });
-      User.hasMany(models.FollowupSheet, { foreignKey: 'agent_name', as: 'followups' });
-      User.hasMany(models.Notification, { foreignKey: 'username', as: 'notifications' });
+      // Associations are now managed in associates/config.js
     }
   }
 

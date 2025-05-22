@@ -1,19 +1,11 @@
+
 'use strict';
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   class CarrierProfile extends Model {
     static associate(models) {
-      // Define associations
-      CarrierProfile.belongsTo(models.User, { 
-        foreignKey: 'agent_name',
-        targetKey: 'username',
-        as: 'agent' 
-      });
-      CarrierProfile.hasMany(models.Dispatch, { 
-        foreignKey: 'carrier_id',
-        as: 'dispatches' 
-      });
+      // Associations are now managed in associates/config.js
     }
   }
 

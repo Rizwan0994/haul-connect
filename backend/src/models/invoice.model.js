@@ -5,7 +5,7 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Invoice extends Model {
     static associate(models) {
-      Invoice.belongsTo(models.Dispatch, { foreignKey: 'dispatch_id', as: 'dispatch' });
+      // Associations are now managed in associates/config.js
     }
   }
 

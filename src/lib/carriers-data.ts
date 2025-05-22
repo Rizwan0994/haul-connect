@@ -47,7 +47,7 @@ export type Carrier = {
 
 export async function getAllCarriers() {
   const response = await backendApiClient.get('/carriers');
-  return response.data.data;
+  return response.data.data || [];
 }
 
 export async function getCarrierById(id: string) {

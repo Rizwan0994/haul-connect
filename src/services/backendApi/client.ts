@@ -1,5 +1,6 @@
 
 import axios from 'axios';
+import { cookies } from 'next/headers';
 
 const backendApiUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
@@ -12,13 +13,15 @@ const backendApiClient = axios.create({
 });
 
 backendApiClient.interceptors.request.use((config) => {
-  // Get token from cookie
-  const cookies = document.cookie.split(';');
-  const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
-  const token = tokenCookie ? tokenCookie.split('=')[1].trim() : null;
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Check if we're on the client side
+  if (typeof window !== 'undefined') {
+    const cookies = document.cookie.split(';');
+    const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
+    const token = tokenCookie ? tokenCookie.split('=')[1].trim() : null;
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });

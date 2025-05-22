@@ -124,8 +124,16 @@ export const columns: ColumnDef<Carrier>[] = [
     accessorKey: "created_at",
     header: "Created On",
     cell: ({ row }) => {
-      const createdDate = new Date(row.getValue("created_at") as string);
-      return format(createdDate, "MMM dd, yyyy");
+      const dateValue = row.getValue("created_at");
+      if (!dateValue) return "-";
+      
+      try {
+        const createdDate = new Date(dateValue as string);
+        if (isNaN(createdDate.getTime())) return "-";
+        return format(createdDate, "MMM dd, yyyy");
+      } catch (error) {
+        return "-";
+      }
     },
   },
   {

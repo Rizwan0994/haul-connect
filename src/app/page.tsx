@@ -2,11 +2,12 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export default function Home() {
-  const token = cookies().get('token');
+export default async function Home() {
+  const cookieStore = cookies();
+  const token = cookieStore.get('token');
   
   if (!token) {
-    redirect('/(auth)/login');
+    redirect('/auth/login');
   } else {
     redirect('/carrier-management');
   }

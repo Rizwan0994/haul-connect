@@ -51,19 +51,18 @@ export function RegisterForm() {
     }
 
     try {
-      // This is where you would handle registration logic
-      console.log("Registration attempt:", {
-        fullName,
+      const response = await backendApiClient.post('/auth/register', {
+        username: fullName,
         email,
-        password,
-        acceptTerms,
+        password
       });
 
-      // Simulate registration delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // For demo purposes - redirect to login page
-      router.push("/login");
+      if (response.data.token) {
+        document.cookie = `token=${response.data.token}; path=/`;
+        router.push('/carrier-management');
+      } else {
+        router.push('/auth/login');
+      }
     } catch (error) {
       setError("Registration failed. Please try again.");
       console.error("Registration error:", error);

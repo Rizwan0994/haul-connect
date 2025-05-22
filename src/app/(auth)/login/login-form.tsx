@@ -38,20 +38,19 @@ export function LoginForm() {
     const remember = formData.get("remember") === "on";
 
     try {
-      const response = await backendApiClient.post('/api/auth/login', {
+      const response = await backendApiClient.post('/auth/login', {
         username,
         password
       });
 
       if (response.data.token) {
-        // Store token in cookie
         document.cookie = `token=${response.data.token}; path=/`;
         router.push('/carrier-management');
       } else {
-        setError('Invalid login response');
+        setError('Invalid credentials');
       }
     } catch (error: any) {
-      setError(error?.response?.data?.message || 'Failed to login');
+      setError(error?.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

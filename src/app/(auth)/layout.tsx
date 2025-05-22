@@ -1,8 +1,10 @@
+
 import { Metadata } from "next";
+import { AuthTemplate } from "@/components/auth/auth-template";
 
 export const metadata: Metadata = {
-  title: "Haul Connect BPO",
-  description: "Logistics & Carrier Management System",
+  title: "Authentication | Haul Connect BPO",
+  description: "Authentication pages for Haul Connect BPO",
 };
 
 export default function AuthLayout({
@@ -10,5 +12,9 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen w-full p-0 m-0">{children}</div>;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      {children}
+    </div>
+  );
 }

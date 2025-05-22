@@ -8,11 +8,13 @@ import { getAllCarriers } from "@/lib/carriers-data";
 import UserAssignmentProvider from "@/components/carrier-management/user-assignment-provider";
 
 async function getData(): Promise<Carrier[]> {
-  // Get data from our mock data service
-  const allCarriers = getAllCarriers();
+  try {
+    // Get data from our mock data service
+    const allCarriers = await getAllCarriers();
+    if (!allCarriers) return [];
 
-  // Map to the required data structure for the table
-  return allCarriers.map((carrier) => ({
+    // Map to the required data structure for the table
+    return allCarriers.map((carrier) => ({
     id: carrier.id,
     mc_number: carrier.mc_number,
     company_name: carrier.company_name,

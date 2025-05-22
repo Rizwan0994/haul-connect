@@ -20,10 +20,15 @@ backendApiClient.interceptors.request.use((config) => {
       ?.split('=')[1];
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = {
+        ...config.headers,
+        'Authorization': `Bearer ${token}`
+      };
     }
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export default backendApiClient;

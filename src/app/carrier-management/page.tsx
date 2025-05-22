@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -11,29 +12,31 @@ import UserAssignmentProvider from "@/components/carrier-management/user-assignm
 
 async function getData(): Promise<Carrier[]> {
   try {
-    // Get data from our mock data service
     const allCarriers = await getAllCarriers();
     if (!allCarriers) return [];
 
-    // Map to the required data structure for the table
     return allCarriers.map((carrier) => ({
-    id: carrier.id,
-    mc_number: carrier.mc_number,
-    company_name: carrier.company_name,
-    owner_name: carrier.owner_name,
-    phone_number: carrier.phone_number,
-    email_address: carrier.email_address,
-    truck_type: carrier.truck_type,
-    status:
-      carrier.status === "active"
-        ? "Active"
-        : carrier.status === "pending"
-        ? "Temporary"
-        : carrier.status === "suspended"
-        ? "Blacklist"
-        : "Active",
-    created_at: carrier.created_at,
-  }));
+      id: carrier.id,
+      mc_number: carrier.mc_number,
+      company_name: carrier.company_name,
+      owner_name: carrier.owner_name,
+      phone_number: carrier.phone_number,
+      email_address: carrier.email_address,
+      truck_type: carrier.truck_type,
+      status:
+        carrier.status === "active"
+          ? "Active"
+          : carrier.status === "pending"
+          ? "Temporary"
+          : carrier.status === "suspended"
+          ? "Blacklist"
+          : "Active",
+      created_at: carrier.created_at,
+    }));
+  } catch (error) {
+    console.error('Error fetching carriers:', error);
+    return [];
+  }
 }
 
 export default async function CarrierManagementPage() {

@@ -1,7 +1,6 @@
-
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { columns, Carrier } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
 import Link from "next/link";
@@ -10,37 +9,22 @@ import { Plus } from "lucide-react";
 import { getAllCarriers } from "@/lib/carriers-data";
 import UserAssignmentProvider from "@/components/carrier-management/user-assignment-provider";
 
-async function getData(): Promise<Carrier[]> {
-  try {
-    const allCarriers = await getAllCarriers();
-    if (!allCarriers) return [];
+export default function CarrierManagementPage() {
+  const [data, setData] = useState<Carrier[]>([]);
 
-    return allCarriers.map((carrier) => ({
-      id: carrier.id,
-      mc_number: carrier.mc_number,
-      company_name: carrier.company_name,
-      owner_name: carrier.owner_name,
-      phone_number: carrier.phone_number,
-      email_address: carrier.email_address,
-      truck_type: carrier.truck_type,
-      status:
-        carrier.status === "active"
-          ? "Active"
-          : carrier.status === "pending"
-          ? "Temporary"
-          : carrier.status === "suspended"
-          ? "Blacklist"
-          : "Active",
-      created_at: carrier.created_at,
-    }));
-  } catch (error) {
-    console.error('Error fetching carriers:', error);
-    return [];
-  }
-}
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const carriers = await getAllCarriers();
+        setData(carriers || []);
+      } catch (error) {
+        console.error('Error fetching carriers:', error);
+        setData([]);
+      }
+    };
 
-export default async function CarrierManagementPage() {
-  const data = await getData();
+    fetchData();
+  }, []);
 
   return (
     <UserAssignmentProvider>

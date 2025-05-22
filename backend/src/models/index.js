@@ -1,10 +1,10 @@
 "use strict";
 const dbConfig = require("../config/db");
-
 const fs = require("fs");
 const path = require("path");
 const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
+
 const sequelize = new Sequelize(
   dbConfig.DB_NAME,
   dbConfig.DB_USER,
@@ -17,13 +17,7 @@ const sequelize = new Sequelize(
     dialectOptions:
       process.env["NODE_ENV"] === "development"
         ? {}
-        : {
-            // ssl: {
-            //   require: true,
-            //   rejectUnauthorized: false,
-            // },
-          },
-    // replication: dbConfig.replication,
+        : {},
     pool: {
       max: dbConfig.pool.max,
       min: dbConfig.pool.min,
@@ -31,51 +25,35 @@ const sequelize = new Sequelize(
       idle: dbConfig.pool.idle,
     },
     logging: false,
-  },
+  }
 );
 
 const db = {};
-sequelize
-  .authenticate()
-  .then(() => {
-    // console.log('Connection has been established successfully.');
-  })
-  .catch((err) => {
-    console.error("Unable to connect to the database:", err);
-  });
-fs.readdirSync(__dirname)
-  .filter((file) => {
+
+// Read model files and initialize them
+fs.readdirSync(path.join(__dirname))
+  .filter(file => {
     return (
       file.indexOf(".") !== 0 &&
       file !== basename &&
       file.slice(-3) === ".js" &&
-      file !== "associate.js" &&
-      file !== "associates" &&
-      file !== "config.js"
+      !file.includes("associates") &&
+      file !== "index.js"
     );
   })
-  .forEach((file) => {
-    const model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes,
-    );
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
     db[model.name] = model;
   });
-Object.keys(db).forEach((modelName) => {
+
+// Initialize associations after all models are loaded
+Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
 
-db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-db.Op = Sequelize.Op;
-//db.user=require('./user.model')(sequelize);
-// db.role = require('./role.model')(sequelize);
-// db.invoice = require('./invoice.model')(sequelize);
-// db.carrier = require('./carrier.model')(sequelize);
-// db.dispatch = require('./dispatch.model')(sequelize);
-
-require("./associates")(db);
+db.Sequelize = Sequelize;
 
 module.exports = db;

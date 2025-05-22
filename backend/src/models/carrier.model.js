@@ -5,9 +5,16 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class CarrierProfile extends Model {
     static associate(models) {
-      CarrierProfile.belongsTo(models.User, { foreignKey: 'agent_name', as: 'agent' });
-      CarrierProfile.hasMany(models.Dispatch, { foreignKey: 'carrier_id', as: 'dispatches' });
-      CarrierProfile.hasMany(models.FollowupSheet, { foreignKey: 'mc_no', as: 'followups' });
+      // Define associations
+      CarrierProfile.belongsTo(models.User, { 
+        foreignKey: 'agent_name',
+        targetKey: 'username',
+        as: 'agent' 
+      });
+      CarrierProfile.hasMany(models.Dispatch, { 
+        foreignKey: 'carrier_id',
+        as: 'dispatches' 
+      });
     }
   }
 
@@ -64,19 +71,16 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('active', 'inactive', 'pending', 'suspended'),
       defaultValue: 'pending'
     },
-    // Insurance Information
     insurance_company_name: DataTypes.STRING,
     insurance_company_address: DataTypes.STRING,
     insurance_agent_name: DataTypes.STRING,
     insurance_agent_number: DataTypes.STRING,
     insurance_agent_email: DataTypes.STRING,
-    // Factoring Information
     factoring_company_name: DataTypes.STRING,
     factoring_company_address: DataTypes.STRING,
     factoring_agent_name: DataTypes.STRING,
     factoring_agent_number: DataTypes.STRING,
     factoring_agent_email: DataTypes.STRING,
-    // Notes
     notes_home_town: DataTypes.STRING,
     notes_days_working: DataTypes.STRING,
     notes_preferred_lanes: DataTypes.TEXT,

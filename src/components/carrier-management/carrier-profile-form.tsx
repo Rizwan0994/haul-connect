@@ -126,7 +126,6 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     try {
       if (isNew) {
         // Create new carrier with only non-empty fields
-        const formTruckType = form.querySelector('#truck_type') as HTMLSelectElement;
         const carrierData = {
           status: "active",
           mc_number: formValues.mc_number,
@@ -134,13 +133,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
           owner_name: formValues.owner_name,
           phone_number: formValues.phone_number,
           email_address: formValues.email_address,
-          truck_type: formTruckType?.value || "Dry Van", // Default to Dry Van if not selected
+          truck_type: formValues.truck_type,
           ...Object.fromEntries(
             Object.entries(formValues)
               .filter(([key, value]) => 
                 value && 
                 value !== '' && 
-                !['mc_number', 'company_name', 'owner_name', 'phone_number', 'email_address'].includes(key)
+                !['mc_number', 'company_name', 'owner_name', 'phone_number', 'email_address', 'truck_type'].includes(key)
               )
           )
         };
@@ -321,7 +320,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="truck_type">Truck Type</Label>
-                  <Select defaultValue={mockCarrierData?.truck_type} name="truck_type">
+                  <Select defaultValue={mockCarrierData?.truck_type}>
                     <SelectTrigger id="truck_type">
                       <SelectValue placeholder="Select truck type" />
                     </SelectTrigger>

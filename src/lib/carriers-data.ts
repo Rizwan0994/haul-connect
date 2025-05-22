@@ -3,7 +3,7 @@
  * In a real application, this would be replaced with actual API calls.
  */
 
-import backendApiClient from '@/services/backendApi/client';
+import backendApiClient from "@/services/backendApi/client";
 
 export type Carrier = {
   id: string;
@@ -46,7 +46,7 @@ export type Carrier = {
 };
 
 export async function getAllCarriers() {
-  const response = await backendApiClient.get('/carriers');
+  const response = await backendApiClient.get("/carriers");
   return response.data.data || [];
 }
 
@@ -58,21 +58,21 @@ export async function getCarrierById(id: string) {
 export async function createCarrier(data: Partial<Carrier>) {
   // Ensure required fields are present
   const requiredFields = [
-    'mc_number',
-    'company_name', 
-    'owner_name',
-    'phone_number',
-    'email_address',
-    'truck_type',
-    'status'
+    "mc_number",
+    "company_name",
+    "owner_name",
+    "phone_number",
+    "email_address",
+    "truck_type",
+    "status",
   ];
 
-  const missingFields = requiredFields.filter(field => !data[field]);
-  if (missingFields.length > 0) {
-    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-  }
+  // const missingFields = requiredFields.filter(field => !data[field]);
+  // if (missingFields.length > 0) {
+  //   throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  // }
 
-  const response = await backendApiClient.post('/carriers', data);
+  const response = await backendApiClient.post("/carriers", data);
   return response.data.data;
 }
 

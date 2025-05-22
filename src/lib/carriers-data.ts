@@ -56,23 +56,28 @@ export async function getCarrierById(id: string) {
 }
 
 export async function createCarrier(data: Partial<Carrier>) {
-  // Ensure required fields are present
+  // Ensure required fields are present and have values
   const requiredFields = [
     "mc_number",
     "company_name",
-    "owner_name",
+    "owner_name", 
     "phone_number",
     "email_address",
     "truck_type",
-    "status",
+    "status"
   ];
 
-  // const missingFields = requiredFields.filter(field => !data[field]);
-  // if (missingFields.length > 0) {
-  //   throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-  // }
+  const missingFields = requiredFields.filter(field => !data[field]);
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
 
-  const response = await backendApiClient.post("/carriers", data);
+  // Remove empty string values
+  const cleanedData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== '')
+  );
+
+  const response = await backendApiClient.post("/carriers", cleanedData);
   return response.data.data;
 }
 

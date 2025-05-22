@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    allowedDevOrigins: ["*.replit.dev", "*.sisko.replit.dev"],
+    serverActions: true,
   },
   async headers() {
     return [

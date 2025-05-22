@@ -3,14 +3,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  const isAuthenticated = request.cookies.get('token')
+  const token = request.cookies.get('token')?.value
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api')
 
-  if (!isAuthenticated && !isAuthPage && request.nextUrl.pathname !== '/') {
+  if (!token && !isAuthPage && !isApiRoute) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  if (isAuthenticated && isAuthPage) {
+  if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/carrier-management', request.url))
   }
 

@@ -7,7 +7,7 @@ module.exports = (sequelize) => {
     static associate(models) {
       Dispatch.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
       Dispatch.belongsTo(models.CarrierProfile, { foreignKey: 'carrier_id', as: 'carrier' });
-      Dispatch.hasMany(models.DispatchLoad, { foreignKey: 'dispatch_id', as: 'loads' });
+      Dispatch.hasOne(models.Invoice, { foreignKey: 'dispatch_id', as: 'invoice' });
     }
   }
 
@@ -42,14 +42,14 @@ module.exports = (sequelize) => {
     load_amount: DataTypes.DECIMAL(10, 2),
     charge_percent: DataTypes.DECIMAL(5, 2),
     status: {
-      type: DataTypes.ENUM('pending', 'in_transit', 'delivered', 'completed'),
-      defaultValue: 'pending'
+      type: DataTypes.ENUM('Scheduled', 'In Transit', 'Delivered', 'Cancelled'),
+      defaultValue: 'Scheduled'
     },
-    payment: DataTypes.JSON,
+    payment: DataTypes.STRING,
     dispatcher: DataTypes.STRING,
     invoice_status: {
-      type: DataTypes.ENUM('not_sent', 'sent', 'pending', 'cleared'),
-      defaultValue: 'not_sent'
+      type: DataTypes.ENUM('Not Sent', 'Invoice Sent', 'Invoice Pending', 'Invoice Cleared'),
+      defaultValue: 'Not Sent'
     },
     payment_method: {
       type: DataTypes.ENUM('ACH', 'ZELLE', 'OTHER'),

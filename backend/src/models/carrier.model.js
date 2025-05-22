@@ -5,10 +5,9 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class CarrierProfile extends Model {
     static associate(models) {
-      CarrierProfile.belongsTo(models.User, {
-        foreignKey: 'agent_name',
-        as: 'agent'
-      });
+      CarrierProfile.belongsTo(models.User, { foreignKey: 'agent_name', as: 'agent' });
+      CarrierProfile.hasMany(models.Dispatch, { foreignKey: 'carrier_id', as: 'dispatches' });
+      CarrierProfile.hasMany(models.FollowupSheet, { foreignKey: 'mc_no', as: 'followups' });
     }
   }
 
@@ -20,16 +19,16 @@ module.exports = (sequelize) => {
     },
     agent_name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      references: {
-        model: 'users',
-        key: 'username'
-      }
+      allowNull: false
     },
     mc_number: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false
+    },
+    us_dot_number: {
+      type: DataTypes.STRING,
+      unique: true
     },
     company_name: {
       type: DataTypes.STRING,
@@ -53,25 +52,37 @@ module.exports = (sequelize) => {
     address: DataTypes.STRING,
     ein_number: DataTypes.STRING,
     truck_type: DataTypes.STRING,
-    equipment_type: DataTypes.STRING,
-    insurance_status: {
-      type: DataTypes.ENUM('valid', 'expired', 'pending'),
-      defaultValue: 'pending'
-    },
-    insurance_expiry: DataTypes.DATE,
-    factoring_company: DataTypes.STRING,
-    preferred_lanes: DataTypes.TEXT,
-    commission_rate: {
-      type: DataTypes.DECIMAL(5, 2),
-      validate: {
-        min: 0,
-        max: 100
-      }
-    },
+    dock_height: DataTypes.STRING,
+    dimensions: DataTypes.STRING,
+    doors_type: DataTypes.STRING,
+    door_clearance: DataTypes.STRING,
+    accessories: DataTypes.STRING,
+    max_weight: DataTypes.STRING,
+    temp_control_range: DataTypes.STRING,
+    agreed_percentage: DataTypes.STRING,
     status: {
-      type: DataTypes.ENUM('active', 'pending', 'suspended'),
+      type: DataTypes.ENUM('active', 'inactive', 'pending', 'suspended'),
       defaultValue: 'pending'
-    }
+    },
+    // Insurance Information
+    insurance_company_name: DataTypes.STRING,
+    insurance_company_address: DataTypes.STRING,
+    insurance_agent_name: DataTypes.STRING,
+    insurance_agent_number: DataTypes.STRING,
+    insurance_agent_email: DataTypes.STRING,
+    // Factoring Information
+    factoring_company_name: DataTypes.STRING,
+    factoring_company_address: DataTypes.STRING,
+    factoring_agent_name: DataTypes.STRING,
+    factoring_agent_number: DataTypes.STRING,
+    factoring_agent_email: DataTypes.STRING,
+    // Notes
+    notes_home_town: DataTypes.STRING,
+    notes_days_working: DataTypes.STRING,
+    notes_preferred_lanes: DataTypes.TEXT,
+    notes_additional_preferences: DataTypes.TEXT,
+    notes_parking_space: DataTypes.STRING,
+    notes_average_gross: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'carrier_profile',

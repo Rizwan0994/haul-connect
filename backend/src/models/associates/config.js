@@ -15,16 +15,11 @@ exports.CarrierProfileModel = (db) => {
 exports.DispatchModel = (db) => {
   db.Dispatch.belongsTo(db.User, { foreignKey: 'user_id', as: 'user' });
   db.Dispatch.belongsTo(db.CarrierProfile, { foreignKey: 'carrier_id', as: 'carrier' });
-  db.Dispatch.hasMany(db.DispatchLoad, { foreignKey: 'dispatch_id', as: 'loads' });
+  db.Dispatch.hasOne(db.Invoice, { foreignKey: 'dispatch_id', as: 'invoice' });
 };
 
-exports.DispatchLoadModel = (db) => {
-  db.DispatchLoad.belongsTo(db.Dispatch, { foreignKey: 'dispatch_id', as: 'dispatch' });
-};
-
-exports.FollowupSheetModel = (db) => {
-  db.FollowupSheet.belongsTo(db.User, { foreignKey: 'agent_name', as: 'agent' });
-  db.FollowupSheet.belongsTo(db.CarrierProfile, { foreignKey: 'mc_no', as: 'carrier' });
+exports.InvoiceModel = (db) => {
+  db.Invoice.belongsTo(db.Dispatch, { foreignKey: 'dispatch_id', as: 'dispatch' });
 };
 
 exports.NotificationModel = (db) => {

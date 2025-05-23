@@ -46,10 +46,8 @@ export const getCarrierById = async (id: string): Promise<Carrier> => {
 
 export const getAllCarriers = async () => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/carriers`);
-    if (!response.ok) throw new Error('Failed to fetch carriers');
-    const data = await response.json();
-    return data.data;
+    const response = await backendApiClient.get('/carriers');
+    return response.data.data;
   } catch (error) {
     console.error('Error fetching carriers:', error);
     return [];

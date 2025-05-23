@@ -44,6 +44,24 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!isNew);
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: mockCarrierData || {
+      status: "active",
+      mc_number: "",
+      company_name: "",
+      owner_name: "",
+      phone_number: "",
+      email_address: "",
+      truck_type: "Dry Van",
+    },
+  });
+
   useEffect(() => {
     const loadCarrierData = async () => {
       if (!isNew) {

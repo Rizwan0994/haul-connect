@@ -88,7 +88,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     };
 
     loadCarrierData();
-  }, [isNew, id, setValue, toast]);
+  }, [isNew, id]); // Remove setValue and toast from dependencies
 
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">

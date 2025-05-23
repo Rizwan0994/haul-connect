@@ -47,10 +47,11 @@ export const getCarrierById = async (id: string): Promise<Carrier> => {
 export const getAllCarriers = async () => {
   try {
     const response = await backendApiClient.get('/carriers');
-    return response.data.data;
+    console.log('Carriers response:', response.data);
+    return response.data.data || [];
   } catch (error) {
     console.error('Error fetching carriers:', error);
-    return [];
+    throw error;
   }
 };
 

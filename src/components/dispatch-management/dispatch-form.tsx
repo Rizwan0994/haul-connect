@@ -115,28 +115,27 @@ export function DispatchForm({
       percentage: string;
     }[]
   >([]);
+  const [isLoadingCarriers, setIsLoadingCarriers] = useState(false);
 
   // Selected carrier data
   const [selectedCarrier, setSelectedCarrier] = useState<string | null>(null);
 
   // Fetch carriers on component mount
   useEffect(() => {
-    // In a real application, this would be an API call
-    const fetchCarriers = () => {
+    const fetchCarriers = async () => {
+      setIsLoadingCarriers(true);
       try {
-        // Get carriers from the mock data
-        const allCarriers = getAllCarriers();
-
-        // Format carriers for the dropdown
+        const allCarriers = await getAllCarriers();
         const formattedCarriers = allCarriers.map((carrier) => ({
           value: carrier.id,
           label: carrier.company_name,
-          percentage: carrier.agreed_percentage,
+          percentage: carrier.agreed_percentage || "0",
         }));
-
         setCarriers(formattedCarriers);
       } catch (error) {
-        console.error("Error fetching carriers:", error);
+        console.error('Error fetching carriers:', error);
+      } finally {
+        setIsLoadingCarriers(false);
       }
     };
 
@@ -390,6 +389,7 @@ export function DispatchForm({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isLoadingCarriers}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -834,7 +834,7 @@ export function DispatchForm({
           <Button type="button" variant="outline">
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting || isLoadingCarriers}>
             {initialData ? "Update Dispatch" : "Create Dispatch"}
           </Button>
         </div>

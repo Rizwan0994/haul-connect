@@ -1,10 +1,9 @@
-
 import axios from 'axios';
 
 const backendApiUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
 const backendApiClient = axios.create({
-  baseURL: backendApiUrl,
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://0.0.0.0:5000/api',
   withCredentials: true
 });
 

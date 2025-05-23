@@ -41,10 +41,27 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+    defaultValues: mockCarrierData || {
+      status: "active",
+      mc_number: "",
+      company_name: "",
+      owner_name: "",
+      phone_number: "",
+      email_address: "",
+      truck_type: "Dry Van"
+    }
+  });
 
-  // TODO: Implement form validation with React Hook Form
-  // TODO: Implement API calls to save carrier data
-  console.log(`id: ${id}`);
+  // Persist form data across tab changes
+  const formData = watch();
+  useEffect(() => {
+    if (mockCarrierData && !isNew) {
+      Object.entries(mockCarrierData).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
+  }, [mockCarrierData, setValue, isNew]);
 
   // Replace apostrophes in these dimensions with escaped versions
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
@@ -109,19 +126,22 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
         created_at: "2023-01-15",
       };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
 
-    // Get form data
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    const formValues: Record<string, string> = {};
-
-    // Convert FormData to object
-    formData.forEach((value, key) => {
-      formValues[key] = value.toString();
-    });
+    // Validate required fields
+    const requiredFields = ['mc_number', 'company_name', 'owner_name', 'phone_number', 'email_address', 'truck_type'];
+    const missingFields = requiredFields.filter(field => !data[field]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: `Missing required fields: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       if (isNew) {
@@ -180,7 +200,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {!isNew && mockCarrierData?.created_at && (
         <div className="text-sm text-muted-foreground text-right">
           Created on {new Date(mockCarrierData.created_at).toLocaleDateString()}
@@ -221,9 +241,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="mc_number">MC Number</Label>
                   <Input
                     id="mc_number"
-                    defaultValue={mockCarrierData?.mc_number}
+                    {...register("mc_number", { required: true })}
                     placeholder="MC-XXXXXX"
+                    className={errors.mc_number ? "border-red-500" : ""}
                   />
+                  {errors.mc_number && (
+                    <span className="text-sm text-red-500">MC number is required</span>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="us_dot_number">US DOT Number</Label>

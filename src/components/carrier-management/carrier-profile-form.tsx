@@ -44,6 +44,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!isNew);
 
+  // Initialize form with default values
   const {
     register,
     handleSubmit,
@@ -51,7 +52,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: mockCarrierData || {
+    defaultValues: {
       status: "active",
       mc_number: "",
       company_name: "",
@@ -94,11 +95,12 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     </div>;
   }
 
-  // Replace apostrophes in these dimensions with escaped versions
+  // Mock data for development - remove in production
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
   const doorClearance = "8.5&apos;";
-
-  const mockCarrierData = isNew ? null : {
+  
+  // Define mock data structure
+  const defaultCarrierData = {
     id: "1",
     agent_name: "Jane Doe",
     mc_number: "MC-123456",
@@ -153,33 +155,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     created_at: "2023-01-15"
   };
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: mockCarrierData || {
-      status: "active",
-      mc_number: "",
-      company_name: "",
-      owner_name: "",
-      phone_number: "",
-      email_address: "",
-      truck_type: "Dry Van",
-    },
-  });
-
   // Persist form data across tab changes
   const formData = watch();
-  useEffect(() => {
-    if (mockCarrierData && !isNew) {
-      Object.entries(mockCarrierData).forEach(([key, value]) => {
-        setValue(key, value);
-      });
-    }
-  }, [mockCarrierData, setValue, isNew]);
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);

@@ -21,7 +21,7 @@ const invoiceController = {
         ],
       };
 
-      const recipientEmail = 'muhammadrizwanse23@gmail.com'; // Replace with a real test email address
+      const recipientEmail = 'mb0587494@gmail.com'; // Replace with a real test email address
       const subject = `Invoice ${dummyInvoiceDetails.invoice_number} from Your Company`;
       const html = `
         <h1>Invoice ${dummyInvoiceDetails.invoice_number}</h1>

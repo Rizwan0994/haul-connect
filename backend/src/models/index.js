@@ -12,8 +12,8 @@ const sequelize = new Sequelize(
   {
     host: dbConfig.DB_HOST,
     dialect: dbConfig.dialect,
-    operatorsAliases: 0,
     port: dbConfig.DB_PORT,
+    operatorsAliases: 0,
     dialectOptions: process.env["NODE_ENV"] === "development" ? {} : {},
     pool: {
       max: dbConfig.pool.max,
@@ -46,13 +46,9 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-// Set up associations after all models are loaded
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-console.log("Loaded models:", Object.keys(db));
+// Correctly invoke associations via associate/index.js
+const tableConfiguration = require("./associates");
+tableConfiguration(db); // ✅ This sets up all associations
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

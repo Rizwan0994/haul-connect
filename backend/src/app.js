@@ -30,4 +30,5 @@ const dispatchRoutes = require('./routes/dispatchRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/carriers', carrierRoutes);
 app.use('/api/dispatches', dispatchRoutes);
+app.use('/api/invoices', invoiceRoutes);
 module.exports = app;

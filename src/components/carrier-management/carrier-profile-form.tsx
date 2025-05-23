@@ -91,8 +91,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   // Replace apostrophes in these dimensions with escaped versions
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
   const doorClearance = "8.5&apos;";
-    ? null
-    : {
+
+  const mockCarrierData = isNew ? null : {
         id: "1",
         agent_name: "Jane Doe",
         mc_number: "MC-123456",

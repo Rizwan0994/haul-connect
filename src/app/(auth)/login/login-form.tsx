@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertCircle } from "lucide-react";
+// import { AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/loading-spinner";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import backendApiClient from "@/services/backendApi/client";
@@ -27,7 +27,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -43,25 +43,21 @@ export function LoginForm() {
         password
       });
 
+      // Adjust this logic based on your API response structure
       if (response.data.token) {
         document.cookie = `token=${response.data.token}; path=/`;
+        if (remember) {
+          localStorage.setItem('token', response.data.token);
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+          }
+        }
         router.push('/carrier-management');
       } else {
         setError('Invalid credentials');
       }
     } catch (error: any) {
       setError(error?.response?.data?.message || 'Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-
-      if (response.data.status === 'success') {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        router.push('/dashboard');
-      }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }

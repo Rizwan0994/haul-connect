@@ -157,7 +157,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   };
 
   // Persist form data across tab changes
-  const formData = watch();
+  // const formData = watch();
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);

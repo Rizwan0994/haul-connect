@@ -98,7 +98,7 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const router = useRouter(); // Get router instance inside cell
+      // const router = useRouter(); // Get router instance inside cell
       const { toast } = useToast(); // Get toast instance
       const invoice = row.original;
 

@@ -1,5 +1,5 @@
 import backendApiClient from "@/services/backendApi/client";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 export type Dispatch = {
   id: string;
@@ -34,25 +34,51 @@ export type Dispatch = {
   };
 };
 
-export const getAllDispatches = async (): Promise<Dispatch[]> => {
+export const getAllDispatches = async (cookie?: string) => {
   try {
-    const response = await backendApiClient.get("/dispatches");
+    let headers: any = {};
+
+    if (cookie) {
+      headers["Cookie"] = cookie;
+
+      const tokenMatch = cookie.match(/token=([^;]+)/);
+      if (tokenMatch) {
+        headers["Authorization"] = `Bearer ${tokenMatch[1]}`;
+      }
+    }
+
+    const response = await backendApiClient.get("/dispatches", {
+      headers,
+    });
+
     return response.data.data;
+    console.log(response.data.data)
   } catch (error: any) {
-    // if (error.response?.status === 401) {
-    //   window.location.href = '/auth/login';
-    //   return [];
-    // }
-    console.error("Error fetching dispatches:", error);
+    // console.log(
+    //   "Error fetching dispatches:",
+    //   error?.response?.data || error.message,
+    // );
     return [];
   }
 };
 
 export const getDispatchById = async (
   id: string,
+  cookie?: string,
 ): Promise<Dispatch | undefined> => {
   try {
-    const response = await backendApiClient.get(`/dispatches/${id}`);
+    let headers: any = {};
+    if (cookie) {
+      headers["Cookie"] = cookie;
+
+      const tokenMatch = cookie.match(/token=([^;]+)/);
+      if (tokenMatch) {
+        headers["Authorization"] = `Bearer ${tokenMatch[1]}`;
+      }
+    }
+    const response = await backendApiClient.get(`/dispatches/${id}`, {
+      headers,
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error fetching dispatch:", error);

@@ -308,7 +308,8 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                     <Truck className="h-4 w-4 mt-1 mr-2 text-slate-400" />
                     <div>
                       <div className="font-bold text-slate-800">
-                        {dispatch.carrier}
+                        {/* {dispatch.carrier} */}
+                        {dispatch.carrier?.owner_name}
                       </div>
                       <div className="text-sm text-slate-500">
                         MC#: {dispatch.load_no.slice(2)}
@@ -443,7 +444,7 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                         </td>
                         <td className="py-4 px-4 align-top text-right">
                           <div className="font-medium">
-                            ${subtotal.toFixed(2)}
+                            {/* ${subtotal?.toFixed(2)||20} */} $20
                           </div>
                         </td>
                       </tr>
@@ -455,7 +456,7 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                           Subtotal
                         </td>
                         <td className="py-3 px-4 text-right font-medium">
-                          ${subtotal.toFixed(2)}
+                          {/* ${subtotal.toFixed(2)} */} $20
                         </td>
                       </tr>
                       <tr className="border-t border-slate-200 bg-slate-50">
@@ -473,7 +474,7 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                           Total
                         </td>
                         <td className="py-3 px-4 text-right text-base font-bold text-primary">
-                          ${total.toFixed(2)}
+                          {/* ${total.toFixed(2)} */} $20
                         </td>
                       </tr>
                     </tfoot>

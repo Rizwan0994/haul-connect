@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/loading-spinner";
+import backendApiClient from "@/services/backendApi/client";
 
 export function RegisterForm() {
   const router = useRouter();

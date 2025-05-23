@@ -1,12 +1,9 @@
-
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    serverActions: {
-      enabled: true
-    },
+    serverActions: {},
   },
   async headers() {
     return [

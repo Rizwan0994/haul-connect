@@ -3,6 +3,7 @@ import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
 import {
   Plus,
   FileText,
@@ -25,8 +26,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 async function getData() {
-  // Get data from our mock data service
-  const allDispatches = getAllDispatches();
+  const cookieStore = await cookies(); // Await this
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  const allDispatches = await getAllDispatches(cookieHeader); // Also await this if it's a Promise
   return allDispatches;
 }
 
@@ -247,8 +252,8 @@ export default async function DispatchManagementPage() {
                         index === 0
                           ? "bg-yellow-100"
                           : index === 1
-                          ? "bg-gray-100"
-                          : "bg-amber-50"
+                            ? "bg-gray-100"
+                            : "bg-amber-50"
                       }`}
                     >
                       <Users
@@ -256,8 +261,8 @@ export default async function DispatchManagementPage() {
                           index === 0
                             ? "text-yellow-700"
                             : index === 1
-                            ? "text-gray-600"
-                            : "text-amber-600"
+                              ? "text-gray-600"
+                              : "text-amber-600"
                         }`}
                       />
                     </div>
@@ -360,7 +365,7 @@ export default async function DispatchManagementPage() {
             data={data.filter(
               (d) =>
                 d.status === "Delivered" &&
-                d.invoice_status === "Invoice Cleared"
+                d.invoice_status === "Invoice Cleared",
             )}
             filterableColumns={[
               "carrier",

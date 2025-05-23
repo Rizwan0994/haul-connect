@@ -1,13 +1,8 @@
-/**
- * This file contains mock data for the carrier management system.
- * In a real application, this would be replaced with actual API calls.
- */
-
-import backendApiClient from '@/services/backendApi/client';
+import backendApiClient from "@/services/backendApi/client";
 
 export interface Carrier {
   id: string;
-  status: 'active' | 'inactive' | 'pending' | 'suspended';
+  status: "active" | "inactive" | "pending" | "suspended";
   mc_number: string;
   company_name: string;
   owner_name: string;
@@ -17,21 +12,26 @@ export interface Carrier {
   [key: string]: any;
 }
 
-export const createCarrier = async (carrierData: Omit<Carrier, 'id'>): Promise<Carrier> => {
+export const createCarrier = async (
+  carrierData: Omit<Carrier, "id">,
+): Promise<Carrier> => {
   try {
-    const response = await backendApiClient.post('/carriers', carrierData);
+    const response = await backendApiClient.post("/carriers", carrierData);
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Error creating carrier');
+    throw new Error(error.response?.data?.message || "Error creating carrier");
   }
 };
 
-export const updateCarrier = async (id: string, carrierData: Partial<Carrier>): Promise<Carrier> => {
+export const updateCarrier = async (
+  id: string,
+  carrierData: Partial<Carrier>,
+): Promise<Carrier> => {
   try {
     const response = await backendApiClient.put(`/carriers/${id}`, carrierData);
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Error updating carrier');
+    throw new Error(error.response?.data?.message || "Error updating carrier");
   }
 };
 
@@ -40,29 +40,31 @@ export const getCarrierById = async (id: string): Promise<Carrier> => {
     const response = await backendApiClient.get(`/carriers/${id}`);
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Error fetching carrier');
+    throw new Error(error.response?.data?.message || "Error fetching carrier");
   }
 };
 
 export const getAllCarriers = async () => {
   try {
-    const response = await backendApiClient.get('/carriers');
-    console.log('Carriers response:', response.data);
+    const response = await backendApiClient.get("/carriers");
+    console.log("Carriers response:", response.data);
     return response.data.data || [];
   } catch (error) {
-    console.error('Error fetching carriers:', error);
+    console.error("Error fetching carriers:", error);
     throw error;
   }
 };
 
 export const getCarrierById_fetch = async (id: string) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/carriers/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch carrier');
+    const response = await fetch(
+      `https://haul-connect.onrender.com/api/carriers/${id}`,
+    );
+    if (!response.ok) throw new Error("Failed to fetch carrier");
     const data = await response.json();
     return data.data;
   } catch (error) {
-    console.error('Error fetching carrier:', error);
+    console.error("Error fetching carrier:", error);
     return null;
   }
 };

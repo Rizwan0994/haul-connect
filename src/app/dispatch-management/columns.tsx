@@ -76,8 +76,16 @@ export const columns: ColumnDef<Dispatch>[] = [
     accessorKey: "created_at",
     header: "Created On",
     cell: ({ row }) => {
-      const createdDate = new Date(row.getValue("created_at") as string);
-      return format(createdDate, "MMM dd, yyyy");
+      const dateValue = row.getValue("created_at");
+      if (!dateValue) return "-";
+
+      try {
+        const createdDate = new Date(dateValue as string);
+        if (isNaN(createdDate.getTime())) return "-";
+        return format(createdDate, "MMM dd, yyyy");
+      } catch (error) {
+        return "-";
+      }
     },
   },
   {
@@ -131,7 +139,7 @@ export const columns: ColumnDef<Dispatch>[] = [
     header: "Charge %",
     cell: ({ row }) => {
       const chargePercent = parseFloat(
-        row.getValue("charge_percent") as string
+        row.getValue("charge_percent") as string,
       );
       const loadAmount = parseFloat(row.getValue("load_amount") as string);
       const commissionAmount = (loadAmount * chargePercent) / 100;
@@ -172,12 +180,12 @@ export const columns: ColumnDef<Dispatch>[] = [
             status === "Delivered"
               ? "bg-green-100 text-green-800 border-green-200"
               : status === "In Transit"
-              ? "bg-blue-100 text-blue-800 border-blue-200"
-              : status === "Scheduled"
-              ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-              : status === "Cancelled"
-              ? "bg-red-100 text-red-800 border-red-200"
-              : "bg-gray-100 text-gray-800 border-gray-200"
+                ? "bg-blue-100 text-blue-800 border-blue-200"
+                : status === "Scheduled"
+                  ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                  : status === "Cancelled"
+                    ? "bg-red-100 text-red-800 border-red-200"
+                    : "bg-gray-100 text-gray-800 border-gray-200"
           }
         >
           {status}
@@ -204,10 +212,10 @@ export const columns: ColumnDef<Dispatch>[] = [
               invoiceStatus === "Invoice Cleared"
                 ? "bg-green-100 text-green-800 border-green-200"
                 : invoiceStatus === "Invoice Pending"
-                ? "bg-purple-100 text-purple-800 border-purple-200"
-                : invoiceStatus === "Invoice Sent"
-                ? "bg-blue-100 text-blue-800 border-blue-200"
-                : "bg-gray-100 text-gray-800 border-gray-200"
+                  ? "bg-purple-100 text-purple-800 border-purple-200"
+                  : invoiceStatus === "Invoice Sent"
+                    ? "bg-blue-100 text-blue-800 border-blue-200"
+                    : "bg-gray-100 text-gray-800 border-gray-200"
             }
           >
             {invoiceStatus}

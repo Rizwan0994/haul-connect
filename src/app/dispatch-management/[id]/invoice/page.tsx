@@ -8,14 +8,19 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
+import { cookies } from "next/headers";
 interface InvoicePageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
   const { id } = await params;
-  const dispatch = getDispatchById(id);
+   const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  const dispatch = await getDispatchById(id, cookieHeader);
 
   if (!dispatch) {
     return notFound();

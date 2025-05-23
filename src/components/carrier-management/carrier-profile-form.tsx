@@ -253,7 +253,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="company_name">Company Name</Label>
                   <Input
                     id="company_name"
-                    defaultValue={mockCarrierData?.company_name}
+                    {...register("company_name", { required: true })}
                     placeholder="Carrier company name"
                   />
                 </div>
@@ -261,15 +261,16 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="owner_name">Owner Name</Label>
                   <Input
                     id="owner_name"
-                    defaultValue={mockCarrierData?.owner_name}
+                    {...register("owner_name", { required: true })}
                     placeholder="Name of company owner"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone_number">Phone Number</Label>
-                  <PhoneInput
+                  <Input
                     id="phone_number"
-                    defaultValue={mockCarrierData?.phone_number}
+                    {...register("phone_number", { required: true })}
+                    placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
                 <div className="space-y-2">
@@ -277,7 +278,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Input
                     id="email_address"
                     type="email"
-                    defaultValue={mockCarrierData?.email_address}
+                    {...register("email_address", { required: true })}
                     placeholder="contact@example.com"
                   />
                 </div>

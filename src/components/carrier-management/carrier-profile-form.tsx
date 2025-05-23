@@ -42,6 +42,39 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(!isNew);
+
+  useEffect(() => {
+    const loadCarrierData = async () => {
+      if (!isNew) {
+        try {
+          const data = await getCarrierById(id);
+          if (data) {
+            Object.entries(data).forEach(([key, value]) => {
+              setValue(key, value);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading carrier data:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load carrier data",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadCarrierData();
+  }, [isNew, id, setValue, toast]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center p-8">
+      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+    </div>;
+  }
 
   // Replace apostrophes in these dimensions with escaped versions
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";

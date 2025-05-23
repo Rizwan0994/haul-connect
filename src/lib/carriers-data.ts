@@ -44,10 +44,29 @@ export const getCarrierById = async (id: string): Promise<Carrier> => {
   }
 };
 
-export async function getAllCarriers() {
-  const response = await backendApiClient.get("/carriers");
-  return response.data.data || [];
-}
+export const getAllCarriers = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/carriers`);
+    if (!response.ok) throw new Error('Failed to fetch carriers');
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching carriers:', error);
+    return [];
+  }
+};
+
+export const getCarrierById_fetch = async (id: string) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/carriers/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch carrier');
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching carrier:', error);
+    return null;
+  }
+};
 
 export async function deleteCarrier(id: string) {
   const response = await backendApiClient.delete(`/carriers/${id}`);

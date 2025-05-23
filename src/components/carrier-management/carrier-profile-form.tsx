@@ -91,11 +91,6 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   // Replace apostrophes in these dimensions with escaped versions
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
   const doorClearance = "8.5&apos;";
-
-  const mockCarrierData = isNew ? null : {
-        id: "1",
-        agent_name: "Jane Doe",
-        mc_number: "MC-123456",
         us_dot_number: "USDOT-7890123",
         company_name: "Speedy Logistics Inc.",
         owner_name: "John Smith",

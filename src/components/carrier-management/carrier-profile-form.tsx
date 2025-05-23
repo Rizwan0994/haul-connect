@@ -31,6 +31,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { createCarrier, updateCarrier } from "@/lib/carriers-data";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { useForm } from "react-hook-form";
 
 interface CarrierProfileFormProps {
   isNew: boolean;
@@ -41,7 +42,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: mockCarrierData || {
       status: "active",
       mc_number: "",
@@ -49,8 +56,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
       owner_name: "",
       phone_number: "",
       email_address: "",
-      truck_type: "Dry Van"
-    }
+      truck_type: "Dry Van",
+    },
   });
 
   // Persist form data across tab changes
@@ -130,14 +137,21 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     setIsSubmitting(true);
 
     // Validate required fields
-    const requiredFields = ['mc_number', 'company_name', 'owner_name', 'phone_number', 'email_address', 'truck_type'];
-    const missingFields = requiredFields.filter(field => !data[field]);
-    
+    const requiredFields = [
+      "mc_number",
+      "company_name",
+      "owner_name",
+      "phone_number",
+      "email_address",
+      "truck_type",
+    ];
+    const missingFields = requiredFields.filter((field) => !data[field]);
+
     if (missingFields.length > 0) {
       toast({
         title: "Validation Error",
-        description: `Missing required fields: ${missingFields.join(', ')}`,
-        variant: "destructive"
+        description: `Missing required fields: ${missingFields.join(", ")}`,
+        variant: "destructive",
       });
       setIsSubmitting(false);
       return;
@@ -155,15 +169,22 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
           email_address: formValues.email_address,
           truck_type: formValues.truck_type,
           ...Object.fromEntries(
-            Object.entries(formValues)
-              .filter(([key, value]) => 
-                value && 
-                value !== '' && 
-                !['mc_number', 'company_name', 'owner_name', 'phone_number', 'email_address', 'truck_type'].includes(key)
-              )
-          )
+            Object.entries(formValues).filter(
+              ([key, value]) =>
+                value &&
+                value !== "" &&
+                ![
+                  "mc_number",
+                  "company_name",
+                  "owner_name",
+                  "phone_number",
+                  "email_address",
+                  "truck_type",
+                ].includes(key),
+            ),
+          ),
         };
-        
+
         await createCarrier(carrierData);
 
         toast({
@@ -176,7 +197,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
           id,
           formValues as Partial<
             Omit<import("@/lib/carriers-data").Carrier, "id" | "created_at">
-          >
+          >,
         );
 
         toast({
@@ -246,7 +267,9 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     className={errors.mc_number ? "border-red-500" : ""}
                   />
                   {errors.mc_number && (
-                    <span className="text-sm text-red-500">MC number is required</span>
+                    <span className="text-sm text-red-500">
+                      MC number is required
+                    </span>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -1124,8 +1147,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
           {isSubmitting
             ? "Saving..."
             : isNew
-            ? "Create Carrier"
-            : "Update Carrier"}
+              ? "Create Carrier"
+              : "Update Carrier"}
         </Button>
       </div>
     </form>

@@ -25,7 +25,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
 });
 
-const authRoutes = require("./routes/authRoutes");
-app.use("/api/auth", authRoutes);
-app.use("/api/carriers", require("./routes/carrierRoutes"));
+const authRoutes = require('./routes/authRoutes');
+const carrierRoutes = require('./routes/carrierRoutes');
+const dispatchRoutes = require('./routes/dispatchRoutes');
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/carriers', carrierRoutes);
+app.use('/api/dispatches', dispatchRoutes);
 module.exports = app;

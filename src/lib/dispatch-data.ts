@@ -38,7 +38,11 @@ export const getAllDispatches = async (): Promise<Dispatch[]> => {
   try {
     const response = await backendApiClient.get("/dispatches");
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      window.location.href = '/auth/login';
+      return [];
+    }
     console.error("Error fetching dispatches:", error);
     return [];
   }

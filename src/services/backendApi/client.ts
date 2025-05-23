@@ -9,22 +9,22 @@ if (!backendApiUrl) {
 
 const backendApiClient = axios.create({
   baseURL: backendApiUrl,
+  withCredentials: true
 });
 
-backendApiClient.interceptors.request.use((config) => {
-  // Check if we're on the client side
-  if (typeof window !== 'undefined') {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('token='))
-      ?.split('=')[1];
-
-    if (token) {
+backendApiClient.interceptors.request.use(async (config) => {
+  try {
+    const session = await fetch('/api/auth/session');
+    const data = await session.json();
+    
+    if (data?.accessToken) {
       config.headers = {
         ...config.headers,
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${data.accessToken}`
       };
     }
+  } catch (error) {
+    console.error('Error getting session:', error);
   }
   return config;
 }, (error) => {

@@ -42,6 +42,24 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Mock data for existing carrier (would be fetched from API)
+  const mockCarrierData = isNew ? null : {
+    id: "1",
+    agent_name: "Jane Doe",
+    mc_number: "MC-123456",
+    us_dot_number: "USDOT-7890123",
+    company_name: "Speedy Logistics Inc.",
+    owner_name: "John Smith",
+    phone_number: "(555) 123-4567",
+    email_address: "contact@speedylogistics.com",
+    address: "123 Freight Lane, Logisticsville, CA 90210",
+    ein_number: "12-3456789",
+    truck_type: "Dry Van",
+    status: "active",
+    // ... rest of the mock data
+  };
+
   const {
     register,
     handleSubmit,
@@ -73,9 +91,6 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   // Replace apostrophes in these dimensions with escaped versions
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
   const doorClearance = "8.5&apos;";
-
-  // Mock data for existing carrier (would be fetched from API)
-  const mockCarrierData = isNew
     ? null
     : {
         id: "1",

@@ -172,7 +172,7 @@ export function LoginForm() {
               Google
             </Button>
           </div>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          {/* <div className="mt-4 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
@@ -183,7 +183,7 @@ export function LoginForm() {
             >
               Sign up
             </Link>
-          </div>
+          </div> */}
         </CardFooter>
       </form>
     </Card>

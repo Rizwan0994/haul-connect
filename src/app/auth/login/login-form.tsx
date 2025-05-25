@@ -109,7 +109,7 @@ export function LoginForm() {
           >
             {isLoading ? <LoadingSpinner /> : 'Sign in'}
           </Button>
-          <div className="text-sm text-center">
+          {/* <div className="text-sm text-center">
             Don't have an account?{' '}
             <Link
               href="/auth/register"
@@ -117,7 +117,7 @@ export function LoginForm() {
             >
               Sign up
             </Link>
-          </div>
+          </div> */}
         </CardFooter>
       </form>
     </Card>

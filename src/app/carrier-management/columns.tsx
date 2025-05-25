@@ -126,7 +126,7 @@ export const columns: ColumnDef<Carrier>[] = [
     cell: ({ row }) => {
       const dateValue = row.getValue("created_at");
       if (!dateValue) return "-";
-      
+
       try {
         const createdDate = new Date(dateValue as string);
         if (isNaN(createdDate.getTime())) return "-";

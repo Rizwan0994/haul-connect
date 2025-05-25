@@ -80,8 +80,8 @@ export const getDispatchById = async (
       headers,
     });
     return response.data.data;
-  } catch (error) {
-    console.error("Error fetching dispatch:", error);
+  } catch (_error: any) {
+    console.error("Error fetching dispatch:", _error);
     return undefined;
   }
 };
@@ -92,8 +92,8 @@ export const createDispatch = async (
   try {
     const response = await backendApiClient.post("/dispatches", dispatchData);
     return response.data.data;
-  } catch (error) {
-    console.error("Error creating dispatch:", error);
+  } catch (_error: any) {
+    console.error("Error creating dispatch:", _error);
     return undefined;
   }
 };
@@ -108,8 +108,8 @@ export const updateDispatch = async (
       dispatchData,
     );
     return response.data.data;
-  } catch (error) {
-    console.error("Error updating dispatch:", error);
+  } catch (_error: any) {
+    console.error("Error updating dispatch:", _error);
     return undefined;
   }
 };
@@ -118,8 +118,8 @@ export const deleteDispatch = async (id: string): Promise<boolean> => {
   try {
     await backendApiClient.delete(`/dispatches/${id}`);
     return true;
-  } catch (error) {
-    console.error("Error deleting dispatch:", error);
+  } catch (_error: any) {
+    console.error("Error deleting dispatch:", _error);
     return false;
   }
 };

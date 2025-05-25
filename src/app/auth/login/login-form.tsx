@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,9 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/loading-spinner";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import backendApiClient from "@/services/backendApi/client";
@@ -47,7 +43,7 @@ export function LoginForm() {
         document.cookie = `token=${response.data.data.token}; path=/`;
         router.push('/carrier-management');
       }
-      
+
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred during login');
     } finally {

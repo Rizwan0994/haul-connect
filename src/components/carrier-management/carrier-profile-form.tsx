@@ -50,7 +50,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     register,
     handleSubmit,
     setValue,
-    watch,
+    _watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -88,7 +88,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     };
 
     loadCarrierData();
-  }, [isNew, id]); // Remove setValue and toast from dependencies
+  }, [isNew, id, setValue, toast]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">

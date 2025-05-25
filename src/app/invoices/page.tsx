@@ -25,15 +25,15 @@ const InvoicesPage = () => {
   };
 
   // Placeholder action handlers
-  const handleViewInvoice = (invoiceId: string) => {
+  const _handleViewInvoice = (invoiceId: string) => {
     router.push(`/dispatch-management/${invoiceId}/invoice`);
   };
 
-  const handleEditInvoice = (invoiceId: string) => {
+  const _handleEditInvoice = (invoiceId: string) => {
     router.push(`/dispatch-management/${invoiceId}/edit`);
   };
 
-  const handleDeleteInvoice = (invoiceId: string) => {
+  const _handleDeleteInvoice = (invoiceId: string) => {
     console.log(`Delete invoice with ID: ${invoiceId}`);
     const confirmed = confirm(`Are you sure you want to delete invoice ${invoiceId}?`);
 
@@ -51,7 +51,7 @@ const InvoicesPage = () => {
     fetchInvoices();
   }, []);
 
-  const handleSendInvoice = (invoiceId: string) => {
+  const _handleSendInvoice = (invoiceId: string) => {
     console.log(`Send invoice with ID: ${invoiceId}`);
   };
 

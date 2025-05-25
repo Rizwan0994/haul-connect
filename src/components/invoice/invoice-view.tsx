@@ -187,7 +187,7 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
   const subtotal = dispatch.load_amount;
   const rate = dispatch.charge_percent || 7; // Default to 7% if not specified
   const rateAmount = (subtotal * rate) / 100;
-  const total = subtotal + rateAmount;
+  const _total = subtotal + rateAmount;
 
   // Generate a professional invoice number based on load number and date
   const invoiceNumber = `INV-${dispatch.load_no}-${format(

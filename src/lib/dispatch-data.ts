@@ -53,7 +53,7 @@ export const getAllDispatches = async (cookie?: string) => {
 
     return response.data.data;
     console.log(response.data.data)
-  } catch (error: any) {
+  } catch (_error: any) {
     // console.log(
     //   "Error fetching dispatches:",
     //   error?.response?.data || error.message,

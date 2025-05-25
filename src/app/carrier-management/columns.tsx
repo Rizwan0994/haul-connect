@@ -131,7 +131,7 @@ export const columns: ColumnDef<Carrier>[] = [
         const createdDate = new Date(dateValue as string);
         if (isNaN(createdDate.getTime())) return "-";
         return format(createdDate, "MMM dd, yyyy");
-      } catch (error) {
+      } catch (_error) {
         return "-";
       }
     },

@@ -13,7 +13,7 @@ import {
   Users,
   ChevronRight,
 } from "lucide-react";
-import { getAllDispatches } from "@/lib/dispatch-data";
+import { getAllDispatches, type Dispatch } from "@/lib/dispatch-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -39,9 +39,9 @@ export default async function DispatchManagementPage() {
   const data = await getData();
 
   // Calculate some stats for the overview cards
-  const scheduledCount = data.filter((d) => d.status === "Scheduled").length;
-  const inTransitCount = data.filter((d) => d.status === "In Transit").length;
-  const deliveredCount = data.filter((d) => d.status === "Delivered").length;
+  const scheduledCount = data.filter((d: Dispatch) => d.status === "Scheduled").length;
+  const inTransitCount = data.filter((d: Dispatch) => d.status === "In Transit").length;
+  const deliveredCount = data.filter((d: Dispatch) => d.status === "Delivered").length;
   const confirmedSalesCount = deliveredCount; // For now, assuming all delivered are confirmed sales
   const confirmedDispatchCount = deliveredCount; // Same for dispatches
 

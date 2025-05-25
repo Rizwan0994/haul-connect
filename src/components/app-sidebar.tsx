@@ -205,11 +205,7 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Billing</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  // Clear the auth token and redirect
-                  document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-                  window.location.href = '/auth/login';
-                }}>
+                <DropdownMenuItem>
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

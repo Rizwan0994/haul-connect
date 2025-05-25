@@ -25,10 +25,16 @@ export type Dispatch = {
   dispatcher: string;
   invoice_status: "Not Sent" | "Invoice Sent" | "Invoice Pending" | "Invoice Cleared";
   payment_method: "ACH" | "ZELLE" | "OTHER";
+  carrier_id: string;
   carrier?: {
+    id: string;
     company_name: string;
     mc_number: string;
     owner_name: string;
+    phone_number: string;
+    email_address: string;
+    truck_type: string;
+    status: "active" | "inactive" | "pending" | "suspended";
   };
 };
 

@@ -4,12 +4,41 @@ export interface Carrier {
   id: string;
   status: "active" | "inactive" | "pending" | "suspended";
   mc_number: string;
+  us_dot_number: string;
   company_name: string;
   owner_name: string;
   phone_number: string;
   email_address: string;
+  address: string;
   truck_type: string;
-  [key: string]: any;
+  dimensions?: string;
+  doors_type?: string;
+  door_clearance?: string;
+  max_weight?: string;
+  dock_height?: string;
+  accessories?: string;
+  temp_control_range?: string;
+  agreed_percentage?: string;
+  created_at?: string;
+  insurance_company_name?: string;
+  insurance_company_address?: string;
+  insurance_agent_name?: string;
+  insurance_agent_number?: string;
+  insurance_agent_email?: string;
+  factoring_company_name?: string;
+  factoring_company_address?: string;
+  factoring_agent_name?: string;
+  factoring_agent_number?: string;
+  factoring_agent_email?: string;
+  notes_home_town?: string;
+  notes_days_working?: string;
+  notes_preferred_lanes?: string;
+  notes_average_gross?: string;
+  notes_parking_space?: string;
+  notes_additional_preferences?: string;
+  office_use_carrier_no?: string;
+  office_use_team_assigned?: string;
+  office_use_special_notes?: string;
 }
 
 export const createCarrier = async (

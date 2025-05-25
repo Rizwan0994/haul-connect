@@ -313,7 +313,7 @@ export default async function DispatchPage({ params }: DispatchPageProps) {
                   </p>
                   <div className="flex items-center mt-1">
                     <Truck className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <p>{dispatch.carrier}</p>
+                    <p>{dispatch.carrier?.company_name} (MC: {dispatch.carrier?.mc_number})</p>
                   </div>
                 </div>
                 <div>

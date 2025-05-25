@@ -1,9 +1,10 @@
+
 import backendApiClient from "@/services/backendApi/client";
-// import { v4 as uuidv4 } from "uuid";
 
 export type Dispatch = {
   id: string;
   user_id: string;
+  user: string;
   department: string;
   booking_date: string;
   created_at: string;
@@ -22,11 +23,7 @@ export type Dispatch = {
   status: "Scheduled" | "In Transit" | "Delivered" | "Cancelled";
   payment: string;
   dispatcher: string;
-  invoice_status:
-    | "Not Sent"
-    | "Invoice Sent"
-    | "Invoice Pending"
-    | "Invoice Cleared";
+  invoice_status: "Not Sent" | "Invoice Sent" | "Invoice Pending" | "Invoice Cleared";
   payment_method: "ACH" | "ZELLE" | "OTHER";
   carrier?: {
     company_name: string;
@@ -53,12 +50,7 @@ export const getAllDispatches = async (cookie?: string) => {
     });
 
     return response.data.data;
-    console.log(response.data.data)
   } catch (_error: any) {
-    // console.log(
-    //   "Error fetching dispatches:",
-    //   error?.response?.data || error.message,
-    // );
     return [];
   }
 };

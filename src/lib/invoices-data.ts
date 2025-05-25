@@ -4,11 +4,10 @@
 export type Invoice = {
   id: string;
   invoice_number: string;
-  carrier_name: string; // Or driver name, depending on your data structure
-  date: string; // Changed from invoice_date to date to match dummy data structure
-  amount: number; // Changed from string to number to match dummy data structure
+  carrier_name: string;
+  invoice_date: string;
+  amount: number;
   status: "Paid" | "Unpaid" | "Draft";
-  // Add other relevant invoice fields here
 };
 
 // Mock invoices data
@@ -17,7 +16,7 @@ const invoices: Invoice[] = [
     id: "1",
     invoice_number: "INV-001",
     carrier_name: "Carrier A",
-    date: "2023-10-26",
+    invoice_date: "2023-10-26",
     amount: 1500,
     status: "Unpaid",
   },

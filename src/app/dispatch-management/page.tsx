@@ -13,7 +13,6 @@ import {
   Users,
   ChevronRight,
 } from "lucide-react";
-import { format } from "date-fns";
 import { getAllDispatches, type Dispatch } from "@/lib/dispatch-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -40,9 +39,15 @@ export default async function DispatchManagementPage() {
   const data = await getData();
 
   // Calculate some stats for the overview cards
-  const scheduledCount = data.filter((d: Dispatch) => d.status === "Scheduled").length;
-  const inTransitCount = data.filter((d: Dispatch) => d.status === "In Transit").length;
-  const deliveredCount = data.filter((d: Dispatch) => d.status === "Delivered").length;
+  const scheduledCount = data.filter(
+    (d: Dispatch) => d.status === "Scheduled",
+  ).length;
+  const inTransitCount = data.filter(
+    (d: Dispatch) => d.status === "In Transit",
+  ).length;
+  const deliveredCount = data.filter(
+    (d: Dispatch) => d.status === "Delivered",
+  ).length;
   const confirmedSalesCount = deliveredCount; // For now, assuming all delivered are confirmed sales
   const confirmedDispatchCount = deliveredCount; // Same for dispatches
 
@@ -53,7 +58,11 @@ export default async function DispatchManagementPage() {
 
   const totalCommission = data
     .filter((d: Dispatch) => d.status === "Delivered")
-    .reduce((total: number, d: Dispatch) => total + d.load_amount * (d.charge_percent / 100), 0);
+    .reduce(
+      (total: number, d: Dispatch) =>
+        total + d.load_amount * (d.charge_percent / 100),
+      0,
+    );
 
   // For demonstration purposes - in a real app these would come from user records
   const topDispatchers = [

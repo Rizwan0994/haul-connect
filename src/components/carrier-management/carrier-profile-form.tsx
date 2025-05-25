@@ -50,7 +50,6 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     register,
     handleSubmit,
     setValue,
-    _watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -75,7 +74,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
             });
           }
         } catch (error) {
-          console.error('Error loading carrier data:', error);
+          console.error("Error loading carrier data:", error);
           toast({
             title: "Error",
             description: "Failed to load carrier data",
@@ -91,9 +90,11 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   }, [isNew, id, setValue, toast]);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
   }
 
   // Mock data for development - remove in production
@@ -101,60 +102,63 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   const doorClearance = "8.5&apos;";
 
   // Define mock data structure
-  const mockCarrierData = isNew ? null : {
-    id: "1",
-    agent_name: "Jane Doe",
-    mc_number: "MC-123456",
-    us_dot_number: "USDOT-7890123",
-    company_name: "Speedy Logistics Inc.",
-    owner_name: "John Smith",
-    phone_number: "(555) 123-4567",
-    email_address: "contact@speedylogistics.com",
-    address: "123 Freight Lane, Logisticsville, CA 90210",
-    ein_number: "12-3456789",
-    truck_type: "Dry Van",
-    status: "active",
-    dock_height: "Yes",
-    dimensions: dimensions,
-    doors_type: "Swing",
-    door_clearance: doorClearance,
-    accessories: "Liftgate, Pallet Jack",
-    max_weight: "45000 lbs",
-    temp_control_range: "N/A",
-    agreed_percentage: "12",
-    insurance_company_name: "Trucking Insurance Co.",
-    insurance_company_address: "456 Coverage Blvd, Insuranceville, TX 75001",
-    insurance_agent_name: "Mary Johnson",
-    insurance_agent_number: "(555) 987-6543",
-    insurance_agent_email: "mary@truckinsurance.com",
-    factoring_company_name: "Fast Pay Factoring",
-    factoring_company_address: "789 Money Lane, Finance City, NY 10001",
-    factoring_agent_name: "Bob Williams",
-    factoring_agent_number: "(555) 234-5678",
-    factoring_agent_email: "bob@fastpayfactoring.com",
-    notes_home_town: "Logisticsville, CA",
-    notes_days_working: "Monday-Friday",
-    notes_preferred_lanes: "East Coast, Midwest",
-    notes_additional_preferences: "Prefers long hauls, no Canada routes",
-    notes_parking_space: "Ample space for 53&apos; trailer",
-    notes_average_gross: "$5,000/week",
-    office_use_carrier_no: "C-12345",
-    office_use_team_assigned: "Team Alpha",
-    office_use_special_notes: "VIP carrier, priority dispatch",
-    dat_username: "speedylogistics@dat.com",
-    dat_password: "************",
-    truckstop_username: "speedylogistics@truckstop.com",
-    truckstop_password: "************",
-    truckstop_carrier_id: "TS-987654",
-    truckstop_carrier_zip: "90210",
-    eld_provider: "FleetComplete",
-    eld_site: "https://fleetcomplete.com/login",
-    eld_username: "speedylogistics@eld.com",
-    eld_password: "************",
-    mycarrierpackets_username: "speedylogistics@mycarrierpackets.com",
-    mycarrierpackets_password: "************",
-    created_at: "2023-01-15"
-  };
+  const mockCarrierData = isNew
+    ? null
+    : {
+        id: "1",
+        agent_name: "Jane Doe",
+        mc_number: "MC-123456",
+        us_dot_number: "USDOT-7890123",
+        company_name: "Speedy Logistics Inc.",
+        owner_name: "John Smith",
+        phone_number: "(555) 123-4567",
+        email_address: "contact@speedylogistics.com",
+        address: "123 Freight Lane, Logisticsville, CA 90210",
+        ein_number: "12-3456789",
+        truck_type: "Dry Van",
+        status: "active",
+        dock_height: "Yes",
+        dimensions: dimensions,
+        doors_type: "Swing",
+        door_clearance: doorClearance,
+        accessories: "Liftgate, Pallet Jack",
+        max_weight: "45000 lbs",
+        temp_control_range: "N/A",
+        agreed_percentage: "12",
+        insurance_company_name: "Trucking Insurance Co.",
+        insurance_company_address:
+          "456 Coverage Blvd, Insuranceville, TX 75001",
+        insurance_agent_name: "Mary Johnson",
+        insurance_agent_number: "(555) 987-6543",
+        insurance_agent_email: "mary@truckinsurance.com",
+        factoring_company_name: "Fast Pay Factoring",
+        factoring_company_address: "789 Money Lane, Finance City, NY 10001",
+        factoring_agent_name: "Bob Williams",
+        factoring_agent_number: "(555) 234-5678",
+        factoring_agent_email: "bob@fastpayfactoring.com",
+        notes_home_town: "Logisticsville, CA",
+        notes_days_working: "Monday-Friday",
+        notes_preferred_lanes: "East Coast, Midwest",
+        notes_additional_preferences: "Prefers long hauls, no Canada routes",
+        notes_parking_space: "Ample space for 53&apos; trailer",
+        notes_average_gross: "$5,000/week",
+        office_use_carrier_no: "C-12345",
+        office_use_team_assigned: "Team Alpha",
+        office_use_special_notes: "VIP carrier, priority dispatch",
+        dat_username: "speedylogistics@dat.com",
+        dat_password: "************",
+        truckstop_username: "speedylogistics@truckstop.com",
+        truckstop_password: "************",
+        truckstop_carrier_id: "TS-987654",
+        truckstop_carrier_zip: "90210",
+        eld_provider: "FleetComplete",
+        eld_site: "https://fleetcomplete.com/login",
+        eld_username: "speedylogistics@eld.com",
+        eld_password: "************",
+        mycarrierpackets_username: "speedylogistics@mycarrierpackets.com",
+        mycarrierpackets_password: "************",
+        created_at: "2023-01-15",
+      };
 
   // Persist form data across tab changes
   // const formData = watch();
@@ -880,7 +884,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
 
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="notes_additional_preferences">
-                    Additional Preferences                  </Label>
+                    Additional Preferences{" "}
+                  </Label>
                   <Textarea
                     id="notes_additional_preferences"
                     defaultValue={mockCarrierData?.notes_additional_preferences}
@@ -905,7 +910,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="office_use_carrier_no">
-                    Carrier Number (Office Use)                  </Label>
+                    Carrier Number (Office Use){" "}
+                  </Label>
                   <Input
                     id="office_use_carrier_no"
                     defaultValue={mockCarrierData?.office_use_carrier_no}

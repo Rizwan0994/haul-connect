@@ -19,7 +19,7 @@ export default async function EditDispatchPage({
   // In a real application, this would be an API call
   // TODO: Replace with actual API call
   const { id } = await params;
-  const dispatch = getDispatchById(id);
+  const dispatch = await getDispatchById(id);
 
   if (!dispatch) {
     return notFound();

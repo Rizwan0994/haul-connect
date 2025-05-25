@@ -1,0 +1,48 @@
+Error: Event handlers cannot be passed to Client Component props.
+  <... onClick={function onClick} children=...>
+               ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at resolveErrorDev (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17582:48)
+    at processFullStringRow (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17798:23)
+    at processFullBinaryRow (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17786:9)
+    at progress (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17932:102)
+    at PopperContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:6724:217)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9604:229
+    at Primitive.div.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at Primitive.div (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2506:210)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:7174:213
+    at RovingFocusGroup (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:7113:217)
+    at RovingFocusGroupCollectionSlot.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at RovingFocusGroupCollectionSlot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2572:210)
+    at RovingFocusGroup (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:7111:213)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9592:225
+    at Primitive.div.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at Primitive.div (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2506:210)
+    at DismissableLayer (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:3431:206)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9584:221
+    at Primitive.div.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at Primitive.div (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2506:210)
+    at FocusScope (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:3819:206)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9574:217
+    at MenuContent.ScrollLock.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:8587:190
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9029:191
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9572:213
+    at https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9464:206
+    at MenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9443:241)
+    at MenuCollectionSlot.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at MenuCollectionSlot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2572:210)
+    at MenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9441:217)
+    at MenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9439:213)
+    at DropdownMenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:10327:206)
+    at DropdownMenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/src_e07a277c._.js:234:221)
+    at Primitive.div.Slot (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:1850:210)
+    at Primitive.div (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:2506:210)
+    at Portal (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:6873:407)
+    at MenuPortal (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9421:217)
+    at MenuPortal (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:9419:213)
+    at DropdownMenuPortal (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/node_modules_55056c61._.js:10315:206)
+    at DropdownMenuContent (https://7ce467f7-cc70-4c4d-8fc8-4d0a09cedfe0-00-2d6jqrv4dyi1e.pike.replit.dev/_next/static/chunks/src_e07a277c._.js:233:214)
+    at AppSidebar (rsc://React/Server/file:///home/runner/workspace/.next/server/chunks/ssr/src_b8daece8._.js?91:1002:284)
+    at DashboardLayout (rsc://React/Server/file:///home/runner/workspace/.next/server/chunks/ssr/src_b8daece8._.js?1:1106:282)
+    at CarrierManagementLayout (rsc://React/Server/file:///home/runner/workspace/.next/server/chunks/ssr/src_b8daece8._.js?0:1162:263)

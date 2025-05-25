@@ -47,12 +47,12 @@ export default async function DispatchManagementPage() {
 
   // Calculate financial metrics
   const totalLoadAmount = data
-    .filter((d) => d.status === "Delivered")
-    .reduce((total, d) => total + d.load_amount, 0);
+    .filter((d: Dispatch) => d.status === "Delivered")
+    .reduce((total: number, d: Dispatch) => total + d.load_amount, 0);
 
   const totalCommission = data
-    .filter((d) => d.status === "Delivered")
-    .reduce((total, d) => total + d.load_amount * (d.charge_percent / 100), 0);
+    .filter((d: Dispatch) => d.status === "Delivered")
+    .reduce((total: number, d: Dispatch) => total + d.load_amount * (d.charge_percent / 100), 0);
 
   // For demonstration purposes - in a real app these would come from user records
   const topDispatchers = [
@@ -320,7 +320,7 @@ export default async function DispatchManagementPage() {
         <TabsContent value="scheduled" className="rounded-md border">
           <DataTable
             columns={columns}
-            data={data.filter((d) => d.status === "Scheduled")}
+            data={data.filter((d: Dispatch) => d.status === "Scheduled")}
             filterableColumns={[
               "carrier",
               "load_no",
@@ -334,7 +334,7 @@ export default async function DispatchManagementPage() {
         <TabsContent value="in-transit" className="rounded-md border">
           <DataTable
             columns={columns}
-            data={data.filter((d) => d.status === "In Transit")}
+            data={data.filter((d: Dispatch) => d.status === "In Transit")}
             filterableColumns={[
               "carrier",
               "load_no",
@@ -348,7 +348,7 @@ export default async function DispatchManagementPage() {
         <TabsContent value="delivered" className="rounded-md border">
           <DataTable
             columns={columns}
-            data={data.filter((d) => d.status === "Delivered")}
+            data={data.filter((d: Dispatch) => d.status === "Delivered")}
             filterableColumns={[
               "carrier",
               "load_no",
@@ -363,7 +363,7 @@ export default async function DispatchManagementPage() {
           <DataTable
             columns={columns}
             data={data.filter(
-              (d) =>
+              (d: Dispatch) =>
                 d.status === "Delivered" &&
                 d.invoice_status === "Invoice Cleared",
             )}
@@ -380,7 +380,7 @@ export default async function DispatchManagementPage() {
         <TabsContent value="cancelled" className="rounded-md border">
           <DataTable
             columns={columns}
-            data={data.filter((d) => d.status === "Cancelled")}
+            data={data.filter((d: Dispatch) => d.status === "Cancelled")}
             filterableColumns={[
               "carrier",
               "load_no",

@@ -205,7 +205,11 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Billing</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  import('@/services/backendApi/authService').then(({ logout }) => {
+                    logout();
+                  });
+                }}>
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

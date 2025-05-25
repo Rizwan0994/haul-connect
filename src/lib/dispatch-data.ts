@@ -6,6 +6,7 @@ export type Dispatch = {
   user_id: string;
   department: string;
   booking_date: string;
+  created_at: string;
   load_no: string;
   pickup_date: string;
   dropoff_date: string;

@@ -15,7 +15,7 @@ interface InvoicePageProps {
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
   const { id } = await params;
-   const cookieStore = await cookies();
+  const cookieStore = await cookies();
   const cookieHeader = cookieStore
     .getAll()
     .map((c) => `${c.name}=${c.value}`)

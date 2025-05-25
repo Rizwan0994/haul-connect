@@ -36,7 +36,7 @@ export type Dispatch = {
 
 export const getAllDispatches = async (cookie?: string) => {
   try {
-    let headers: any = {};
+    const headers: any = {};
 
     if (cookie) {
       headers["Cookie"] = cookie;
@@ -67,7 +67,7 @@ export const getDispatchById = async (
   cookie?: string,
 ): Promise<Dispatch | undefined> => {
   try {
-    let headers: any = {};
+    const headers: any = {};
     if (cookie) {
       headers["Cookie"] = cookie;
 

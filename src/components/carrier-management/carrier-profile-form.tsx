@@ -99,7 +99,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
   // Mock data for development - remove in production
   const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
   const doorClearance = "8.5&apos;";
-  
+
   // Define mock data structure
   const mockCarrierData = isNew ? null : {
     id: "1",
@@ -880,8 +880,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
 
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="notes_additional_preferences">
-                    Additional Preferences
-                  </Label>
+                    Additional Preferences                  </Label>
                   <Textarea
                     id="notes_additional_preferences"
                     defaultValue={mockCarrierData?.notes_additional_preferences}

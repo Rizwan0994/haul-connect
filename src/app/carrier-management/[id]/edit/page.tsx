@@ -1,13 +1,11 @@
-
 "use client";
 
-import { Metadata } from "next";
 import { use } from "react";
 import CarrierProfileForm from "@/components/carrier-management/carrier-profile-form";
 
 export default function EditCarrierPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  
+
   return (
     <div className="container py-6">
       <div className="mb-6">

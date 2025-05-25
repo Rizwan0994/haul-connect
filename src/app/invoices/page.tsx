@@ -11,7 +11,7 @@ const InvoicesPage = () => {
   const router = useRouter();
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(false);
 
   // Placeholder function to fetch invoice data
   const fetchInvoices = async () => {

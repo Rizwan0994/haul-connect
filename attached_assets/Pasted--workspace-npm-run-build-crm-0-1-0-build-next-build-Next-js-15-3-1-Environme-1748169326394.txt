@@ -1,0 +1,78 @@
+~/workspace$ npm run build
+
+> crm@0.1.0 build
+> next build
+
+   ▲ Next.js 15.3.1
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 43s
+
+Failed to compile.
+
+./src/app/(auth)/login/login-form.tsx
+59:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/invoices/[invoiceId]/send-email/route.ts
+57:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/auth/forgot-password/forgot-password-form.tsx
+38:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+51:36  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/auth/login/login-form.tsx
+6:10  Error: 'Icons' is defined but never used.  @typescript-eslint/no-unused-vars
+18:10  Error: 'Separator' is defined but never used.  @typescript-eslint/no-unused-vars
+19:10  Error: 'Checkbox' is defined but never used.  @typescript-eslint/no-unused-vars
+20:10  Error: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+51:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+117:16  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/auth/register/register-form.tsx
+47:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/carrier-management/[id]/edit/page.tsx
+4:10  Error: 'Metadata' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/carrier-management/columns.tsx
+134:16  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dispatch-management/columns.tsx
+86:16  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/invoices/columns.tsx
+15:10  Error: 'useRouter' is defined but never used.  @typescript-eslint/no-unused-vars
+102:25  Error: React Hook "useToast" is called in function "cell" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use".  react-hooks/rules-of-hooks
+
+./src/app/invoices/page.tsx
+14:10  Error: 'loading' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+28:9  Error: 'handleViewInvoice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+32:9  Error: 'handleEditInvoice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+36:9  Error: 'handleDeleteInvoice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+54:9  Error: 'handleSendInvoice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/carrier-management/carrier-profile-form.tsx
+53:5  Error: 'watch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+91:6  Warning: React Hook useEffect has missing dependencies: 'setValue' and 'toast'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+162:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/invoice/invoice-view.tsx
+190:9  Error: 'total' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/carriers-data.ts
+12:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+21:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+33:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+42:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/dispatch-data.ts
+39:9  Error: 'headers' is never reassigned. Use 'const' instead.  prefer-const
+39:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:12  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+56:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+70:9  Error: 'headers' is never reassigned. Use 'const' instead.  prefer-const
+70:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+~/workspace$ 

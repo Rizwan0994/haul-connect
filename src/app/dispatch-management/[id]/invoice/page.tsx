@@ -52,7 +52,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
             Invoice for {dispatch.load_no}
           </h1>
           <p className="text-muted-foreground">
-            {dispatch.origin} to {dispatch.destination} | {dispatch.carrier}
+            {dispatch.origin} to {dispatch.destination} | {dispatch.carrier?.company_name}
           </p>
         </div>
       </div>

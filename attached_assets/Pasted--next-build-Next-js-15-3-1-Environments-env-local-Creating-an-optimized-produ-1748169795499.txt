@@ -1,0 +1,44 @@
+> next build
+
+   ▲ Next.js 15.3.1
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 47s
+
+Failed to compile.
+
+./src/app/auth/login/login-form.tsx
+6:10  Error: 'Icons' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+18:10  Error: 'Separator' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+19:10  Error: 'Checkbox' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+20:10  Error: 'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./src/app/carrier-management/columns.tsx
+134:16  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dispatch-management/columns.tsx
+86:16  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/invoices/columns.tsx
+15:10  Error: 'useRouter' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+102:25  Error: React Hook "useToast" is called in function "cell" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use".  react-hooks/rules-of-hooks
+
+./src/app/invoices/page.tsx
+28:9  Error: 'handleViewInvoice' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+32:9  Error: 'handleEditInvoice' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+36:9  Error: 'handleDeleteInvoice' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+54:9  Error: 'handleSendInvoice' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./src/components/carrier-management/carrier-profile-form.tsx
+53:5  Error: 'watch' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+91:6  Warning: React Hook useEffect has missing dependencies: 'setValue' and 'toast'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/invoice/invoice-view.tsx
+190:9  Error: 'total' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./src/lib/dispatch-data.ts
+56:12  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+~/workspace$ 

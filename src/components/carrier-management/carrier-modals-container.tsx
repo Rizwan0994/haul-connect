@@ -15,7 +15,7 @@ const CarrierModalsContainer: React.FC = () => {
 
   return (
     <>
-      {modals.map((modal) => (
+      {modals.map((modal) => modal && (
         <CarrierProfileModal
           key={modal.id}
           id={modal.carrierId}

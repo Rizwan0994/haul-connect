@@ -163,7 +163,7 @@ const CarrierProfileModal: React.FC<CarrierProfileModalProps> = ({
   return (
     <DraggableModal
       id={modalId}
-      title={`${carrier.company_name} (${carrier.mc_number})`}
+      title={carrier ? `${carrier.company_name} (${carrier.mc_number})` : 'Loading...'}
       isOpen={true}
       onClose={handleClose}
       zIndex={zIndex}

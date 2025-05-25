@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Calendar,
   ChevronDown,
@@ -205,10 +207,9 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Billing</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  import('@/services/backendApi/authService').then(({ logout }) => {
-                    logout();
-                  });
+                <DropdownMenuItem onClick={async () => {
+                  const { logout } = await import('@/services/backendApi/authService');
+                  logout();
                 }}>
                   <span>Sign out</span>
                 </DropdownMenuItem>

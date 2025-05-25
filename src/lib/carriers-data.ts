@@ -11,7 +11,6 @@ export interface Carrier {
   email_address: string;
   truck_type: string;
   address: string;
-  truck_type: string;
   dimensions?: string;
   doors_type?: string;
   door_clearance?: string;

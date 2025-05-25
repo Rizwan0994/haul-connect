@@ -24,7 +24,7 @@ import { getDispatchById } from "@/lib/dispatch-data";
 import { format } from "date-fns";
 
 interface DispatchPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default async function DispatchPage({ params }: DispatchPageProps) {

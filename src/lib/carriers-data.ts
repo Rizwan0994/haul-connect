@@ -4,11 +4,12 @@ export interface Carrier {
   id: string;
   status: "active" | "inactive" | "pending" | "suspended";
   mc_number: string;
-  us_dot_number: string;
+  us_dot_number?: string;
   company_name: string;
   owner_name: string;
   phone_number: string;
   email_address: string;
+  truck_type: string;
   address: string;
   truck_type: string;
   dimensions?: string;

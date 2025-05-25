@@ -51,7 +51,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<Carrier>({
     defaultValues: {
       status: "active",
       mc_number: "",
@@ -69,9 +69,14 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
         try {
           const data = await getCarrierById(id);
           if (data) {
-            Object.entries(data).forEach(([key, value]) => {
-              setValue(key, value);
-            });
+            // Type-safe way to set form values
+            setValue("status", data.status);
+            setValue("mc_number", data.mc_number);
+            setValue("company_name", data.company_name);
+            setValue("owner_name", data.owner_name);
+            setValue("phone_number", data.phone_number);
+            setValue("email_address", data.email_address);
+            setValue("truck_type", data.truck_type);
           }
         } catch (error) {
           console.error("Error loading carrier data:", error);

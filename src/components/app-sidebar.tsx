@@ -1,15 +1,12 @@
-'use client';
+"use client";
 
 import {
   Calendar,
   ChevronDown,
   ChevronUp,
-  FileText,
   Home,
   Inbox,
   Search,
-  Settings,
-  Truck,
   User2,
   Users,
   Plus,
@@ -59,35 +56,35 @@ const items = [
   },
 ];
 
-import { useNavigate, useLocation } from 'react-router-dom'
-import { Truck, Package, FileText, Settings } from 'lucide-react'
+import { useNavigate, useLocation } from "react-router-dom";
+import { Truck, Package, FileText, Settings } from "lucide-react";
 
 const menuItems = [
   {
-    title: 'Carrier Management',
-    path: '/carrier-management',
-    icon: Truck
+    title: "Carrier Management",
+    path: "/carrier-management",
+    icon: Truck,
   },
   {
-    title: 'Dispatch Management',
-    path: '/dispatch-management',
-    icon: Package
+    title: "Dispatch Management",
+    path: "/dispatch-management",
+    icon: Package,
   },
   {
-    title: 'Invoices',
-    path: '/invoices',
-    icon: FileText
+    title: "Invoices",
+    path: "/invoices",
+    icon: FileText,
   },
   {
-    title: 'Settings',
-    path: '/settings/smtp',
-    icon: Settings
-  }
-]
+    title: "Settings",
+    path: "/settings/smtp",
+    icon: Settings,
+  },
+];
 
 export function AppSidebar() {
-  const navigate = useNavigate()
-  const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <Sidebar>
@@ -95,7 +92,7 @@ export function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton 
+              <SidebarMenuButton
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
               >
@@ -107,5 +104,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

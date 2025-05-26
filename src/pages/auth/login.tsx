@@ -11,12 +11,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Icons } from '@/components/icons'
 import { Loader2 } from 'lucide-react'
+import { login } from '@/services/backendApi/authService'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(1, 'Password is required'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
@@ -32,6 +32,7 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
   })
 
   const onSubmit = async (data: LoginFormData) => {
@@ -39,24 +40,18 @@ export default function LoginForm() {
     setError('')
 
     try {
-      // Replace this with your actual login API call
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        localStorage.setItem('token', result.token)
+      // Use the backend auth service
+      const result = await login(data.email, data.password)
+      
+      if (result.status === 'success') {
+        // Set token as HTTP-only cookie
+        document.cookie = `token=${result.data.token}; path=/; secure; samesite=strict`
         navigate('/carrier-management')
       } else {
-        setError('Invalid email or password')
+        setError(result.message || 'Login failed')
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -96,6 +91,7 @@ export default function LoginForm() {
                   type="email"
                   placeholder="Enter your email"
                   {...register('email')}
+                  className={errors.email ? 'border-red-500' : ''}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -109,6 +105,7 @@ export default function LoginForm() {
                   type="password"
                   placeholder="Enter your password"
                   {...register('password')}
+                  className={errors.password ? 'border-red-500' : ''}
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>

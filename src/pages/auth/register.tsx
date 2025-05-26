@@ -12,12 +12,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
+import { register as registerUser } from '@/services/backendApi/authService'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -36,6 +37,7 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
   })
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -43,28 +45,18 @@ export default function RegisterPage() {
     setError('')
 
     try {
-      // Replace this with your actual register API call
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        localStorage.setItem('token', result.token)
+      // Use the backend auth service
+      const result = await registerUser(data.name, data.password, data.email)
+      
+      if (result.status === 'success') {
+        // Set token as HTTP-only cookie
+        document.cookie = `token=${result.data.token}; path=/; secure; samesite=strict`
         navigate('/carrier-management')
       } else {
-        setError('Registration failed. Please try again.')
+        setError(result.message || 'Registration failed')
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -104,6 +96,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Enter your full name"
                   {...register('name')}
+                  className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && (
                   <p className="text-sm text-red-500">{errors.name.message}</p>
@@ -117,6 +110,7 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="Enter your email"
                   {...register('email')}
+                  className={errors.email ? 'border-red-500' : ''}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -130,6 +124,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="Enter your password"
                   {...register('password')}
+                  className={errors.password ? 'border-red-500' : ''}
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -143,6 +138,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="Confirm your password"
                   {...register('confirmPassword')}
+                  className={errors.confirmPassword ? 'border-red-500' : ''}
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>

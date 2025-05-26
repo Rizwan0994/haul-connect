@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react'
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -37,6 +37,7 @@ export default function ResetPasswordPage() {
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
+    mode: 'onChange',
   })
 
   const onSubmit = async (data: ResetPasswordFormData) => {
@@ -160,6 +161,7 @@ export default function ResetPasswordPage() {
                   type="password"
                   placeholder="Enter your new password"
                   {...register('password')}
+                  className={errors.password ? 'border-red-500' : ''}
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -173,6 +175,7 @@ export default function ResetPasswordPage() {
                   type="password"
                   placeholder="Confirm your new password"
                   {...register('confirmPassword')}
+                  className={errors.confirmPassword ? 'border-red-500' : ''}
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>

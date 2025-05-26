@@ -14,17 +14,17 @@ import { Moon, Sun, Laptop } from "lucide-react";
 export function ThemeSwitch() {
   const { theme, setTheme } = useTheme();
 
+  const getIcon = () => {
+    if (theme === "light") return <Sun className="h-[1.2rem] w-[1.2rem]" />;
+    if (theme === "dark") return <Moon className="h-[1.2rem] w-[1.2rem]" />;
+    return <Laptop className="h-[1.2rem] w-[1.2rem]" />;
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" className="border-gray-700">
-          {theme === "light" ? (
-            <Sun className="h-[1.2rem] w-[1.2rem]" />
-          ) : theme === "dark" ? (
-            <Moon className="h-[1.2rem] w-[1.2rem]" />
-          ) : (
-            <Laptop className="h-[1.2rem] w-[1.2rem]" />
-          )}
+          {getIcon()}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>

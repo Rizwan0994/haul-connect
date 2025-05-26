@@ -221,3 +221,54 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Truck, Package, FileText, Settings } from 'lucide-react'
+
+const menuItems = [
+  {
+    title: 'Carrier Management',
+    path: '/carrier-management',
+    icon: Truck
+  },
+  {
+    title: 'Dispatch Management',
+    path: '/dispatch-management',
+    icon: Package
+  },
+  {
+    title: 'Invoices',
+    path: '/invoices',
+    icon: FileText
+  },
+  {
+    title: 'Settings',
+    path: '/settings/smtp',
+    icon: Settings
+  }
+]
+
+export function AppSidebar() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  return (
+    <Sidebar>
+      <SidebarContent>
+        <SidebarMenu>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton 
+                onClick={() => navigate(item.path)}
+                isActive={location.pathname === item.path}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.title}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
+  )
+}

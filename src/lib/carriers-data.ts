@@ -102,3 +102,50 @@ export async function deleteCarrier(id: string) {
   const response = await backendApiClient.delete(`/carriers/${id}`);
   return response.data;
 }
+export interface Carrier {
+  id: string
+  name: string
+  email: string
+  phone: string
+  address: string
+  status: 'active' | 'inactive'
+  rating: number
+  totalLoads: number
+  onTimeDelivery: number
+}
+
+export const carriersData: Carrier[] = [
+  {
+    id: '1',
+    name: 'Swift Transportation',
+    email: 'contact@swift.com',
+    phone: '+1-555-0101',
+    address: '123 Transport Ave, Phoenix, AZ',
+    status: 'active',
+    rating: 4.5,
+    totalLoads: 150,
+    onTimeDelivery: 95
+  },
+  {
+    id: '2',
+    name: 'Schneider National',
+    email: 'info@schneider.com',
+    phone: '+1-555-0102',
+    address: '456 Logistics Blvd, Green Bay, WI',
+    status: 'active',
+    rating: 4.2,
+    totalLoads: 200,
+    onTimeDelivery: 92
+  },
+  {
+    id: '3',
+    name: 'JB Hunt',
+    email: 'support@jbhunt.com',
+    phone: '+1-555-0103',
+    address: '789 Freight St, Lowell, AR',
+    status: 'inactive',
+    rating: 4.0,
+    totalLoads: 75,
+    onTimeDelivery: 88
+  }
+]

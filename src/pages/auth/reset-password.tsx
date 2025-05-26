@@ -23,9 +23,10 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
@@ -48,6 +49,7 @@ export default function ResetPasswordForm() {
     setError('')
 
     try {
+      // Replace this with your actual reset password API call
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
@@ -60,7 +62,10 @@ export default function ResetPasswordForm() {
       })
 
       if (response.ok) {
-        navigate('/auth/login')
+        setSuccess(true)
+        setTimeout(() => {
+          navigate('/auth/login')
+        }, 2000)
       } else {
         setError('Failed to reset password. Please try again.')
       }
@@ -74,21 +79,49 @@ export default function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-        <Card>
-          <CardContent className="pt-6">
-            <Alert variant="destructive">
-              <AlertDescription>Invalid or missing reset token</AlertDescription>
-            </Alert>
-          </CardContent>
-          <CardFooter>
-            <Link
-              to="/auth/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
-            >
-              Request a new reset link
-            </Link>
-          </CardFooter>
-        </Card>
+        <div className="max-w-md w-full space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Invalid Reset Link</CardTitle>
+              <CardDescription>
+                This password reset link is invalid or has expired.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link
+                to="/auth/forgot-password"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Request a new reset link
+              </Link>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Password Reset Successful</CardTitle>
+              <CardDescription>
+                Your password has been reset successfully. Redirecting to login...
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link
+                to="/auth/login"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Go to login
+              </Link>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -134,7 +167,7 @@ export default function ResetPasswordForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -152,6 +185,14 @@ export default function ResetPasswordForm() {
               </Button>
             </form>
           </CardContent>
+          <CardFooter>
+            <Link
+              to="/auth/login"
+              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            >
+              Back to login
+            </Link>
+          </CardFooter>
         </Card>
       </div>
     </div>

@@ -19,9 +19,9 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
-export default function ForgotPasswordForm() {
+export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState('')
+  const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
   const {
@@ -35,9 +35,9 @@ export default function ForgotPasswordForm() {
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true)
     setError('')
-    setMessage('')
 
     try {
+      // Replace this with your actual forgot password API call
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
@@ -47,15 +47,40 @@ export default function ForgotPasswordForm() {
       })
 
       if (response.ok) {
-        setMessage('Password reset instructions have been sent to your email.')
+        setSuccess(true)
       } else {
-        setError('Failed to send reset instructions. Please try again.')
+        setError('An error occurred. Please try again.')
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Check your email</CardTitle>
+              <CardDescription>
+                We've sent a password reset link to your email address.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link
+                to="/auth/login"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Back to login
+              </Link>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -66,7 +91,7 @@ export default function ForgotPasswordForm() {
             Forgot your password?
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Enter your email address and we'll send you a link to reset your password
+            Enter your email and we'll send you a reset link
           </p>
         </div>
 
@@ -74,7 +99,7 @@ export default function ForgotPasswordForm() {
           <CardHeader>
             <CardTitle>Reset Password</CardTitle>
             <CardDescription>
-              We'll send you instructions to reset your password
+              Enter your email address and we'll send you a link to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -82,12 +107,6 @@ export default function ForgotPasswordForm() {
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {message && (
-                <Alert>
-                  <AlertDescription>{message}</AlertDescription>
                 </Alert>
               )}
 
@@ -106,7 +125,7 @@ export default function ForgotPasswordForm() {
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Reset Instructions
+                Send Reset Link
               </Button>
             </form>
           </CardContent>
@@ -115,7 +134,7 @@ export default function ForgotPasswordForm() {
               to="/auth/login"
               className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
             >
-              Back to sign in
+              Back to login
             </Link>
           </CardFooter>
         </Card>

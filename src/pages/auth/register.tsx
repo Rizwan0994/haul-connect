@@ -25,7 +25,7 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
-export default function RegisterForm() {
+export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -43,6 +43,7 @@ export default function RegisterForm() {
     setError('')
 
     try {
+      // Replace this with your actual register API call
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -56,7 +57,9 @@ export default function RegisterForm() {
       })
 
       if (response.ok) {
-        navigate('/auth/login')
+        const result = await response.json()
+        localStorage.setItem('token', result.token)
+        navigate('/carrier-management')
       } else {
         setError('Registration failed. Please try again.')
       }
@@ -81,7 +84,7 @@ export default function RegisterForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign up</CardTitle>
+            <CardTitle>Sign Up</CardTitle>
             <CardDescription>
               Create a new account to get started
             </CardDescription>

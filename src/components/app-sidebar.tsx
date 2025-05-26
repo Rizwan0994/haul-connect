@@ -59,7 +59,6 @@ const items = [
   },
 ];
 
-import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Truck, Package, FileText, Settings } from 'lucide-react'
 

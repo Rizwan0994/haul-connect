@@ -19,7 +19,7 @@ const createTransporter = () => {
     return null;
   }
 
-  return nodemailer.createTransporter(config);
+  return nodemailer.createTransport(config);
 };
 
 async function sendEmail({ to, subject, text, html, attachments }) {

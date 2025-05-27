@@ -2,10 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const carrierController = require('../controllers/carrierController');
-const { authenticateToken } = require('../middleware/auth');
-
-// Apply authenticateToken middleware to all routes
-router.use(authenticateToken);
 
 router.post('/', carrierController.createCarrier);
 router.get('/', carrierController.getAllCarriers);

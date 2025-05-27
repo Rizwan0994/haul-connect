@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models');
+const { user: User  } = require('../models');
 const bcrypt = require('bcrypt');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireRole } = require('../middleware/auth');
 
 // Get all users (HR/Admin only)
-router.get('/', authenticateToken, requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.get('/', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
@@ -19,7 +19,7 @@ router.get('/', authenticateToken, requireRole(['hr_manager', 'hr_user', 'admin_
 });
 
 // Get user by ID (HR/Admin only)
-router.get('/:id', authenticateToken, requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.get('/:id', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] }
@@ -37,7 +37,7 @@ router.get('/:id', authenticateToken, requireRole(['hr_manager', 'hr_user', 'adm
 });
 
 // Create new user (HR/Admin only)
-router.post('/', authenticateToken, requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.post('/', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
   try {
     const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
 
@@ -73,7 +73,7 @@ router.post('/', authenticateToken, requireRole(['hr_manager', 'admin_manager', 
 });
 
 // Update user (HR/Admin only)
-router.put('/:id', authenticateToken, requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.put('/:id', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
   try {
     const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
     
@@ -111,7 +111,7 @@ router.put('/:id', authenticateToken, requireRole(['hr_manager', 'admin_manager'
 });
 
 // Delete user (HR Manager/Admin only)
-router.delete('/:id', authenticateToken, requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
+router.delete('/:id', requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
@@ -132,7 +132,7 @@ router.delete('/:id', authenticateToken, requireRole(['hr_manager', 'admin_manag
 });
 
 // Update user status (activate/deactivate)
-router.patch('/:id/status', authenticateToken, requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
+router.patch('/:id/status', requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
   try {
     const { is_active } = req.body;
     

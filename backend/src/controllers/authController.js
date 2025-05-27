@@ -86,7 +86,38 @@ const login = async (req, res) => {
   }
 };
 
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category', 'is_active']
+    });
+
+    if (!user) {
+      return res.status(404).json(errorResponse("User not found"));
+    }
+
+    if (!user.is_active) {
+      return res.status(403).json(errorResponse("Account is inactive"));
+    }
+
+    res.json(
+      successResponse("User data retrieved successfully", {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name || '',
+        lastName: user.last_name || '',
+        role: user.role,
+        category: user.category
+      })
+    );
+  } catch (error) {
+    console.error("Get current user error:", error);
+    res.status(500).json(errorResponse("Error fetching user data", error.message));
+  }
+};
+
 module.exports = {
   register,
   login,
+  getCurrentUser,
 };

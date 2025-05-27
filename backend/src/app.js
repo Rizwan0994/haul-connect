@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const invoiceRoutes = require("./routes/invoiceRoutes");
+const { authenticateToken } = require("./middleware/auth");
 
 const app = express();
 
@@ -22,15 +22,19 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
 });
 
+// Import routes
 const authRoutes = require('./routes/authRoutes');
 const carrierRoutes = require('./routes/carrierRoutes');
 const dispatchRoutes = require('./routes/dispatchRoutes');
 const userRoutes = require('./routes/userRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 
-// Routes
+// Public routes (no authentication required)
 app.use('/api/auth', authRoutes);
-app.use('/api/carriers', carrierRoutes);
-app.use('/api/dispatches', dispatchRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/invoices', invoiceRoutes);
+
+// Protected routes (authentication required)
+app.use('/api/carriers', authenticateToken, carrierRoutes);
+app.use('/api/dispatches', authenticateToken, dispatchRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/invoices', authenticateToken, invoiceRoutes);
 module.exports = app;

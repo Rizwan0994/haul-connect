@@ -1,17 +1,35 @@
-const { dispatch: Dispatch, carrier_profile: Carrier } = require("../models");
+const { dispatch: Dispatch, carrier_profile: Carrier, user: User } = require("../models");
 const { successResponse, errorResponse } = require("../utils/responseUtils");
 
 const createDispatch = async (req, res) => {
   try {
+    // Create dispatch with user_id from authenticated user
     const dispatch = await Dispatch.create({
       ...req.body,
       user_id: req.user.id,
     });
 
+    // Fetch the created dispatch with associations
+    const createdDispatch = await Dispatch.findByPk(dispatch.id, {
+      include: [
+        {
+          model: Carrier,
+          as: "carrier",
+          attributes: ["id", "company_name", "mc_number", "owner_name", "phone_number", "email_address", "truck_type", "status"],
+        },
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+      ],
+    });
+
     res
       .status(201)
-      .json(successResponse("Dispatch created successfully", dispatch));
+      .json(successResponse("Dispatch created successfully", createdDispatch));
   } catch (error) {
+    console.error("Error creating dispatch:", error);
     res
       .status(500)
       .json(errorResponse("Error creating dispatch", error.message));
@@ -21,13 +39,19 @@ const createDispatch = async (req, res) => {
 const getAllDispatches = async (req, res) => {
   try {
     const dispatches = await Dispatch.findAll({
-      // include: [
-      //   {
-      //     model: Carrier,
-      //     attributes: ["company_name", "mc_number", "owner_name"],
-      //     as: "carrier",
-      //   },
-      // ],
+      include: [
+        {
+          model: Carrier,
+          as: "carrier",
+          attributes: ["id", "company_name", "mc_number", "owner_name", "phone_number", "email_address", "truck_type", "status"],
+        },
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+      ],
+      order: [['created_at', 'DESC']],
     });
 
     res.json(successResponse("Dispatches retrieved successfully", dispatches));
@@ -42,12 +66,18 @@ const getAllDispatches = async (req, res) => {
 const getDispatchById = async (req, res) => {
   try {
     const dispatch = await Dispatch.findByPk(req.params.id, {
-      // include: [
-      //   {
-      //     model: Carrier,
-      //     attributes: ["company_name", "mc_number", "owner_name"],
-      //   },
-      // ],
+      include: [
+        {
+          model: Carrier,
+          as: "carrier",
+          attributes: ["id", "company_name", "mc_number", "owner_name", "phone_number", "email_address", "truck_type", "status"],
+        },
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+      ],
     });
 
     if (!dispatch) {
@@ -56,6 +86,7 @@ const getDispatchById = async (req, res) => {
 
     res.json(successResponse("Dispatch retrieved successfully", dispatch));
   } catch (error) {
+    console.error("Error fetching dispatch:", error);
     res
       .status(500)
       .json(errorResponse("Error fetching dispatch", error.message));
@@ -72,8 +103,25 @@ const updateDispatch = async (req, res) => {
 
     await dispatch.update(req.body);
 
-    res.json(successResponse("Dispatch updated successfully", dispatch));
+    // Fetch updated dispatch with associations
+    const updatedDispatch = await Dispatch.findByPk(req.params.id, {
+      include: [
+        {
+          model: Carrier,
+          as: "carrier",
+          attributes: ["id", "company_name", "mc_number", "owner_name", "phone_number", "email_address", "truck_type", "status"],
+        },
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+      ],
+    });
+
+    res.json(successResponse("Dispatch updated successfully", updatedDispatch));
   } catch (error) {
+    console.error("Error updating dispatch:", error);
     res
       .status(500)
       .json(errorResponse("Error updating dispatch", error.message));

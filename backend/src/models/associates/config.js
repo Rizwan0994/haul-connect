@@ -1,25 +1,25 @@
 
-exports.UserModel = (db) => {
-  db.User.hasMany(db.CarrierProfile, { foreignKey: 'agent_name', as: 'managedCarriers' });
-  db.User.hasMany(db.Dispatch, { foreignKey: 'user_id', as: 'dispatches' });
-  // db.User.hasMany(db.FollowupSheet, { foreignKey: 'agent_name', as: 'followups' });
-  // db.User.hasMany(db.Notification, { foreignKey: 'username', as: 'notifications' });
+exports.userModel = (db) => {
+  db.user.hasMany(db.carrier_profile, { foreignKey: 'agent_name', as: 'managedCarriers' });
+  db.user.hasMany(db.dispatch, { foreignKey: 'user_id', as: 'dispatches' });
+  // db.user.hasMany(db.FollowupSheet, { foreignKey: 'agent_name', as: 'followups' });
+  // db.user.hasMany(db.Notification, { foreignKey: 'username', as: 'notifications' });
 };
 
-exports.CarrierProfileModel = (db) => {
-  db.CarrierProfile.belongsTo(db.User, { foreignKey: 'agent_name', as: 'agent' });
-  db.CarrierProfile.hasMany(db.Dispatch, { foreignKey: 'carrier_id', as: 'dispatches' });
-  // db.CarrierProfile.hasMany(db.FollowupSheet, { foreignKey: 'mc_no', as: 'followups' });
+exports.carrierModel = (db) => {
+  db.carrier_profile.belongsTo(db.user, { foreignKey: 'agent_name', as: 'agent' });
+  db.carrier_profile.hasMany(db.dispatch, { foreignKey: 'carrier_id', as: 'dispatches' });
+  // db.carrier_profile.hasMany(db.FollowupSheet, { foreignKey: 'mc_no', as: 'followups' });
 };
 
-exports.DispatchModel = (db) => {
-  db.Dispatch.belongsTo(db.User, { foreignKey: 'user_id', as: 'user' });
-  db.Dispatch.belongsTo(db.CarrierProfile, { foreignKey: 'carrier_id', as: 'carrier' });
-  db.Dispatch.hasOne(db.Invoice, { foreignKey: 'dispatch_id', as: 'invoice' });
+exports.dispatchModel = (db) => {
+  db.dispatch.belongsTo(db.user, { foreignKey: 'user_id', as: 'user' });
+  db.dispatch.belongsTo(db.carrier_profile, { foreignKey: 'carrier_id', as: 'carrier' });
+  db.dispatch.hasOne(db.invoice, { foreignKey: 'dispatch_id', as: 'invoice' });
 };
 
-exports.InvoiceModel = (db) => {
-  db.Invoice.belongsTo(db.Dispatch, { foreignKey: 'dispatch_id', as: 'dispatch' });
+exports.invoiceModel = (db) => {
+  db.invoice.belongsTo(db.dispatch, { foreignKey: 'dispatch_id', as: 'dispatch' });
 };
 
 // exports.NotificationModel = (db) => {

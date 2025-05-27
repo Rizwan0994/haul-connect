@@ -2,12 +2,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ModalProvider } from '@/components/carrier-management/modal-context'
+import { AuthProvider } from '@/components/auth/auth-context'
+import CarrierModalsContainer from '@/components/carrier-management/carrier-modals-container'
 import DashboardLayout from '@/components/dashboard-layout'
 import PrivateRoute from '@/components/auth/private-route'
 
 // Auth pages
 import LoginPage from '@/pages/auth/login'
-import RegisterPage from '@/pages/auth/register'
 import ForgotPasswordPage from '@/pages/auth/forgot-password'
 import ResetPasswordPage from '@/pages/auth/reset-password'
 
@@ -23,16 +25,22 @@ import NewDispatchPage from '@/pages/dispatch-management/new'
 import InvoicesPage from '@/pages/invoices'
 import SMTPSettingsPage from '@/pages/settings/smtp'
 
+// Import user management page and access denied page
+import UserManagementPage from '@/pages/user-management'
+import AccessDeniedPage from '@/pages/access-denied'
+
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Router>
-        <Routes>
-          {/* Auth routes */}
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/register" element={<RegisterPage />} />
-          <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+      <ModalProvider>
+        <Router>
+          <AuthProvider>
+            <Routes>
+              {/* Auth routes */}
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/access-denied" element={<AccessDeniedPage />} />
           
           {/* Protected routes */}
           <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
@@ -45,12 +53,20 @@ function App() {
             <Route path="dispatch-management/:id" element={<DispatchDetailPage />} />
             <Route path="dispatch-management/:id/edit" element={<DispatchEditPage />} />
             <Route path="dispatch-management/:id/invoice" element={<DispatchInvoicePage />} />
+            <Route path="user-management" element={
+              <PrivateRoute requiredRoles={['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']}>
+                <UserManagementPage />
+              </PrivateRoute>
+            } />
             <Route path="invoices" element={<InvoicesPage />} />
             <Route path="settings/smtp" element={<SMTPSettingsPage />} />
           </Route>
         </Routes>
+        <CarrierModalsContainer />
         <Toaster />
-      </Router>
+          </AuthProvider>
+        </Router>
+      </ModalProvider>
     </ThemeProvider>
   )
 }

@@ -30,9 +30,24 @@ export const useCarrierModal = () => {
     [closeModal]
   );
 
+  /**
+   * Open modal for creating/editing carriers
+   * @param mode - 'create' for new carrier, 'edit' for editing existing
+   * @param carrierId - Optional carrier ID for edit mode
+   */
+  const onOpen = useCallback(
+    (mode: 'create' | 'edit', carrierId?: string) => {
+      const title = mode === 'create' ? 'Add New Carrier' : 'Edit Carrier';
+      const id = mode === 'create' ? 'create-carrier' : carrierId!;
+      openModal(id, title);
+    },
+    [openModal]
+  );
+
   return {
     openCarrierModal,
     closeCarrierModal,
+    onOpen,
   };
 };
 

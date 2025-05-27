@@ -7,11 +7,13 @@ const {
   updateDispatch,
   deleteDispatch
 } = require('../controllers/dispatchController');
-const auth = require('../middleware/auth');
-
+const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 
-router.use(auth); // Protect all dispatch routes
+
+
+// Apply authenticateToken middleware to all routes
+router.use(authenticateToken);
 
 router.post('/', createDispatch);
 router.get('/', getAllDispatches);

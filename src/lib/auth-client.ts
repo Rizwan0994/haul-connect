@@ -1,5 +1,57 @@
-import { createAuthClient } from "better-auth/react";
-export const authClient = createAuthClient({
-  /** The base URL of the server (optional if you're using the same domain) */
-  baseURL: process.env.B,
-});
+import apiClient from './api-client';
+
+export interface User {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  category: string;
+}
+
+export interface LoginResponse {
+  status: string;
+  message: string;
+  data: {
+    token: string;
+    user: User;
+  };
+}
+
+export interface RegisterData {
+  username: string;
+  password: string;
+  email: string;
+}
+
+export const authClient = {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
+    const response = await apiClient.post('/auth/login', {
+      email,
+      password,
+    });
+    return response.data;
+  },
+
+  register: async (data: RegisterData): Promise<LoginResponse> => {
+    const response = await apiClient.post('/auth/register', data);
+    return response.data;
+  },
+
+  logout: async (): Promise<void> => {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear token and redirect
+      localStorage.removeItem('authToken');
+      window.location.href = '/auth/login';
+    }
+  },
+
+  getCurrentUser: async () => {
+    const response = await apiClient.get('/auth/me');
+    return response.data;
+  },
+};

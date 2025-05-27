@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
-import { getCarrierById } from "@/lib/carriers-data";
+import { getCarrierById, Carrier } from "@/lib/carriers-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { AlertCircle, Save, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { createCarrier, updateCarrier } from "@/lib/carriers-data";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 
@@ -40,43 +38,135 @@ interface CarrierProfileFormProps {
 }
 
 const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!isNew);
+  const [carrierData, setCarrierData] = useState<Carrier | null>(null);
 
   // Initialize form with default values
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
+    reset,
     formState: { errors },
   } = useForm<Carrier>({
     defaultValues: {
-      status: "active",
+      status: "pending",
+      agent_name: "",
       mc_number: "",
       company_name: "",
       owner_name: "",
       phone_number: "",
       email_address: "",
       truck_type: "Dry Van",
+      address: "",
+      us_dot_number: "",
+      ein_number: "",
+      agreed_percentage: "",
+      dimensions: "",
+      doors_type: "Roll Up",
+      door_clearance: "",
+      max_weight: "",
+      dock_height: "no",
+      accessories: "",
+      temp_control_range: "",
+      insurance_company_name: "",
+      insurance_company_address: "",
+      insurance_agent_name: "",
+      insurance_agent_number: "",
+      insurance_agent_email: "",
+      factoring_company_name: "",
+      factoring_company_address: "",
+      factoring_agent_name: "",
+      factoring_agent_number: "",
+      factoring_agent_email: "",
+      notes_home_town: "",
+      notes_days_working: "",
+      notes_preferred_lanes: "",
+      notes_average_gross: "",
+      notes_parking_space: "",
+      notes_additional_preferences: "",
+      office_use_carrier_no: "",
+      office_use_team_assigned: "",
+      office_use_special_notes: "",
+      dat_username: "",
+      dat_password: "",
+      truckstop_username: "",
+      truckstop_password: "",
+      truckstop_carrier_id: "",
+      truckstop_carrier_zip: "",
+      eld_provider: "",
+      eld_site: "",
+      eld_username: "",
+      eld_password: "",
+      mycarrierpackets_username: "",
+      mycarrierpackets_password: "",
     },
   });
 
   useEffect(() => {
     const loadCarrierData = async () => {
-      if (!isNew) {
+      if (!isNew && id !== "new") {
         try {
           const data = await getCarrierById(id);
           if (data) {
-            // Type-safe way to set form values
-            setValue("status", data.status);
-            setValue("mc_number", data.mc_number);
-            setValue("company_name", data.company_name);
-            setValue("owner_name", data.owner_name);
-            setValue("phone_number", data.phone_number);
-            setValue("email_address", data.email_address);
-            setValue("truck_type", data.truck_type);
+            setCarrierData(data);
+            // Reset form with all loaded data
+            reset({
+              status: data.status || "pending",
+              agent_name: data.agent_name || "",
+              mc_number: data.mc_number || "",
+              company_name: data.company_name || "",
+              owner_name: data.owner_name || "",
+              phone_number: data.phone_number || "",
+              email_address: data.email_address || "",
+              truck_type: data.truck_type || "Dry Van",
+              address: data.address || "",
+              us_dot_number: data.us_dot_number || "",
+              ein_number: data.ein_number || "",
+              agreed_percentage: data.agreed_percentage || "",
+              dimensions: data.dimensions || "",
+              doors_type: data.doors_type || "Roll Up",
+              door_clearance: data.door_clearance || "",
+              max_weight: data.max_weight || "",
+              dock_height: data.dock_height || "no",
+              accessories: data.accessories || "",
+              temp_control_range: data.temp_control_range || "",
+              insurance_company_name: data.insurance_company_name || "",
+              insurance_company_address: data.insurance_company_address || "",
+              insurance_agent_name: data.insurance_agent_name || "",
+              insurance_agent_number: data.insurance_agent_number || "",
+              insurance_agent_email: data.insurance_agent_email || "",
+              factoring_company_name: data.factoring_company_name || "",
+              factoring_company_address: data.factoring_company_address || "",
+              factoring_agent_name: data.factoring_agent_name || "",
+              factoring_agent_number: data.factoring_agent_number || "",
+              factoring_agent_email: data.factoring_agent_email || "",
+              notes_home_town: data.notes_home_town || "",
+              notes_days_working: data.notes_days_working || "",
+              notes_preferred_lanes: data.notes_preferred_lanes || "",
+              notes_average_gross: data.notes_average_gross || "",
+              notes_parking_space: data.notes_parking_space || "",
+              notes_additional_preferences: data.notes_additional_preferences || "",
+              office_use_carrier_no: data.office_use_carrier_no || "",
+              office_use_team_assigned: data.office_use_team_assigned || "",
+              office_use_special_notes: data.office_use_special_notes || "",
+              dat_username: data.dat_username || "",
+              dat_password: data.dat_password || "",
+              truckstop_username: data.truckstop_username || "",
+              truckstop_password: data.truckstop_password || "",
+              truckstop_carrier_id: data.truckstop_carrier_id || "",
+              truckstop_carrier_zip: data.truckstop_carrier_zip || "",
+              eld_provider: data.eld_provider || "",
+              eld_site: data.eld_site || "",
+              eld_username: data.eld_username || "",
+              eld_password: data.eld_password || "",
+              mycarrierpackets_username: data.mycarrierpackets_username || "",
+              mycarrierpackets_password: data.mycarrierpackets_password || "",
+            });
           }
         } catch (error) {
           console.error("Error loading carrier data:", error);
@@ -92,7 +182,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     };
 
     loadCarrierData();
-  }, [isNew, id, setValue, toast]);
+  }, [isNew, id, reset, toast]);
 
   if (isLoading) {
     return (
@@ -102,68 +192,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
     );
   }
 
-  // Mock data for development - remove in production
-  const dimensions = "53&apos; x 8.5&apos; x 9&apos;";
-  const doorClearance = "8.5&apos;";
-
-  // Define mock data structure
-  const mockCarrierData = isNew
-    ? null
-    : {
-        id: "1",
-        agent_name: "Jane Doe",
-        mc_number: "MC-123456",
-        us_dot_number: "USDOT-7890123",
-        company_name: "Speedy Logistics Inc.",
-        owner_name: "John Smith",
-        phone_number: "(555) 123-4567",
-        email_address: "contact@speedylogistics.com",
-        address: "123 Freight Lane, Logisticsville, CA 90210",
-        ein_number: "12-3456789",
-        truck_type: "Dry Van",
-        status: "active",
-        dock_height: "Yes",
-        dimensions: dimensions,
-        doors_type: "Swing",
-        door_clearance: doorClearance,
-        accessories: "Liftgate, Pallet Jack",
-        max_weight: "45000 lbs",
-        temp_control_range: "N/A",
-        agreed_percentage: "12",
-        insurance_company_name: "Trucking Insurance Co.",
-        insurance_company_address:
-          "456 Coverage Blvd, Insuranceville, TX 75001",
-        insurance_agent_name: "Mary Johnson",
-        insurance_agent_number: "(555) 987-6543",
-        insurance_agent_email: "mary@truckinsurance.com",
-        factoring_company_name: "Fast Pay Factoring",
-        factoring_company_address: "789 Money Lane, Finance City, NY 10001",
-        factoring_agent_name: "Bob Williams",
-        factoring_agent_number: "(555) 234-5678",
-        factoring_agent_email: "bob@fastpayfactoring.com",
-        notes_home_town: "Logisticsville, CA",
-        notes_days_working: "Monday-Friday",
-        notes_preferred_lanes: "East Coast, Midwest",
-        notes_additional_preferences: "Prefers long hauls, no Canada routes",
-        notes_parking_space: "Ample space for 53&apos; trailer",
-        notes_average_gross: "$5,000/week",
-        office_use_carrier_no: "C-12345",
-        office_use_team_assigned: "Team Alpha",
-        office_use_special_notes: "VIP carrier, priority dispatch",
-        dat_username: "speedylogistics@dat.com",
-        dat_password: "************",
-        truckstop_username: "speedylogistics@truckstop.com",
-        truckstop_password: "************",
-        truckstop_carrier_id: "TS-987654",
-        truckstop_carrier_zip: "90210",
-        eld_provider: "FleetComplete",
-        eld_site: "https://fleetcomplete.com/login",
-        eld_username: "speedylogistics@eld.com",
-        eld_password: "************",
-        mycarrierpackets_username: "speedylogistics@mycarrierpackets.com",
-        mycarrierpackets_password: "************",
-        created_at: "2023-01-15",
-      };
+  // Watch values for Select and RadioGroup components
+  const watchedValues = watch();
 
   // Persist form data across tab changes
   // const formData = watch();
@@ -206,7 +236,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
           description: "Carrier profile has been updated successfully.",
         });
       }
-      router.push("/carrier-management");
+      navigate("/carrier-management");
     } catch (error) {
       console.error("Error saving carrier:", error);
       toast({
@@ -221,9 +251,9 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {!isNew && mockCarrierData?.created_at && (
+      {!isNew && carrierData?.created_at && (
         <div className="text-sm text-muted-foreground text-right">
-          Created on {new Date(mockCarrierData.created_at).toLocaleDateString()}
+          Created on {new Date(carrierData.created_at).toLocaleDateString()}
         </div>
       )}
       {/* Form Tabs */}
@@ -253,7 +283,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="agent_name">Agent Name</Label>
                   <Input
                     id="agent_name"
-                    defaultValue={mockCarrierData?.agent_name}
+                    {...register("agent_name")}
                     placeholder="Agent responsible for this carrier"
                   />
                 </div>
@@ -275,7 +305,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="us_dot_number">US DOT Number</Label>
                   <Input
                     id="us_dot_number"
-                    defaultValue={mockCarrierData?.us_dot_number}
+                    {...register("us_dot_number")}
                     placeholder="USDOT-XXXXXXX"
                   />
                 </div>
@@ -283,7 +313,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="ein_number">EIN Number</Label>
                   <Input
                     id="ein_number"
-                    defaultValue={mockCarrierData?.ein_number}
+                    {...register("ein_number")}
                     placeholder="XX-XXXXXXX"
                   />
                 </div>
@@ -293,7 +323,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     id="company_name"
                     {...register("company_name", { required: true })}
                     placeholder="Carrier company name"
+                    className={errors.company_name ? "border-red-500" : ""}
                   />
+                  {errors.company_name && (
+                    <span className="text-sm text-red-500">
+                      Company name is required
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="owner_name">Owner Name</Label>
@@ -301,7 +337,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     id="owner_name"
                     {...register("owner_name", { required: true })}
                     placeholder="Name of company owner"
+                    className={errors.owner_name ? "border-red-500" : ""}
                   />
+                  {errors.owner_name && (
+                    <span className="text-sm text-red-500">
+                      Owner name is required
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone_number">Phone Number</Label>
@@ -309,7 +351,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     id="phone_number"
                     {...register("phone_number", { required: true })}
                     placeholder="(XXX) XXX-XXXX"
+                    className={errors.phone_number ? "border-red-500" : ""}
                   />
+                  {errors.phone_number && (
+                    <span className="text-sm text-red-500">
+                      Phone number is required
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email_address">Email Address</Label>
@@ -318,7 +366,13 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     type="email"
                     {...register("email_address", { required: true })}
                     placeholder="contact@example.com"
+                    className={errors.email_address ? "border-red-500" : ""}
                   />
+                  {errors.email_address && (
+                    <span className="text-sm text-red-500">
+                      Email address is required
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -326,7 +380,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                 <Label htmlFor="address">Physical Address</Label>
                 <Textarea
                   id="address"
-                  defaultValue={mockCarrierData?.address}
+                  {...register("address")}
                   placeholder="Full street address, city, state, zip"
                   rows={3}
                 />
@@ -340,7 +394,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Input
                     id="agreed_percentage"
                     type="number"
-                    defaultValue={mockCarrierData?.agreed_percentage}
+                    {...register("agreed_percentage")}
                     placeholder="0"
                     min="0"
                     max="100"
@@ -367,7 +421,10 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="truck_type">Truck Type</Label>
-                  <Select defaultValue={mockCarrierData?.truck_type}>
+                  <Select 
+                    value={watchedValues.truck_type} 
+                    onValueChange={(value) => setValue("truck_type", value)}
+                  >
                     <SelectTrigger id="truck_type">
                       <SelectValue placeholder="Select truck type" />
                     </SelectTrigger>
@@ -393,9 +450,8 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                 <div className="space-y-2">
                   <Label htmlFor="dock_height">Dock Height</Label>
                   <RadioGroup
-                    defaultValue={
-                      mockCarrierData?.dock_height === "Yes" ? "yes" : "no"
-                    }
+                    value={watchedValues.dock_height}
+                    onValueChange={(value) => setValue("dock_height", value)}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="yes" id="dock_height_yes" />
@@ -412,14 +468,17 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="dimensions">Dimensions</Label>
                   <Input
                     id="dimensions"
-                    defaultValue={mockCarrierData?.dimensions}
+                    {...register("dimensions")}
                     placeholder="Length x Width x Height"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="doors_type">Door Type</Label>
-                  <Select defaultValue={mockCarrierData?.doors_type}>
+                  <Select 
+                    value={watchedValues.doors_type} 
+                    onValueChange={(value) => setValue("doors_type", value)}
+                  >
                     <SelectTrigger id="doors_type">
                       <SelectValue placeholder="Select door type" />
                     </SelectTrigger>
@@ -436,7 +495,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="door_clearance">Door Clearance</Label>
                   <Input
                     id="door_clearance"
-                    defaultValue={mockCarrierData?.door_clearance}
+                    {...register("door_clearance")}
                     placeholder="Door clearance measurements"
                   />
                 </div>
@@ -445,7 +504,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="max_weight">Maximum Weight Capacity</Label>
                   <Input
                     id="max_weight"
-                    defaultValue={mockCarrierData?.max_weight}
+                    {...register("max_weight")}
                     placeholder="Maximum weight in lbs"
                   />
                 </div>
@@ -456,7 +515,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="temp_control_range"
-                    defaultValue={mockCarrierData?.temp_control_range}
+                    {...register("temp_control_range")}
                     placeholder="For refrigerated trucks (e.g., -10°F to 60°F)"
                   />
                 </div>
@@ -465,7 +524,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="accessories">Accessories</Label>
                   <Textarea
                     id="accessories"
-                    defaultValue={mockCarrierData?.accessories}
+                    {...register("accessories")}
                     placeholder="Liftgate, pallet jack, straps, etc."
                     rows={2}
                   />
@@ -502,7 +561,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="insurance_company_name"
-                    defaultValue={mockCarrierData?.insurance_company_name}
+                    {...register("insurance_company_name")}
                     placeholder="Name of insurance company"
                   />
                 </div>
@@ -513,7 +572,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Textarea
                     id="insurance_company_address"
-                    defaultValue={mockCarrierData?.insurance_company_address}
+                    {...register("insurance_company_address")}
                     placeholder="Full address of insurance company"
                     rows={2}
                   />
@@ -525,7 +584,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="insurance_agent_name"
-                    defaultValue={mockCarrierData?.insurance_agent_name}
+                    {...register("insurance_agent_name")}
                     placeholder="Name of insurance agent"
                   />
                 </div>
@@ -534,9 +593,10 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="insurance_agent_number">
                     Insurance Agent Phone
                   </Label>
-                  <PhoneInput
+                  <Input
                     id="insurance_agent_number"
-                    defaultValue={mockCarrierData?.insurance_agent_number}
+                    {...register("insurance_agent_number")}
+                    placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
 
@@ -547,7 +607,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Input
                     id="insurance_agent_email"
                     type="email"
-                    defaultValue={mockCarrierData?.insurance_agent_email}
+                    {...register("insurance_agent_email")}
                     placeholder="agent@insurance.com"
                   />
                 </div>
@@ -769,10 +829,16 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
               <div className="flex items-center space-x-2">
                 <Switch
                   id="uses_factoring"
-                  defaultChecked={
-                    !!mockCarrierData?.factoring_company_name &&
-                    mockCarrierData.factoring_company_name.length > 0
-                  }
+                  checked={!!watchedValues.factoring_company_name}
+                  onCheckedChange={(checked) => {
+                    if (!checked) {
+                      setValue("factoring_company_name", "");
+                      setValue("factoring_company_address", "");
+                      setValue("factoring_agent_name", "");
+                      setValue("factoring_agent_number", "");
+                      setValue("factoring_agent_email", "");
+                    }
+                  }}
                 />
                 <Label htmlFor="uses_factoring">Uses Factoring Company</Label>
               </div>
@@ -784,7 +850,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="factoring_company_name"
-                    defaultValue={mockCarrierData?.factoring_company_name}
+                    {...register("factoring_company_name")}
                     placeholder="Name of factoring company"
                   />
                 </div>
@@ -795,7 +861,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Textarea
                     id="factoring_company_address"
-                    defaultValue={mockCarrierData?.factoring_company_address}
+                    {...register("factoring_company_address")}
                     placeholder="Full address of factoring company"
                     rows={2}
                   />
@@ -807,7 +873,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="factoring_agent_name"
-                    defaultValue={mockCarrierData?.factoring_agent_name}
+                    {...register("factoring_agent_name")}
                     placeholder="Name of factoring agent"
                   />
                 </div>
@@ -816,9 +882,10 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="factoring_agent_number">
                     Factoring Agent Phone
                   </Label>
-                  <PhoneInput
+                  <Input
                     id="factoring_agent_number"
-                    defaultValue={mockCarrierData?.factoring_agent_number}
+                    {...register("factoring_agent_number")}
+                    placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
 
@@ -829,7 +896,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Input
                     id="factoring_agent_email"
                     type="email"
-                    defaultValue={mockCarrierData?.factoring_agent_email}
+                    {...register("factoring_agent_email")}
                     placeholder="agent@factoring.com"
                   />
                 </div>
@@ -853,7 +920,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="notes_home_town">Home Town</Label>
                   <Input
                     id="notes_home_town"
-                    defaultValue={mockCarrierData?.notes_home_town}
+                    {...register("notes_home_town")}
                     placeholder="Carrier's home location"
                   />
                 </div>
@@ -862,7 +929,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="notes_days_working">Working Days</Label>
                   <Input
                     id="notes_days_working"
-                    defaultValue={mockCarrierData?.notes_days_working}
+                    {...register("notes_days_working")}
                     placeholder="e.g., Monday-Friday"
                   />
                 </div>
@@ -871,7 +938,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   <Label htmlFor="notes_preferred_lanes">Preferred Lanes</Label>
                   <Input
                     id="notes_preferred_lanes"
-                    defaultValue={mockCarrierData?.notes_preferred_lanes}
+                    {...register("notes_preferred_lanes")}
                     placeholder="Preferred routes or regions"
                   />
                 </div>
@@ -882,7 +949,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="notes_average_gross"
-                    defaultValue={mockCarrierData?.notes_average_gross}
+                    {...register("notes_average_gross")}
                     placeholder="e.g., $5000/week"
                   />
                 </div>
@@ -893,7 +960,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Textarea
                     id="notes_additional_preferences"
-                    defaultValue={mockCarrierData?.notes_additional_preferences}
+                    {...register("notes_additional_preferences")}
                     placeholder="Special requirements or preferences"
                     rows={3}
                   />
@@ -905,7 +972,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Textarea
                     id="notes_parking_space"
-                    defaultValue={mockCarrierData?.notes_parking_space}
+                    {...register("notes_parking_space")}
                     placeholder="Details about parking availability"
                     rows={2}
                   />
@@ -919,7 +986,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="office_use_carrier_no"
-                    defaultValue={mockCarrierData?.office_use_carrier_no}
+                    {...register("office_use_carrier_no")}
                     placeholder="Internal carrier reference number"
                   />
                 </div>
@@ -930,7 +997,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Input
                     id="office_use_team_assigned"
-                    defaultValue={mockCarrierData?.office_use_team_assigned}
+                    {...register("office_use_team_assigned")}
                     placeholder="Internal team assignment"
                   />
                 </div>
@@ -941,7 +1008,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                   </Label>
                   <Textarea
                     id="office_use_special_notes"
-                    defaultValue={mockCarrierData?.office_use_special_notes}
+                    {...register("office_use_special_notes")}
                     placeholder="Internal notes and special instructions"
                     rows={3}
                   />
@@ -979,7 +1046,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="dat_username"
                       type="text"
-                      defaultValue={mockCarrierData?.dat_username}
+                      {...register("dat_username")}
                       placeholder="DAT username or email"
                     />
                   </div>
@@ -988,7 +1055,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="dat_password"
                       type="password"
-                      defaultValue={mockCarrierData?.dat_password}
+                      {...register("dat_password")}
                       placeholder="DAT password"
                     />
                   </div>
@@ -1010,7 +1077,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="truckstop_username"
                       type="text"
-                      defaultValue={mockCarrierData?.truckstop_username}
+                      {...register("truckstop_username")}
                       placeholder="Truckstop username or email"
                     />
                   </div>
@@ -1021,7 +1088,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="truckstop_password"
                       type="password"
-                      defaultValue={mockCarrierData?.truckstop_password}
+                      {...register("truckstop_password")}
                       placeholder="Truckstop password"
                     />
                   </div>
@@ -1032,7 +1099,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="truckstop_carrier_id"
                       type="text"
-                      defaultValue={mockCarrierData?.truckstop_carrier_id}
+                      {...register("truckstop_carrier_id")}
                       placeholder="Carrier ID"
                     />
                   </div>
@@ -1043,7 +1110,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="truckstop_carrier_zip"
                       type="text"
-                      defaultValue={mockCarrierData?.truckstop_carrier_zip}
+                      {...register("truckstop_carrier_zip")}
                       placeholder="Carrier ZIP code"
                     />
                   </div>
@@ -1061,7 +1128,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="eld_provider"
                       type="text"
-                      defaultValue={mockCarrierData?.eld_provider}
+                      {...register("eld_provider")}
                       placeholder="Name of ELD provider"
                     />
                   </div>
@@ -1070,7 +1137,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="eld_site"
                       type="text"
-                      defaultValue={mockCarrierData?.eld_site}
+                      {...register("eld_site")}
                       placeholder="ELD website URL"
                     />
                   </div>
@@ -1079,7 +1146,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="eld_username"
                       type="text"
-                      defaultValue={mockCarrierData?.eld_username}
+                      {...register("eld_username")}
                       placeholder="ELD username or email"
                     />
                   </div>
@@ -1088,7 +1155,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="eld_password"
                       type="password"
-                      defaultValue={mockCarrierData?.eld_password}
+                      {...register("eld_password")}
                       placeholder="ELD password"
                     />
                   </div>
@@ -1110,7 +1177,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="mycarrierpackets_username"
                       type="text"
-                      defaultValue={mockCarrierData?.mycarrierpackets_username}
+                      {...register("mycarrierpackets_username")}
                       placeholder="MyCarrierPackets username or email"
                     />
                   </div>
@@ -1121,7 +1188,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
                     <Input
                       id="mycarrierpackets_password"
                       type="password"
-                      defaultValue={mockCarrierData?.mycarrierpackets_password}
+                      {...register("mycarrierpackets_password")}
                       placeholder="MyCarrierPackets password"
                     />
                   </div>
@@ -1137,7 +1204,7 @@ const CarrierProfileForm = ({ isNew, id }: CarrierProfileFormProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/carrier-management")}
+          onClick={() => navigate("/carrier-management")}
         >
           <X className="h-4 w-4 mr-2" />
           Cancel

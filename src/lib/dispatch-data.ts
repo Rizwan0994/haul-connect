@@ -1,5 +1,5 @@
 
-import backendApiClient from "@/services/backendApi/client";
+import apiClient from "./api-client";
 
 export type Dispatch = {
   id: string;
@@ -25,7 +25,6 @@ export type Dispatch = {
   dispatcher: string;
   invoice_status: "Not Sent" | "Invoice Sent" | "Invoice Pending" | "Invoice Cleared";
   payment_method: "ACH" | "ZELLE" | "OTHER";
-  carrier_id: string;
   carrier?: {
     id: string;
     company_name: string;
@@ -38,23 +37,9 @@ export type Dispatch = {
   };
 };
 
-export const getAllDispatches = async (cookie?: string) => {
+export const getAllDispatches = async () => {
   try {
-    const headers: any = {};
-
-    if (cookie) {
-      headers["Cookie"] = cookie;
-
-      const tokenMatch = cookie.match(/token=([^;]+)/);
-      if (tokenMatch) {
-        headers["Authorization"] = `Bearer ${tokenMatch[1]}`;
-      }
-    }
-
-    const response = await backendApiClient.get("/dispatches", {
-      headers,
-    });
-
+    const response = await apiClient.get("/dispatches");
     return response.data.data;
   } catch (_error: any) {
     return [];
@@ -63,21 +48,9 @@ export const getAllDispatches = async (cookie?: string) => {
 
 export const getDispatchById = async (
   id: string,
-  cookie?: string,
 ): Promise<Dispatch | undefined> => {
   try {
-    const headers: any = {};
-    if (cookie) {
-      headers["Cookie"] = cookie;
-
-      const tokenMatch = cookie.match(/token=([^;]+)/);
-      if (tokenMatch) {
-        headers["Authorization"] = `Bearer ${tokenMatch[1]}`;
-      }
-    }
-    const response = await backendApiClient.get(`/dispatches/${id}`, {
-      headers,
-    });
+    const response = await apiClient.get(`/dispatches/${id}`);
     return response.data.data;
   } catch (_error: any) {
     console.error("Error fetching dispatch:", _error);
@@ -89,7 +62,7 @@ export const createDispatch = async (
   dispatchData: Omit<Dispatch, "id">,
 ): Promise<Dispatch | undefined> => {
   try {
-    const response = await backendApiClient.post("/dispatches", dispatchData);
+    const response = await apiClient.post("/dispatches", dispatchData);
     return response.data.data;
   } catch (_error: any) {
     console.error("Error creating dispatch:", _error);
@@ -102,7 +75,7 @@ export const updateDispatch = async (
   dispatchData: Partial<Omit<Dispatch, "id">>,
 ): Promise<Dispatch | undefined> => {
   try {
-    const response = await backendApiClient.put(
+    const response = await apiClient.put(
       `/dispatches/${id}`,
       dispatchData,
     );
@@ -115,7 +88,7 @@ export const updateDispatch = async (
 
 export const deleteDispatch = async (id: string): Promise<boolean> => {
   try {
-    await backendApiClient.delete(`/dispatches/${id}`);
+    await apiClient.delete(`/dispatches/${id}`);
     return true;
   } catch (_error: any) {
     console.error("Error deleting dispatch:", _error);

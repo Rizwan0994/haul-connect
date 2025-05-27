@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { user: User } = require("../models");
 
-const authMiddleware = async (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -21,6 +21,14 @@ const authMiddleware = async (req, res, next) => {
         message: "User not found",
       });
     }
+    
+    // Check if user is active
+    if (!user.is_active) {
+      return res.status(403).json({
+        status: "error",
+        message: "User account is inactive",
+      });
+    }
 
     req.user = user;
     next();
@@ -32,4 +40,31 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+/**
+ * Middleware to check if user has required role
+ * @param {Array} allowedRoles - Array of allowed roles/categories
+ */
+const requireRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Authentication required",
+      });
+    }
+
+    if (!allowedRoles.includes(req.user.category)) {
+      return res.status(403).json({
+        status: "error",
+        message: "Access denied: Insufficient permissions",
+      });
+    }
+
+    next();
+  };
+};
+
+module.exports = {
+  authenticateToken,
+  requireRole
+};

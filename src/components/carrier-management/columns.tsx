@@ -135,7 +135,7 @@ export const columns: ColumnDef<Carrier>[] = [
     id: "actions",
     cell: ({ row }) => {
       const carrier = row.original;
-      const { openCarrierModal } = useCarrierModal();
+      const { openCarrierModal, onOpen } = useCarrierModal();
 
       return (
         <div className="flex items-center justify-end gap-1">
@@ -157,7 +157,13 @@ export const columns: ColumnDef<Carrier>[] = [
             <Eye className="h-4 w-4" />
             <span className="sr-only">View carrier</span>
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => onOpen('edit', carrier.id)}
+            aria-label="Edit carrier"
+          >
             <Pencil className="h-4 w-4" />
             <span className="sr-only">Edit carrier</span>
           </Button>
@@ -176,10 +182,19 @@ export const columns: ColumnDef<Carrier>[] = [
                 Copy carrier ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  openCarrierModal(
+                    carrier.id,
+                    `${carrier.company_name} (${carrier.mc_number})`
+                  )
+                }
+              >
                 View carrier profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onOpen('edit', carrier.id)}
+              >
                 Edit carrier details
               </DropdownMenuItem>
               <DropdownMenuItem

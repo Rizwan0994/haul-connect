@@ -1,4 +1,4 @@
-import backendApiClient from "@/services/backendApi/client";
+import apiClient from "./api-client";
 
 export interface Carrier {
   id: string;
@@ -39,13 +39,29 @@ export interface Carrier {
   office_use_carrier_no?: string;
   office_use_team_assigned?: string;
   office_use_special_notes?: string;
+  // Agent info
+  agent_name?: string;
+  ein_number?: string;
+  // Admin only fields
+  dat_username?: string;
+  dat_password?: string;
+  truckstop_username?: string;
+  truckstop_password?: string;
+  truckstop_carrier_id?: string;
+  truckstop_carrier_zip?: string;
+  eld_provider?: string;
+  eld_site?: string;
+  eld_username?: string;
+  eld_password?: string;
+  mycarrierpackets_username?: string;
+  mycarrierpackets_password?: string;
 }
 
 export const createCarrier = async (
   carrierData: Omit<Carrier, "id">,
 ): Promise<Carrier> => {
   try {
-    const response = await backendApiClient.post("/carriers", carrierData);
+    const response = await apiClient.post("/carriers", carrierData);
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Error creating carrier");
@@ -57,7 +73,7 @@ export const updateCarrier = async (
   carrierData: Partial<Carrier>,
 ): Promise<Carrier> => {
   try {
-    const response = await backendApiClient.put(`/carriers/${id}`, carrierData);
+    const response = await apiClient.put(`/carriers/${id}`, carrierData);
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Error updating carrier");
@@ -66,7 +82,7 @@ export const updateCarrier = async (
 
 export const getCarrierById = async (id: string): Promise<Carrier> => {
   try {
-    const response = await backendApiClient.get(`/carriers/${id}`);
+    const response = await apiClient.get(`/carriers/${id}`);
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Error fetching carrier");
@@ -75,7 +91,7 @@ export const getCarrierById = async (id: string): Promise<Carrier> => {
 
 export const getAllCarriers = async () => {
   try {
-    const response = await backendApiClient.get("/carriers");
+    const response = await apiClient.get("/carriers");
     console.log("Carriers response:", response.data);
     return response.data.data || [];
   } catch (error) {
@@ -99,53 +115,6 @@ export const getCarrierById_fetch = async (id: string) => {
 };
 
 export async function deleteCarrier(id: string) {
-  const response = await backendApiClient.delete(`/carriers/${id}`);
+  const response = await apiClient.delete(`/carriers/${id}`);
   return response.data;
 }
-export interface Carrier {
-  id: string
-  name: string
-  email: string
-  phone: string
-  address: string
-  status: 'active' | 'inactive'
-  rating: number
-  totalLoads: number
-  onTimeDelivery: number
-}
-
-export const carriersData: Carrier[] = [
-  {
-    id: '1',
-    name: 'Swift Transportation',
-    email: 'contact@swift.com',
-    phone: '+1-555-0101',
-    address: '123 Transport Ave, Phoenix, AZ',
-    status: 'active',
-    rating: 4.5,
-    totalLoads: 150,
-    onTimeDelivery: 95
-  },
-  {
-    id: '2',
-    name: 'Schneider National',
-    email: 'info@schneider.com',
-    phone: '+1-555-0102',
-    address: '456 Logistics Blvd, Green Bay, WI',
-    status: 'active',
-    rating: 4.2,
-    totalLoads: 200,
-    onTimeDelivery: 92
-  },
-  {
-    id: '3',
-    name: 'JB Hunt',
-    email: 'support@jbhunt.com',
-    phone: '+1-555-0103',
-    address: '789 Freight St, Lowell, AR',
-    status: 'inactive',
-    rating: 4.0,
-    totalLoads: 75,
-    onTimeDelivery: 88
-  }
-]

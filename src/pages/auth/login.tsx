@@ -1,61 +1,50 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-context";
 
-'use client'
-
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2 } from 'lucide-react'
-import { login } from '@/services/backendApi/authService'
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
 export default function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onChange',
-  })
+  const { register, handleSubmit } = useForm<LoginFormData>();
 
+  const { login } = useAuth();
+  
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
-    setError('')
-
+    setIsLoading(true);
+    setError("");
     try {
-      // Use the backend auth service
-      const result = await login(data.email, data.password)
-      
-      if (result.status === 'success') {
-        // Set token as HTTP-only cookie
-        document.cookie = `token=${result.data.token}; path=/; secure; samesite=strict`
-        navigate('/carrier-management')
-      } else {
-        setError(result.message || 'Login failed')
-      }
+      // Using our auth context login method
+      await login(data.email, data.password);
+      // Navigation is handled within the login function
     } catch (err: any) {
-      setError(err.response?.data?.message || 'An error occurred. Please try again.')
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message || "An error occurred. Please try again.",
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -90,12 +79,8 @@ export default function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="Enter your email"
-                  {...register('email')}
-                  className={errors.email ? 'border-red-500' : ''}
+                  {...register("email")}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -104,12 +89,8 @@ export default function LoginForm() {
                   id="password"
                   type="password"
                   placeholder="Enter your password"
-                  {...register('password')}
-                  className={errors.password ? 'border-red-500' : ''}
+                  {...register("password")}
                 />
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -118,25 +99,16 @@ export default function LoginForm() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
+          <CardFooter className="flex justify-center">
             <Link
               to="/auth/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
             >
               Forgot your password?
             </Link>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link
-                to="/auth/register"
-                className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
-              >
-                Sign up
-              </Link>
-            </p>
           </CardFooter>
         </Card>
       </div>
     </div>
-  )
+  );
 }

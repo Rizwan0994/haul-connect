@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { updateDispatch, Dispatch } from "@/lib/dispatch-data";
 import { DispatchForm, DispatchFormValues } from "./dispatch-form";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,7 +10,7 @@ interface DispatchEditFormProps {
 }
 
 export function DispatchEditForm({ dispatch, id }: DispatchEditFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,7 +37,7 @@ export function DispatchEditForm({ dispatch, id }: DispatchEditFormProps) {
       });
 
       // Redirect to the dispatch details page after successful update
-      router.push(`/dispatch-management/${id}`);
+      navigate(`/dispatch-management/${id}`);
     } catch (error) {
       console.error("Error updating dispatch:", error);
       toast({

@@ -38,9 +38,9 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { username } });
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json(errorResponse("Invalid credentials"));
     }
@@ -49,18 +49,39 @@ const login = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json(errorResponse("Invalid credentials"));
     }
+    
+    // Check if user account is active
+    if (!user.is_active) {
+      return res.status(403).json(errorResponse("Account is inactive. Please contact HR."));
+    }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign(
+      { 
+        id: user.id,
+        role: user.role,
+        category: user.category
+      }, 
+      process.env.JWT_SECRET, 
+      {
+        expiresIn: "24h",
+      }
+    );
 
     res.json(
       successResponse("Login successful", {
-        user: { id: user.id, username: user.username, role: user.role },
+        user: { 
+          id: user.id, 
+          email: user.email,
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          role: user.role,
+          category: user.category 
+        },
         token,
       }),
     );
   } catch (error) {
+    console.log("Login error:", error);
     res.status(500).json(errorResponse("Error logging in", error.message));
   }
 };

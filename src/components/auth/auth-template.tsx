@@ -1,8 +1,6 @@
-"use client";
-
 import React from "react";
 import { Icons } from "@/components/icons";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 interface AuthTemplateProps {
   children: React.ReactNode;
@@ -42,7 +40,7 @@ export function AuthTemplate({
       {/* Logo placement for better branding */}
       <div className="fixed top-6 left-6 z-50">
         <Link
-          href="/"
+          to="/"
           className="flex items-center space-x-2 text-primary"
           tabIndex={0}
           aria-label="Go to homepage"

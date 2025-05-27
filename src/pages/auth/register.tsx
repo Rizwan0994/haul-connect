@@ -1,6 +1,4 @@
 
-'use client'
-
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -12,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
-import { register as registerUser } from '@/services/backendApi/authService'
+import { authClient } from '@/lib/auth-client'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -45,15 +43,19 @@ export default function RegisterPage() {
     setError('')
 
     try {
-      // Use the backend auth service
-      const result = await registerUser(data.name, data.password, data.email)
+      // Use the auth client
+      const result = await authClient.register({
+        username: data.name,
+        password: data.password,
+        email: data.email
+      })
       
       if (result.status === 'success') {
-        // Set token as HTTP-only cookie
-        document.cookie = `token=${result.data.token}; path=/; secure; samesite=strict`
+        // Store token in localStorage only - access from result.data.token
+        localStorage.setItem("authToken", result.data.token);
         navigate('/carrier-management')
       } else {
-        setError(result.message || 'Registration failed')
+        setError('Registration failed')
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred. Please try again.')

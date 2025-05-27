@@ -25,10 +25,12 @@ app.get("/", (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const carrierRoutes = require('./routes/carrierRoutes');
 const dispatchRoutes = require('./routes/dispatchRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/carriers', carrierRoutes);
 app.use('/api/dispatches', dispatchRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/invoices', invoiceRoutes);
 module.exports = app;

@@ -20,51 +20,8 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { getCarrierById } from "@/lib/carriers-data";
-
-// Define the carrier type
-interface Carrier {
-  id: string;
-  company_name: string;
-  mc_number: string;
-  us_dot_number: string;
-  owner_name: string;
-  phone_number: string;
-  email_address: string;
-  address: string;
-  truck_type: string;
-  status: string;
-  created_at?: string;
-  agreed_percentage?: string;
-  dimensions?: string;
-  doors_type?: string;
-  door_clearance?: string;
-  max_weight?: string;
-  dock_height?: string;
-  accessories?: string;
-  temp_control_range?: string;
-  insurance_company_name?: string;
-  insurance_company_address?: string;
-  insurance_agent_name?: string;
-  insurance_agent_number?: string;
-  insurance_agent_email?: string;
-  factoring_company_name?: string;
-  factoring_company_address?: string;
-  factoring_agent_name?: string;
-  factoring_agent_number?: string;
-  factoring_agent_email?: string;
-  // Notes fields
-  notes_home_town?: string;
-  notes_days_working?: string;
-  notes_preferred_lanes?: string;
-  notes_average_gross?: string;
-  notes_parking_space?: string;
-  notes_additional_preferences?: string;
-  // Office use fields
-  office_use_carrier_no?: string;
-  office_use_team_assigned?: string;
-  office_use_special_notes?: string;
-}
+import { getCarrierById, Carrier } from "@/lib/carriers-data";
+import CarrierProfileForm from "./carrier-profile-form";
 
 interface CarrierProfileModalProps {
   id: string;
@@ -80,15 +37,40 @@ const CarrierProfileModal: React.FC<CarrierProfileModalProps> = ({
   const { closeModal, focusModal } = useModals();
   const [carrier, setCarrier] = useState<Carrier | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Check if this is a create modal or edit modal
+  const isCreateMode = id === 'create-carrier';
+  const isEditMode = modalId.startsWith('edit-carrier-');
+  
+  // Extract actual carrier ID from modalId for edit mode
+  const actualCarrierId = isEditMode ? modalId.replace('edit-carrier-', '') : id;
 
   useEffect(() => {
     const loadCarrierData = async () => {
       try {
         setLoading(true);
-        // Get carrier data from our mock data
-        const data = getCarrierById(id);
-        if (data) {
-          setCarrier(data);
+        
+        // Check if this is a create modal
+        if (isCreateMode) {
+          // For create mode, set a default carrier object
+          setCarrier({
+            id: 'new',
+            company_name: '',
+            mc_number: '',
+            us_dot_number: '',
+            owner_name: '',
+            phone_number: '',
+            email_address: '',
+            address: '',
+            truck_type: '',
+            status: 'pending'
+          });
+        } else {
+          // For view/edit mode, get carrier data from API using actual carrier ID
+          const data = await getCarrierById(actualCarrierId);
+          if (data) {
+            setCarrier(data);
+          }
         }
       } catch (error) {
         console.error("Failed to load carrier data:", error);
@@ -98,7 +80,7 @@ const CarrierProfileModal: React.FC<CarrierProfileModalProps> = ({
     };
 
     loadCarrierData();
-  }, [id]);
+  }, [isCreateMode, actualCarrierId]);
 
   const handleClose = () => {
     closeModal(modalId);
@@ -163,20 +145,31 @@ const CarrierProfileModal: React.FC<CarrierProfileModalProps> = ({
   return (
     <DraggableModal
       id={modalId}
-      title={carrier ? `${carrier.company_name} (${carrier.mc_number})` : 'Loading...'}
+      title={
+        isCreateMode 
+          ? 'Add New Carrier' 
+          : isEditMode 
+            ? `Edit Carrier: ${carrier ? `${carrier.company_name} (${carrier.mc_number})` : 'Loading...'}`
+            : (carrier ? `${carrier.company_name} (${carrier.mc_number})` : 'Loading...')
+      }
       isOpen={true}
       onClose={handleClose}
       zIndex={zIndex}
       onFocus={handleFocus}
     >
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid grid-cols-5 mb-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
-          <TabsTrigger value="insurance">Insurance</TabsTrigger>
-          <TabsTrigger value="factoring">Factoring</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-        </TabsList>
+      {isCreateMode ? (
+        <CarrierProfileForm isNew={true} id="new" />
+      ) : isEditMode ? (
+        <CarrierProfileForm isNew={false} id={actualCarrierId} />
+      ) : (
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid grid-cols-5 mb-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="insurance">Insurance</TabsTrigger>
+            <TabsTrigger value="factoring">Factoring</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
@@ -440,7 +433,8 @@ const CarrierProfileModal: React.FC<CarrierProfileModalProps> = ({
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      )}
     </DraggableModal>
   );
 };

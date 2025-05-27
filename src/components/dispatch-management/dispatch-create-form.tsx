@@ -1,13 +1,11 @@
-"use client";
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { createDispatch } from "@/lib/dispatch-data";
 import { DispatchForm, DispatchFormValues } from "./dispatch-form";
 import { useToast } from "@/components/ui/use-toast";
 
 export function DispatchCreateForm() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,7 +32,7 @@ export function DispatchCreateForm() {
       });
 
       // Redirect to the dispatch list after successful creation
-      router.push("/dispatch-management");
+      navigate("/dispatch-management");
     } catch (error) {
       console.error("Error creating dispatch:", error);
       toast({

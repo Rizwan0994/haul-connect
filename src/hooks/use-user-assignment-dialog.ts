@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback } from "react";
 
 // If you need global state management, consider installing zustand:

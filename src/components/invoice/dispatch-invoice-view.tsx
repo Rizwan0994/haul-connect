@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Dispatch } from "@/lib/dispatch-api";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
@@ -14,12 +14,19 @@ import {
   Clipboard,
   Calendar,
   CreditCard,
+  Mail,
+  Save,
+  Check,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { invoiceAPI, Invoice } from "@/lib/invoice-api";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface DispatchInvoiceViewProps {
   dispatch: Dispatch;
@@ -27,14 +34,61 @@ interface DispatchInvoiceViewProps {
 
 export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isSavingInvoice, setIsSavingInvoice] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailData, setEmailData] = useState({
+    recipientEmail: dispatch.carrier?.email_address || '',
+    subject: '',
+    message: ''
+  });
   const invoiceRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const formatDate = (dateString: string) => {
+  // Calculate amounts
+  const totalAmount = dispatch.load_amount;
+  const carrierPercentage = dispatch.charge_percent;
+  const carrierAmount = (totalAmount * carrierPercentage) / 100;
+  const profit = totalAmount - carrierAmount;
+
+  // Generate invoice details
+  const invoiceNumber = `INV-${dispatch.load_no}-${format(new Date(), "yyyyMMdd")}`;
+  const invoiceDate = format(new Date(), "MMM dd, yyyy");
+  const dueDate = format(
+    new Date(new Date().setDate(new Date().getDate() + 30)),
+    "MMM dd, yyyy"
+  );
+
+  // Load existing invoice for this dispatch
+  useEffect(() => {
+    const loadInvoice = async () => {
+      try {
+        const existingInvoice = await invoiceAPI.getInvoiceByDispatchId(dispatch.id);
+        setInvoice(existingInvoice);
+        setEmailData(prev => ({
+          ...prev,
+          subject: `Invoice ${existingInvoice.invoice_number} - ${dispatch.carrier?.company_name}`,
+          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${existingInvoice.invoice_number}\n- Amount: $${existingInvoice.total_amount.toFixed(2)}\n- Due Date: ${format(new Date(existingInvoice.due_date), "MMM dd, yyyy")}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
+        }));
+      } catch (error) {
+        // Invoice doesn't exist yet, which is fine
+        setEmailData(prev => ({
+          ...prev,
+          subject: `Invoice ${invoiceNumber} - ${dispatch.carrier?.company_name}`,
+          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${invoiceNumber}\n- Amount: $${totalAmount.toFixed(2)}\n- Due Date: ${dueDate}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
+        }));
+      }
+    };
+
+    loadInvoice();
+  }, [dispatch.id, invoiceNumber, totalAmount, dueDate, dispatch.carrier?.company_name, dispatch.load_no]);
+  const formatDate = (dateValue: string | Date) => {
     try {
-      return format(new Date(dateString), "MMM dd, yyyy");
+      const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+      return format(date, "MMM dd, yyyy");
     } catch {
-      return dateString;
+      return typeof dateValue === 'string' ? dateValue : dateValue.toString();
     }
   };
 
@@ -49,6 +103,112 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
     window.print();
   };
 
+  const handleSaveInvoice = async () => {
+    setIsSavingInvoice(true);
+    try {
+      if (invoice) {
+        // Update existing invoice
+        await invoiceAPI.updateInvoice(invoice.id, {
+          total_amount: totalAmount,
+          carrier_amount: carrierAmount,
+          profit_amount: profit,
+          status: 'draft'
+        });
+        toast({
+          title: "Invoice Updated",
+          description: "Invoice has been updated successfully.",
+        });
+      } else {
+        // Create new invoice
+        const newInvoice = await invoiceAPI.createInvoice({
+          dispatch_id: dispatch.id,
+          invoice_number: invoiceNumber,
+          total_amount: totalAmount,
+          carrier_amount: carrierAmount,
+          profit_amount: profit,
+          carrier_percentage: carrierPercentage,
+          invoice_date: new Date().toISOString(),
+          due_date: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
+          status: 'draft',
+          carrierInfo: {
+            name: dispatch.carrier?.company_name || '',
+            email: dispatch.carrier?.email_address || '',
+            phone: dispatch.carrier?.phone_number || '',
+            mcNumber: dispatch.carrier?.mc_number || ''
+          },          serviceDetails: {
+            pickupDate: typeof dispatch.pickup_date === 'string' ? dispatch.pickup_date : dispatch.pickup_date.toISOString(),
+            deliveryDate: typeof dispatch.dropoff_date === 'string' ? dispatch.dropoff_date : dispatch.dropoff_date.toISOString(),
+            pickupLocation: dispatch.origin,
+            deliveryLocation: dispatch.destination,
+            loadNumber: dispatch.load_no,
+            bolNumber: dispatch.load_no // Using load_no as BOL if BOL doesn't exist
+          }
+        });
+        setInvoice(newInvoice);
+        toast({
+          title: "Invoice Created",
+          description: "Invoice has been created and saved successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving invoice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save invoice. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingInvoice(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailData.recipientEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter a recipient email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      // Save invoice first if it doesn't exist
+      if (!invoice) {
+        await handleSaveInvoice();
+      }
+
+      await invoiceAPI.sendInvoiceEmail({
+        invoiceId: invoice?.id || 0,
+        recipientEmail: emailData.recipientEmail,
+        subject: emailData.subject,
+        message: emailData.message
+      });
+
+      // Update invoice status to sent
+      if (invoice) {
+        await invoiceAPI.updateInvoice(invoice.id, { status: 'sent' });
+        setInvoice(prev => prev ? { ...prev, status: 'sent' } : null);
+      }
+
+      toast({
+        title: "Email Sent Successfully",
+        description: `Invoice has been sent to ${emailData.recipientEmail}`,
+      });
+      setEmailDialogOpen(false);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   const handleDownloadPdf = async () => {
     if (!invoiceRef.current) return;
 
@@ -60,6 +220,35 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
         description: "Please wait while we prepare your invoice...",
       });
 
+      // Save invoice first if it doesn't exist
+      if (!invoice) {
+        await handleSaveInvoice();
+      }
+
+      // Try to use backend PDF generation first
+      if (invoice?.id) {
+        try {
+          const pdfBlob = await invoiceAPI.downloadInvoicePDF(invoice.id);
+          const url = window.URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Invoice-${dispatch.load_no}-${format(new Date(), "yyyyMMdd")}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          toast({
+            title: "PDF Downloaded Successfully",
+            description: `Invoice for ${dispatch.carrier?.company_name || 'Carrier'} (${dispatch.load_no}) has been saved.`,
+          });
+          return;
+        } catch (backendError) {
+          console.warn("Backend PDF generation failed, falling back to frontend generation:", backendError);
+        }
+      }
+
+      // Fallback to frontend PDF generation
       const element = invoiceRef.current;
       const originalStyles = {
         width: element.style.width,
@@ -112,7 +301,8 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
       }
 
       const today = new Date();
-      const formattedDate = format(today, "yyyyMMdd");      const fileName = `Invoice-${dispatch.load_no}-${formattedDate}.pdf`;
+      const formattedDate = format(today, "yyyyMMdd");
+      const fileName = `Invoice-${dispatch.load_no}-${formattedDate}.pdf`;
 
       pdf.save(fileName);
 
@@ -131,48 +321,129 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
       setIsGeneratingPdf(false);
     }
   };
-  // Calculate amounts
-  const totalAmount = dispatch.load_amount;
-  const carrierPercentage = dispatch.charge_percent;
-  const carrierAmount = (totalAmount * carrierPercentage) / 100;
-  const profit = totalAmount - carrierAmount;
-
-  // Generate invoice details
-  const invoiceNumber = `INV-${dispatch.load_no}-${format(new Date(), "yyyyMMdd")}`;
-  const invoiceDate = format(new Date(), "MMM dd, yyyy");
-  const dueDate = format(
-    new Date(new Date().setDate(new Date().getDate() + 30)),
-    "MMM dd, yyyy"
-  );
 
   return (
     <div>
-      <div className="flex justify-end gap-2 mb-4 print:hidden">
-        <Button
-          variant="outline"
-          onClick={handlePrint}
-          className="hover:bg-slate-100 transition-colors"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Print Invoice
-        </Button>
-        <Button
-          onClick={handleDownloadPdf}
-          disabled={isGeneratingPdf}
-          className="bg-primary hover:bg-primary/90 transition-colors"
-        >
-          {isGeneratingPdf ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating PDF...
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </>
+      <div className="flex justify-between items-center mb-4 print:hidden">
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleSaveInvoice}
+            disabled={isSavingInvoice}
+            variant="outline"
+            className="hover:bg-slate-100 transition-colors"
+          >
+            {isSavingInvoice ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                {invoice ? <Check className="h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                {invoice ? 'Update Invoice' : 'Save Invoice'}
+              </>
+            )}
+          </Button>
+          
+          {invoice && (
+            <Badge variant={invoice.status === 'sent' ? 'default' : 'secondary'}>
+              {invoice.status.toUpperCase()}
+            </Badge>
           )}
-        </Button>
+        </div>
+
+        <div className="flex gap-2">
+          <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="hover:bg-slate-100 transition-colors"
+                disabled={!dispatch.carrier?.email_address && !emailData.recipientEmail}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Send Invoice via Email</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Recipient Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={emailData.recipientEmail}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, recipientEmail: e.target.value }))}
+                    placeholder="Enter recipient email"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="subject">Subject</Label>
+                  <Input
+                    id="subject"
+                    value={emailData.subject}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="message">Message</Label>
+                  <textarea
+                    id="message"
+                    className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={emailData.message}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendEmail} disabled={isSendingEmail}>
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Email
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+            className="hover:bg-slate-100 transition-colors"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print Invoice
+          </Button>
+          <Button
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+            className="bg-primary hover:bg-primary/90 transition-colors"
+          >
+            {isGeneratingPdf ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Invoice Document */}
@@ -224,9 +495,15 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-amber-50 text-amber-600 hover:bg-amber-50 border-amber-200"
+                  className={
+                    invoice?.status === 'sent' 
+                      ? "bg-green-50 text-green-600 hover:bg-green-50 border-green-200"
+                      : invoice?.status === 'paid'
+                      ? "bg-blue-50 text-blue-600 hover:bg-blue-50 border-blue-200"
+                      : "bg-amber-50 text-amber-600 hover:bg-amber-50 border-amber-200"
+                  }
                 >
-                  {dispatch.status}
+                  {invoice?.status ? invoice.status.toUpperCase() : dispatch.status}
                 </Badge>
               </div>
             </div>
@@ -241,7 +518,8 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                 <div className="space-y-3">
                   <div className="flex items-start">
                     <Truck className="h-4 w-4 mt-1 mr-2 text-slate-400" />
-                    <div>                      <div className="font-bold text-slate-800">
+                    <div>
+                      <div className="font-bold text-slate-800">
                         {dispatch.carrier?.company_name || 'N/A'}
                       </div>
                       <div className="text-sm text-slate-500">
@@ -298,7 +576,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                 </div>
                 <div className="ml-3">
                   <div className="text-xs text-slate-500 uppercase font-medium">Origin</div>
-                  <div className="font-medium">{dispatch.pickupLocation}</div>
+                  <div className="font-medium">{dispatch.origin}</div>
                 </div>
               </div>
 
@@ -312,7 +590,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
               <div className="flex items-center">
                 <div className="mr-3 text-right">
                   <div className="text-xs text-slate-500 uppercase font-medium">Destination</div>
-                  <div className="font-medium">{dispatch.deliveryLocation}</div>
+                  <div className="font-medium">{dispatch.destination}</div>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-white">
                   <MapPin className="h-5 w-5" />
@@ -338,22 +616,22 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                     <tbody>
                       <tr>
                         <td className="py-4 px-4 align-top">
-                          <div className="font-medium">{formatDate(dispatch.pickupDate)}</div>
+                          <div className="font-medium">{formatDate(dispatch.pickup_date)}</div>
                         </td>
                         <td className="py-4 px-4 align-top">
-                          <div className="font-medium">{formatDate(dispatch.deliveryDate)}</div>
+                          <div className="font-medium">{formatDate(dispatch.dropoff_date)}</div>
                         </td>
                         <td className="py-4 px-4 align-top">
                           <Badge variant="secondary" className="font-normal">
-                            {dispatch.loadNumber}
+                            {dispatch.load_no}
                           </Badge>
                         </td>
                         <td className="py-4 px-4 align-top">
                           <div>
-                            Freight transportation services from {dispatch.pickupLocation} to {dispatch.deliveryLocation}
+                            Freight transportation services from {dispatch.origin} to {dispatch.destination}
                           </div>
                           <div className="text-sm font-medium text-primary mt-1">
-                            BOL #: {dispatch.bolNumber}
+                            BOL #: {dispatch.load_no}
                           </div>
                         </td>
                         <td className="py-4 px-4 align-top text-right">

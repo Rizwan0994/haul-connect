@@ -24,15 +24,49 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    carrier_name: DataTypes.STRING,
-    date: DataTypes.DATE,
-    amount: {
+    total_amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
+    carrier_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    profit_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    carrier_percentage: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false
+    },
+    invoice_date: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    due_date: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
     status: {
-      type: DataTypes.ENUM('Paid', 'Unpaid', 'Draft'),
-      defaultValue: 'Draft'
+      type: DataTypes.ENUM('draft', 'sent', 'paid', 'overdue', 'cancelled'),
+      defaultValue: 'draft'
+    },
+    email_sent_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    email_sent_to: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    payment_date: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,

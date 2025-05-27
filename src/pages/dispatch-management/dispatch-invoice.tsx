@@ -40,7 +40,7 @@ export default function DispatchInvoice() {
     }
 
     fetchDispatch()
-  }, [id, toast])
+  }, [id])
 
   if (loading) {
     return (

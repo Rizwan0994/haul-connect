@@ -14,4 +14,10 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true,
   },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    minify: "esbuild",
+  },
+  base: "/",
 });

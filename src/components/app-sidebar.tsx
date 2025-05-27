@@ -57,14 +57,14 @@ export function AppSidebar() {
   });
 
   return (
-    <Sidebar className="border-r" collapsible="icon">
+    <Sidebar className="border-r shrink-0" collapsible="icon">
       <SidebarHeader className="border-b border-border">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
+        <div className="flex items-center gap-2 px-2 py-2 min-w-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground shrink-0">
             <Menu className="h-4 w-4" />
           </div>
-          <div className="group-data-[collapsible=icon]:hidden">
-            <h2 className="text-lg font-semibold tracking-tight">
+          <div className="group-data-[collapsible=icon]:hidden min-w-0 flex-1">
+            <h2 className="text-lg font-semibold tracking-tight truncate">
               Haul Connect
             </h2>
             {currentUser && (
@@ -86,8 +86,8 @@ export function AppSidebar() {
                 className="w-full justify-start"
                 tooltip={item.title}
               >
-                <item.icon className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                <item.icon className="h-4 w-4 shrink-0" />
+                <span className="group-data-[collapsible=icon]:hidden truncate">{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -102,8 +102,8 @@ export function AppSidebar() {
               className="w-full justify-start text-destructive hover:text-destructive/90 hover:bg-destructive/10"
               tooltip="Logout"
             >
-              <LogOut className="h-4 w-4" />
-              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden truncate">Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

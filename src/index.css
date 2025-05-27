@@ -99,6 +99,19 @@
     @apply flex-1 min-w-0 overflow-hidden;
   }
   
+  /* Prevent layout collapse on large screens */
+  .layout-container {
+    @apply flex min-h-screen w-full max-w-none overflow-hidden;
+  }
+  
+  .sidebar-container {
+    @apply shrink-0 w-auto;
+  }
+  
+  .main-container {
+    @apply flex-1 min-w-0 w-full overflow-hidden;
+  }
+  
   /* Mobile-first responsive breakpoints */
   @screen sm {
     .container {
@@ -126,7 +139,22 @@
   
   @screen 2xl {
     .container {
-      max-width: 1536px;
+      max-width: none;
+    }
+  }
+  
+  /* Large screen specific fixes */
+  @media (min-width: 1400px) {
+    .layout-container {
+      @apply flex-nowrap;
+    }
+    
+    .sidebar-container {
+      @apply flex-shrink-0;
+    }
+    
+    .main-container {
+      @apply flex-grow;
     }
   }
 }

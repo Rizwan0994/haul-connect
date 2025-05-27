@@ -5,7 +5,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 
 export default function DashboardLayout() {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full flex bg-background">
         {/* Sidebar - Fixed positioning that pushes content */}
         <AppSidebar />

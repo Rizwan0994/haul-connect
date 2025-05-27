@@ -69,14 +69,14 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
         setEmailData(prev => ({
           ...prev,
           subject: `Invoice ${existingInvoice.invoice_number} - ${dispatch.carrier?.company_name}`,
-          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${existingInvoice.invoice_number}\n- Amount: $${existingInvoice.total_amount.toFixed(2)}\n- Due Date: ${format(new Date(existingInvoice.due_date), "MMM dd, yyyy")}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
+          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${existingInvoice.invoice_number}\n- Amount: $${existingInvoice.total_amount}\n- Due Date: ${format(new Date(existingInvoice.due_date), "MMM dd, yyyy")}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
         }));
       } catch (error) {
         // Invoice doesn't exist yet, which is fine
         setEmailData(prev => ({
           ...prev,
           subject: `Invoice ${invoiceNumber} - ${dispatch.carrier?.company_name}`,
-          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${invoiceNumber}\n- Amount: $${totalAmount.toFixed(2)}\n- Due Date: ${dueDate}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
+          message: `Dear ${dispatch.carrier?.company_name},\n\nPlease find attached your invoice for load ${dispatch.load_no}.\n\nInvoice Details:\n- Invoice Number: ${invoiceNumber}\n- Amount: $${totalAmount}\n- Due Date: ${dueDate}\n\nThank you for your business.\n\nBest regards,\nHaul Connect Logistics`
         }));
       }
     };
@@ -448,7 +448,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
 
       {/* Invoice Document */}
       <Card className="max-w-4xl mx-auto bg-white print:shadow-none print:border-none overflow-hidden">
-        <div className="invoice-container" ref={invoiceRef}>
+        <div className="invoice-container" style={{color:"black"}} ref={invoiceRef}>
           {/* Header */}
           <div className="bg-primary/5 border-b">
             <div className="px-8 py-6 flex justify-between items-center">

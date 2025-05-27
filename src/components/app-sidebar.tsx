@@ -58,7 +58,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className="border-r bg-sidebar-background h-screen flex-shrink-0" 
+      className="border-r bg-sidebar-background h-screen flex-shrink-0 transition-all duration-200 ease-in-out" 
       collapsible="icon"
       variant="sidebar"
     >
@@ -87,7 +87,7 @@ export function AppSidebar() {
               <SidebarMenuButton
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
-                className="w-full justify-start gap-3 px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                className="w-full justify-start gap-3 px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors duration-150"
                 tooltip={item.title}
               >
                 <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -105,7 +105,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={logout}
-              className="w-full justify-start gap-3 px-3 py-2 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+              className="w-full justify-start gap-3 px-3 py-2 text-destructive hover:text-destructive/90 hover:bg-destructive/10 transition-colors duration-150"
               tooltip="Logout"
             >
               <LogOut className="h-4 w-4 flex-shrink-0" />

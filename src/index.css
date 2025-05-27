@@ -86,22 +86,49 @@
 }
 
 @layer utilities {
+  /* Responsive padding system for all screen sizes */
+  .responsive-padding {
+    @apply p-4;
+  }
+  
+  @screen sm {
+    .responsive-padding {
+      @apply p-6;
+    }
+  }
+  
+  @screen md {
+    .responsive-padding {
+      @apply p-8;
+    }
+  }
+  
+  @screen lg {
+    .responsive-padding {
+      @apply p-10;
+    }
+  }
+  
+  @screen xl {
+    .responsive-padding {
+      @apply p-12;
+    }
+  }
+  
+  @screen 2xl {
+    .responsive-padding {
+      @apply p-16;
+    }
+  }
+  
+  /* Container utilities */
   .container {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    @apply w-full mx-auto;
   }
   
-  /* Responsive sidebar utilities */
-  .sidebar-responsive {
-    @apply hidden md:flex;
-  }
-  
-  .main-content-responsive {
-    @apply flex-1 min-w-0 overflow-hidden;
-  }
-  
-  /* Comprehensive responsive layout system */
+  /* Dashboard layout system */
   .dashboard-layout {
-    @apply min-h-screen w-full flex overflow-hidden bg-background;
+    @apply min-h-screen w-full flex bg-background;
   }
   
   .sidebar-wrapper {
@@ -109,80 +136,67 @@
   }
   
   .main-content-wrapper {
-    @apply flex-1 flex flex-col min-w-0 overflow-hidden;
+    @apply flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out;
   }
   
   .content-container {
     @apply flex-1 overflow-auto;
   }
   
-  /* Mobile-first responsive breakpoints */
-  @screen sm {
-    .container {
-      max-width: 640px;
+  /* Ensure sidebar pushes content instead of overlaying */
+  .sidebar-push-layout {
+    @apply flex min-h-screen w-full bg-background;
+  }
+  
+  .sidebar-push-layout .sidebar-container {
+    @apply flex-shrink-0;
+  }
+  
+  .sidebar-push-layout .main-content {
+    @apply flex-1 min-w-0 transition-all duration-200 ease-in-out;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 767px) {
+    .responsive-padding {
+      @apply p-3;
     }
   }
   
-  @screen md {
-    .container {
-      max-width: 768px;
+  /* Large screen optimizations (1280px and above) */
+  @media (min-width: 1280px) {
+    .responsive-padding {
+      @apply px-10 py-8;
     }
   }
   
-  @screen lg {
-    .container {
-      max-width: 1024px;
-    }
-  }
-  
-  @screen xl {
-    .container {
-      max-width: 1280px;
-    }
-  }
-  
-  @screen 2xl {
-    .container {
-      max-width: none;
-    }
-  }
-  
-  /* Prevent sidebar collapse on all screen sizes */
-  @media (min-width: 768px) {
-    .sidebar-wrapper {
-      @apply w-auto flex-shrink-0;
-    }
-    
-    .main-content-wrapper {
-      @apply flex-1 min-w-0;
-    }
-  }
-  
-  /* Large screen optimizations */
-  @media (min-width: 1400px) {
-    .dashboard-layout {
-      @apply flex-nowrap;
-    }
-    
-    .container {
-      @apply max-w-none px-8;
-    }
-  }
-  
-  /* Ultra-wide screen optimizations */
+  /* Ultra-wide screen optimizations (1920px and above) */
   @media (min-width: 1920px) {
-    .container {
-      @apply px-12;
+    .responsive-padding {
+      @apply px-16 py-12;
     }
   }
   
-  /* Sidebar responsive behavior */
-  .sidebar-responsive {
-    transition: width 0.2s ease-in-out;
+  /* Sidebar transition effects */
+  .sidebar-transition {
+    transition: width 0.2s ease-in-out, margin 0.2s ease-in-out;
   }
   
-  /* Ensure proper content spacing */
-  .page-content {
-    @apply w-full max-w-none;
+  /* Content area adjustments for sidebar states */
+  .content-area {
+    @apply w-full max-w-none transition-all duration-200 ease-in-out;
+  }
+  
+  /* Prevent layout shifts */
+  .layout-stable {
+    @apply flex min-h-screen overflow-hidden;
+  }
+  
+  .layout-stable .sidebar {
+    @apply flex-shrink-0;
+  }
+  
+  .layout-stable .main {
+    @apply flex-1 min-w-0 flex flex-col;
   }
 }

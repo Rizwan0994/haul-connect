@@ -99,17 +99,21 @@
     @apply flex-1 min-w-0 overflow-hidden;
   }
   
-  /* Prevent layout collapse on large screens */
-  .layout-container {
-    @apply flex min-h-screen w-full max-w-none overflow-hidden;
+  /* Comprehensive responsive layout system */
+  .dashboard-layout {
+    @apply min-h-screen w-full flex overflow-hidden bg-background;
   }
   
-  .sidebar-container {
-    @apply shrink-0 w-auto;
+  .sidebar-wrapper {
+    @apply flex-shrink-0 h-screen;
   }
   
-  .main-container {
-    @apply flex-1 min-w-0 w-full overflow-hidden;
+  .main-content-wrapper {
+    @apply flex-1 flex flex-col min-w-0 overflow-hidden;
+  }
+  
+  .content-container {
+    @apply flex-1 overflow-auto;
   }
   
   /* Mobile-first responsive breakpoints */
@@ -143,18 +147,42 @@
     }
   }
   
-  /* Large screen specific fixes */
+  /* Prevent sidebar collapse on all screen sizes */
+  @media (min-width: 768px) {
+    .sidebar-wrapper {
+      @apply w-auto flex-shrink-0;
+    }
+    
+    .main-content-wrapper {
+      @apply flex-1 min-w-0;
+    }
+  }
+  
+  /* Large screen optimizations */
   @media (min-width: 1400px) {
-    .layout-container {
+    .dashboard-layout {
       @apply flex-nowrap;
     }
     
-    .sidebar-container {
-      @apply flex-shrink-0;
+    .container {
+      @apply max-w-none px-8;
     }
-    
-    .main-container {
-      @apply flex-grow;
+  }
+  
+  /* Ultra-wide screen optimizations */
+  @media (min-width: 1920px) {
+    .container {
+      @apply px-12;
     }
+  }
+  
+  /* Sidebar responsive behavior */
+  .sidebar-responsive {
+    transition: width 0.2s ease-in-out;
+  }
+  
+  /* Ensure proper content spacing */
+  .page-content {
+    @apply w-full max-w-none;
   }
 }

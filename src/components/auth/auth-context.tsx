@@ -25,7 +25,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('authToken');
@@ -43,23 +42,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
           
-          // Try to get user data from token
+          // Try to get user data from API
           try {
             const response = await authClient.getCurrentUser();
-            setCurrentUser(response.data.user);
+            console.log('Auth init response:', response); // Debug log
+            // The API returns { status, message, data: { id, email, firstName, lastName, role, category } }
+            setCurrentUser(response.data);
           } catch (err) {
             console.error("Failed to fetch user data:", err);
-            // If API call fails, create basic user from token
-            setCurrentUser({
-              id: decoded.id,
-              email: '',
-              firstName: '',
-              lastName: '',
-              role: decoded.role,
-              category: decoded.category
-            });
+            // If API call fails, clear token and redirect to login
+            localStorage.removeItem('authToken');
+            setCurrentUser(null);
           }
         } catch (e) {
+          console.error("Token decode error:", e);
           localStorage.removeItem('authToken');
           setCurrentUser(null);
         }
@@ -69,16 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initAuth();
   }, []);
-
   const login = async (email: string, password: string) => {
     const response = await authClient.login(email, password);
+    console.log('Login response:', response); // Debug log
     
     // Store token in localStorage
     localStorage.setItem('authToken', response.data.token);
     
     // Update user state
     setCurrentUser(response.data.user);
-    
+
     // Redirect based on role
     if (['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin'].includes(response.data.user.category)) {
       navigate('/user-management');

@@ -21,17 +21,28 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-interface InvoiceViewProps {
+interface DispatchInvoiceViewProps {
   dispatch: Dispatch;
 }
 
-export function InvoiceView({ dispatch }: InvoiceViewProps) {
+export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "MMM dd, yyyy");
+    try {
+      return format(new Date(dateString), "MMM dd, yyyy");
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
   };
 
   const handlePrint = () => {
@@ -44,16 +55,12 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
     setIsGeneratingPdf(true);
 
     try {
-      // Notify user that generation has started
       toast({
         title: "Generating PDF",
         description: "Please wait while we prepare your invoice...",
       });
 
-      // Get the invoice element
       const element = invoiceRef.current;
-
-      // Store original styles to restore later
       const originalStyles = {
         width: element.style.width,
         height: element.style.height,
@@ -62,52 +69,23 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
         background: element.style.background,
       };
 
-      // Optimize element for capture
       element.style.width = "1200px";
       element.style.height = "auto";
       element.style.overflow = "visible";
       element.style.position = "relative";
       element.style.background = "white";
 
-      // Create canvas with improved settings
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
-        onclone: (clonedDoc) => {
-          // Add print styles to ensure all elements render correctly
-          const styles = clonedDoc.createElement("style");
-          styles.innerHTML = `
-            * { 
-              print-color-adjust: exact !important; 
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-            .bg-primary, .bg-blue-600, .bg-slate-800 { 
-              display: block !important; 
-              visibility: visible !important;
-            }
-            table { 
-              border-collapse: collapse !important; 
-              width: 100% !important;
-            }
-            td, th { 
-              padding: 12px !important;
-            }
-          `;
-          clonedDoc.head.appendChild(styles);
-        },
       });
 
-      // Restore original styles
       Object.assign(element.style, originalStyles);
 
-      // Get high-quality image data
       const imgData = canvas.toDataURL("image/png", 1.0);
-
-      // Set up PDF document (A4)
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -115,64 +93,35 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
         compress: true,
       });
 
-      // A4 dimensions
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 10;
       const contentWidth = pageWidth - margin * 2;
-
-      // Calculate height maintaining aspect ratio
       const aspectRatio = canvas.height / canvas.width;
       const contentHeight = contentWidth * aspectRatio;
 
-      // Handle multi-page if needed
       if (contentHeight > pageHeight - margin * 2) {
-        // If content is too tall, we'll scale it to fit
         const scaleFactor = (pageHeight - margin * 2) / contentHeight;
         const scaledWidth = contentWidth * scaleFactor;
         const scaledHeight = contentHeight * scaleFactor;
-
-        // Center on page
         const xOffset = margin + (contentWidth - scaledWidth) / 2;
-        pdf.addImage(
-          imgData,
-          "PNG",
-          xOffset,
-          margin,
-          scaledWidth,
-          scaledHeight
-        );
+        pdf.addImage(imgData, "PNG", xOffset, margin, scaledWidth, scaledHeight);
       } else {
-        // Center content vertically if there's room
         const yOffset = margin + (pageHeight - margin * 2 - contentHeight) / 2;
-        pdf.addImage(
-          imgData,
-          "PNG",
-          margin,
-          yOffset,
-          contentWidth,
-          contentHeight
-        );
+        pdf.addImage(imgData, "PNG", margin, yOffset, contentWidth, contentHeight);
       }
 
-      // Generate a meaningful filename
       const today = new Date();
-      const formattedDate = format(today, "yyyyMMdd");
-      const fileName = `Invoice-${dispatch.loadNumber}-${formattedDate}.pdf`;
+      const formattedDate = format(today, "yyyyMMdd");      const fileName = `Invoice-${dispatch.load_no}-${formattedDate}.pdf`;
 
-      // Save PDF
       pdf.save(fileName);
 
-      // Success notification
       toast({
         title: "PDF Downloaded Successfully",
-        description: `Invoice for ${dispatch.carrier?.companyName || 'Carrier'} (${dispatch.loadNumber}) has been saved.`,
-        variant: "success",
+        description: `Invoice for ${dispatch.carrier?.company_name || 'Carrier'} (${dispatch.load_no}) has been saved.`,
       });
     } catch (error) {
       console.error("Error generating PDF:", error);
-
-      // Detailed error notification
       toast({
         title: "Error",
         description: "Failed to generate PDF. Please try again.",
@@ -182,20 +131,14 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
       setIsGeneratingPdf(false);
     }
   };
+  // Calculate amounts
+  const totalAmount = dispatch.load_amount;
+  const carrierPercentage = dispatch.charge_percent;
+  const carrierAmount = (totalAmount * carrierPercentage) / 100;
+  const profit = totalAmount - carrierAmount;
 
-  // Calculate the total
-  const subtotal = dispatch.totalAmount;
-  const rate = dispatch.carrierPercentage || 70; // Default to 70% if not specified
-  const carrierAmount = (subtotal * rate) / 100;
-  const profit = subtotal - carrierAmount;
-
-  // Generate a professional invoice number based on load number and date
-  const invoiceNumber = `INV-${dispatch.loadNumber}-${format(
-    new Date(),
-    "yyyyMMdd"
-  )}`;
-
-  // Format dates for the invoice
+  // Generate invoice details
+  const invoiceNumber = `INV-${dispatch.load_no}-${format(new Date(), "yyyyMMdd")}`;
   const invoiceDate = format(new Date(), "MMM dd, yyyy");
   const dueDate = format(
     new Date(new Date().setDate(new Date().getDate() + 30)),
@@ -245,9 +188,7 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                   </div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-primary">
-                    HAUL CONNECT
-                  </div>
+                  <div className="text-xl font-bold text-primary">HAUL CONNECT</div>
                   <div className="text-sm text-gray-500">LOGISTICS LLC</div>
                 </div>
               </div>
@@ -265,40 +206,34 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
               <div className="mb-4 md:mb-0">
                 <div className="flex items-center mb-2">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
-                  <span className="text-sm font-medium text-gray-500">
-                    ISSUE DATE
-                  </span>
+                  <span className="text-sm font-medium text-gray-500">ISSUE DATE</span>
                 </div>
                 <div className="text-lg font-medium">{invoiceDate}</div>
               </div>
               <div className="mb-4 md:mb-0">
                 <div className="flex items-center mb-2">
                   <Calendar className="h-4 w-4 mr-2 text-primary" />
-                  <span className="text-sm font-medium text-gray-500">
-                    DUE DATE
-                  </span>
+                  <span className="text-sm font-medium text-gray-500">DUE DATE</span>
                 </div>
                 <div className="text-lg font-medium">{dueDate}</div>
               </div>
               <div>
                 <div className="flex items-center mb-2">
                   <Clipboard className="h-4 w-4 mr-2 text-primary" />
-                  <span className="text-sm font-medium text-gray-500">
-                    STATUS
-                  </span>
+                  <span className="text-sm font-medium text-gray-500">STATUS</span>
                 </div>
                 <Badge
                   variant="outline"
                   className="bg-amber-50 text-amber-600 hover:bg-amber-50 border-amber-200"
                 >
-                  Pending
+                  {dispatch.status}
                 </Badge>
               </div>
             </div>
 
             {/* Client and Service Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              {/* Client Info */}
+              {/* Carrier Info */}
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-100">
                 <div className="text-sm font-medium uppercase text-primary mb-4">
                   Carrier Information
@@ -306,31 +241,30 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                 <div className="space-y-3">
                   <div className="flex items-start">
                     <Truck className="h-4 w-4 mt-1 mr-2 text-slate-400" />
-                    <div>
-                      <div className="font-bold text-slate-800">
-                        {dispatch.carrier?.companyName || 'N/A'}
+                    <div>                      <div className="font-bold text-slate-800">
+                        {dispatch.carrier?.company_name || 'N/A'}
                       </div>
                       <div className="text-sm text-slate-500">
-                        MC#: {dispatch.carrier?.mcNumber || 'N/A'}
+                        MC#: {dispatch.carrier?.mc_number || 'N/A'}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <MapPin className="h-4 w-4 mt-1 mr-2 text-slate-400" />
                     <div className="text-sm text-slate-600">
-                      {dispatch.pickupLocation}
+                      {dispatch.origin}
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="h-4 w-4 mr-2 flex justify-center">📞</div>
                     <div className="text-sm text-slate-600">
-                      {dispatch.carrier?.phone || 'N/A'}
+                      {dispatch.carrier?.phone_number || 'N/A'}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Service Info */}
+              {/* Customer Info */}
               <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
                 <div className="text-sm font-medium uppercase text-primary mb-4">
                   Customer Information
@@ -338,18 +272,19 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                 <div className="space-y-3">
                   <div>
                     <div className="font-bold text-slate-800">
-                      {dispatch.brokerage_company || "TERRY FISHER GROUP"}
+                      HAUL CONNECT CUSTOMER
                     </div>
                     <div className="text-sm text-slate-600">
-                      {dispatch.brokerage_agent ||
-                        "T TRANS TRANSPORTATION LLC DBA RIVERSIDE RD"}
+                      Customer Address Line
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="h-4 w-4 mr-2 flex justify-center">📞</div>
-                    <div className="text-sm text-slate-600">
-                      {dispatch.agent_ph}
-                    </div>
+                    <div className="text-sm text-slate-600">Customer Phone</div>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-4 w-4 mr-2 flex justify-center">✉️</div>
+                    <div className="text-sm text-slate-600">customer@email.com</div>
                   </div>
                 </div>
               </div>
@@ -362,10 +297,8 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div className="ml-3">
-                  <div className="text-xs text-slate-500 uppercase font-medium">
-                    Origin
-                  </div>
-                  <div className="font-medium">{dispatch.origin}</div>
+                  <div className="text-xs text-slate-500 uppercase font-medium">Origin</div>
+                  <div className="font-medium">{dispatch.pickupLocation}</div>
                 </div>
               </div>
 
@@ -378,10 +311,8 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
 
               <div className="flex items-center">
                 <div className="mr-3 text-right">
-                  <div className="text-xs text-slate-500 uppercase font-medium">
-                    Destination
-                  </div>
-                  <div className="font-medium">{dispatch.destination}</div>
+                  <div className="text-xs text-slate-500 uppercase font-medium">Destination</div>
+                  <div className="font-medium">{dispatch.deliveryLocation}</div>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-white">
                   <MapPin className="h-5 w-5" />
@@ -389,91 +320,70 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
               </div>
             </div>
 
-            {/* Invoice Details */}
+            {/* Service Details Table */}
             <div className="mb-8">
-              <div className="text-lg font-semibold text-slate-800 mb-4">
-                Service Details
-              </div>
+              <div className="text-lg font-semibold text-slate-800 mb-4">Service Details</div>
               <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="bg-slate-50 text-left border-b border-slate-200">
-                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
-                          Pickup Date
-                        </th>
-                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
-                          Drop Date
-                        </th>
-                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
-                          Type
-                        </th>
-                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
-                          Description
-                        </th>
-                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase text-right">
-                          Amount
-                        </th>
+                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Pickup Date</th>
+                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Delivery Date</th>
+                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Load Number</th>
+                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Description</th>
+                        <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase text-right">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <td className="py-4 px-4 align-top">
-                          <div className="font-medium">
-                            {formatDate(dispatch.pickup_date)}
-                          </div>
+                          <div className="font-medium">{formatDate(dispatch.pickupDate)}</div>
                         </td>
                         <td className="py-4 px-4 align-top">
-                          <div className="font-medium">
-                            {formatDate(dispatch.dropoff_date)}
-                          </div>
+                          <div className="font-medium">{formatDate(dispatch.deliveryDate)}</div>
                         </td>
                         <td className="py-4 px-4 align-top">
                           <Badge variant="secondary" className="font-normal">
-                            {dispatch.department || "JLT"}
+                            {dispatch.loadNumber}
                           </Badge>
                         </td>
                         <td className="py-4 px-4 align-top">
                           <div>
-                            {`Hauling a Full loaded OTR HAUL freight from/to ${dispatch.origin} / ${dispatch.destination}`}
+                            Freight transportation services from {dispatch.pickupLocation} to {dispatch.deliveryLocation}
                           </div>
                           <div className="text-sm font-medium text-primary mt-1">
-                            Load #: {dispatch.load_no} Refrigerated
+                            BOL #: {dispatch.bolNumber}
                           </div>
                         </td>
                         <td className="py-4 px-4 align-top text-right">
-                          <div className="font-medium">
-                            {/* ${subtotal?.toFixed(2)||20} */} $20
-                          </div>
+                          <div className="font-medium">{formatCurrency(totalAmount)}</div>
                         </td>
                       </tr>
                     </tbody>
                     <tfoot>
                       <tr className="border-t border-slate-200 bg-slate-50">
-                        <td colSpan={3} className="py-3 px-4"></td>
-                        <td className="py-3 px-4 text-sm font-medium text-slate-500">
+                        <td colSpan={4} className="py-3 px-4 text-sm font-medium text-slate-500">
                           Subtotal
                         </td>
                         <td className="py-3 px-4 text-right font-medium">
-                          {/* ${subtotal.toFixed(2)} */} $20
+                          {formatCurrency(totalAmount)}
                         </td>
                       </tr>
                       <tr className="border-t border-slate-200 bg-slate-50">
-                        <td colSpan={3} className="py-3 px-4"></td>
-                        <td className="py-3 px-4 text-sm font-medium text-slate-500">
-                          Service Charge ({rate}%)
+                        <td colSpan={4} className="py-3 px-4 text-sm font-medium text-slate-500">
+                          Carrier Payment ({carrierPercentage}%)
                         </td>
                         <td className="py-3 px-4 text-right font-medium">
-                          ${rateAmount.toFixed(2)}
+                          -{formatCurrency(carrierAmount)}
                         </td>
                       </tr>
                       <tr className="border-t border-slate-200 bg-slate-50">
-                        <td colSpan={3} className="py-3 px-4"></td>
-                        <td className="py-3 px-4 text-base font-bold text-slate-800">
-                          Total
+                        <td colSpan={4} className="py-3 px-4 text-base font-bold text-slate-800">
+                          Net Profit
                         </td>
                         <td className="py-3 px-4 text-right text-base font-bold text-primary">
-                          {/* ${total.toFixed(2)} */} $20
+                          {formatCurrency(profit)}
                         </td>
                       </tr>
                     </tfoot>
@@ -487,27 +397,20 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
               <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
                 <div className="flex items-center mb-4">
                   <CreditCard className="h-5 w-5 mr-2 text-primary" />
-                  <div className="text-base font-semibold text-slate-800">
-                    Payment Method
-                  </div>
+                  <div className="text-base font-semibold text-slate-800">Payment Method</div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex">
-                    <div className="w-24 text-sm font-medium text-slate-500">
-                      Zelle:
-                    </div>
+                    <div className="w-24 text-sm font-medium text-slate-500">Zelle:</div>
                     <div className="text-sm">info@haulconnectlogistics.com</div>
                   </div>
                   <div className="flex">
-                    <div className="w-24 text-sm font-medium text-slate-500">
-                      Email:
-                    </div>
+                    <div className="w-24 text-sm font-medium text-slate-500">Email:</div>
                     <div className="text-sm">haulconnect@gmail.com</div>
                   </div>
                   <Separator className="my-2" />
                   <div className="text-xs text-slate-500">
-                    Please include invoice number {invoiceNumber} as reference
-                    when making payment
+                    Please include invoice number {invoiceNumber} as reference when making payment
                   </div>
                 </div>
               </div>
@@ -521,8 +424,8 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                     We appreciate your prompt payment within 30 days of receipt.
                   </p>
                   <p>
-                    If you have any questions concerning this invoice, please
-                    contact our billing department at haulconnect@gmail.com.
+                    If you have any questions concerning this invoice, please contact our billing 
+                    department at haulconnect@gmail.com.
                   </p>
                 </div>
               </div>

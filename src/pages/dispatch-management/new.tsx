@@ -1,5 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DispatchCreateForm } from '@/components/dispatch-management/dispatch-create-form'
 
 export default function NewDispatch() {
   return (
@@ -9,7 +10,7 @@ export default function NewDispatch() {
           <CardTitle>Create New Dispatch</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>New dispatch form will be implemented here.</p>
+          <DispatchCreateForm />
         </CardContent>
       </Card>
     </div>

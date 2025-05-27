@@ -28,7 +28,7 @@ import { CalendarIcon, Info } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Dispatch } from "@/lib/dispatch-data";
+import { Dispatch } from "@/lib/dispatch-api";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import {
@@ -46,6 +46,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getAllCarriers } from "@/lib/carriers-data";
+import { carrierApiService } from "@/services/carrierApi";
+import { useAuth } from "@/components/auth/auth-context";
 
 // Define the form schema with validation
 const formSchema = z.object({
@@ -107,6 +109,7 @@ export function DispatchForm({
   onSubmit,
   isSubmitting = false,
 }: DispatchFormProps) {
+  const { user } = useAuth();
   // State to store carriers data
   const [carriers, setCarriers] = useState<
     {
@@ -125,11 +128,12 @@ export function DispatchForm({
     const fetchCarriers = async () => {
       setIsLoadingCarriers(true);
       try {
-        const allCarriers = await getAllCarriers();
+        // Use the real carrier API service instead of mock data
+        const allCarriers = await carrierApiService.getAllCarriers();
         const formattedCarriers = allCarriers.map((carrier) => ({
-          value: carrier.id,
-          label: carrier.company_name,
-          percentage: carrier.agreed_percentage || "0",
+          value: carrier.id.toString(),
+          label: `${carrier.company_name} (${carrier.mc_number})`,
+          percentage: carrier.agreed_percentage?.toString() || "0",
         }));
         setCarriers(formattedCarriers);
       } catch (error) {
@@ -147,7 +151,7 @@ export function DispatchForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       // Set the user to the current logged-in user (cannot be changed except by admin)
-      user: initialData?.user || mockCurrentUser.name,
+      user: initialData?.user || user?.first_name + " " + user?.last_name || "Unknown User",
       // Default department should always be "Dispatch" per client requirements
       department: initialData?.department || "Dispatch",
       booking_date: initialData?.booking_date
@@ -173,7 +177,7 @@ export function DispatchForm({
       status: initialData?.status || "Scheduled",
       payment: initialData?.payment || "",
       // Dispatcher name should be auto-populated with current user if their role is dispatcher
-      dispatcher: initialData?.dispatcher || mockCurrentUser.name,
+      dispatcher: initialData?.dispatcher || user?.first_name + " " + user?.last_name || "Unknown Dispatcher",
       invoice_status: initialData?.invoice_status || "Not Sent",
       payment_method: initialData?.payment_method || "ACH",
     },
@@ -198,7 +202,7 @@ export function DispatchForm({
 
   // Determine if user is admin
   // TODO: Replace with actual role checking
-  const isAdmin = mockCurrentUser.role === "admin";
+  const isAdmin = user?.category === "admin_manager" || user?.category === "admin_user" || user?.category === "super_admin";
 
   // Form submission handler
   const handleSubmit = (values: DispatchFormValues) => {

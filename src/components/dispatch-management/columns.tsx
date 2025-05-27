@@ -18,7 +18,7 @@ import {
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Dispatch } from "@/lib/dispatch-data";
+import { Dispatch } from "@/lib/dispatch-api";
 import {
   Tooltip,
   TooltipContent,
@@ -41,8 +41,7 @@ export const columns: ColumnDef<Dispatch>[] = [
         </Link>
       );
     },
-  },
-  {
+  },  {
     accessorKey: "carrier",
     header: ({ column }) => {
       return (
@@ -59,7 +58,39 @@ export const columns: ColumnDef<Dispatch>[] = [
         </div>
       );
     },
+    cell: ({ row }) => {
+      const dispatch = row.original;
+      const carrier = dispatch.carrier;
+      
+      if (!carrier) {
+        return <div className="text-muted-foreground">No carrier assigned</div>;
+      }
+      
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="max-w-[150px] truncate font-medium">
+                {carrier.company_name}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <p className="font-medium">{carrier.company_name}</p>
+                <p className="text-sm text-muted-foreground">MC: {carrier.mc_number}</p>
+                <p className="text-sm text-muted-foreground">Owner: {carrier.owner_name}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
     enableSorting: true,
+    sortingFn: (rowA, rowB) => {
+      const carrierA = rowA.original.carrier?.company_name || "";
+      const carrierB = rowB.original.carrier?.company_name || "";
+      return carrierA.localeCompare(carrierB);
+    },
   },
   {
     accessorKey: "dispatcher",

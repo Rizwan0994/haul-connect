@@ -9,7 +9,9 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children, requiredRoles }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+  const { isAuthenticated, isLoading, hasPermission, currentUser } = useAuth();
+
+  console.log('PrivateRoute - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'user:', currentUser); // Debug log
 
   // Still loading, show a loading indicator
   if (isLoading) {
@@ -20,14 +22,17 @@ export default function PrivateRoute({ children, requiredRoles }: PrivateRoutePr
   
   // Not authenticated, redirect to login
   if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to login'); // Debug log
     return <Navigate to="/auth/login" replace />;
   }
 
   // Role-based access check if requiredRoles is specified
   if (requiredRoles && !hasPermission(requiredRoles)) {
+    console.log('Access denied, insufficient permissions'); // Debug log
     return <Navigate to="/access-denied" replace />;
   }
   
   // Authorized, render children
+  console.log('Access granted, rendering children'); // Debug log
   return <>{children}</>;
 }

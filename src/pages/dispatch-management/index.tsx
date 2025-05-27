@@ -1,4 +1,3 @@
-
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from '@/components/dispatch-management/columns'
 import { Button } from '@/components/ui/button'
@@ -82,23 +81,25 @@ const mockDispatches: Dispatch[] = [
 
 export default function DispatchManagement() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
-          <p className="text-muted-foreground">
-            Manage your dispatches and load assignments
-          </p>
+    <div className="container mx-auto max-w-full">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
+            <p className="text-muted-foreground">
+              Manage your dispatches and load assignments
+            </p>
+          </div>
+          <Link to="/dispatch-management/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Dispatch
+            </Button>
+          </Link>
         </div>
-        <Link to="/dispatch-management/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Dispatch
-          </Button>
-        </Link>
-      </div>
 
-      <DataTable columns={columns} data={mockDispatches} />
+        <DataTable columns={columns} data={mockDispatches} />
+      </div>
     </div>
   )
 }

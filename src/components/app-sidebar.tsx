@@ -2,7 +2,7 @@
 "use client";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { Truck, Package, FileText, Settings, Users, LogOut } from "lucide-react";
+import { Truck, Package, FileText, Settings, Users, LogOut, Menu } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 
 import {
@@ -11,6 +11,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -20,7 +22,7 @@ const menuItems = [
     icon: Truck,
   },
   {
-    title: "Dispatch Management",
+    title: "Dispatch Management", 
     path: "/dispatch-management",
     icon: Package,
   },
@@ -55,45 +57,57 @@ export function AppSidebar() {
   });
 
   return (
-    <Sidebar className="border-r">
-      <SidebarContent className="gap-0">
-        <div className="flex flex-col gap-2 p-2">
-          <div className="px-2 py-1">
+    <Sidebar className="border-r" collapsible="icon">
+      <SidebarHeader className="border-b border-border">
+        <div className="flex items-center gap-2 px-2 py-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
+            <Menu className="h-4 w-4" />
+          </div>
+          <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-lg font-semibold tracking-tight">
               Haul Connect
             </h2>
             {currentUser && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground truncate">
                 {currentUser.firstName || currentUser.email}
               </p>
             )}
           </div>
         </div>
-        <SidebarMenu className="gap-2 px-2">
+      </SidebarHeader>
+      
+      <SidebarContent className="px-2 py-2">
+        <SidebarMenu className="gap-1">
           {filteredMenuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
               <SidebarMenuButton
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
                 className="w-full justify-start"
+                tooltip={item.title}
               >
-                <item.icon className="mr-2 h-4 w-4" />
-                <span>{item.title}</span>
+                <item.icon className="h-4 w-4" />
+                <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          
+        </SidebarMenu>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-border p-2">
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={logout}
-              className="w-full justify-start text-destructive hover:text-destructive/90"
+              className="w-full justify-start text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+              tooltip="Logout"
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
+              <LogOut className="h-4 w-4" />
+              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarContent>
+      </SidebarFooter>
     </Sidebar>
   );
 }

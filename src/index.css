@@ -35,6 +35,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 240 5.9% 90%;
     --sidebar-ring: 240 5.9% 10%;
+    
+    /* Sidebar responsive widths */
+    --sidebar-width: 16rem;
+    --sidebar-width-icon: 3rem;
   }
 
   .dark {
@@ -78,5 +82,51 @@
     @apply bg-background text-foreground;
     margin: 0;
     padding: 0;
+  }
+}
+
+@layer utilities {
+  .container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Responsive sidebar utilities */
+  .sidebar-responsive {
+    @apply hidden md:flex;
+  }
+  
+  .main-content-responsive {
+    @apply flex-1 min-w-0 overflow-hidden;
+  }
+  
+  /* Mobile-first responsive breakpoints */
+  @screen sm {
+    .container {
+      max-width: 640px;
+    }
+  }
+  
+  @screen md {
+    .container {
+      max-width: 768px;
+    }
+  }
+  
+  @screen lg {
+    .container {
+      max-width: 1024px;
+    }
+  }
+  
+  @screen xl {
+    .container {
+      max-width: 1280px;
+    }
+  }
+  
+  @screen 2xl {
+    .container {
+      max-width: 1536px;
+    }
   }
 }

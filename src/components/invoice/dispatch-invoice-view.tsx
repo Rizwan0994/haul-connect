@@ -448,24 +448,27 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
 
       {/* Invoice Document */}
       <Card className="max-w-4xl mx-auto bg-white print:shadow-none print:border-none overflow-hidden">
-        <div className="invoice-container" style={{color:"black"}} ref={invoiceRef}>
+        <div className="invoice-container" style={{
+      color: "#0f172a", // Explicit dark color for all text
+      backgroundColor: "white"
+    }}  ref={invoiceRef}>
           {/* Header */}
           <div className="bg-primary/5 border-b">
             <div className="px-8 py-6 flex justify-between items-center">
               <div className="flex items-center">
                 <div className="mr-4">
-                  <div className="bg-primary p-3 rounded-xl">
-                    <div className="text-white font-bold text-xl">HC</div>
+                  <div className="bg-[antiquewhite] p-3 rounded-xl">
+                    <div className="text-slate-900 font-bold text-xl">HC</div>
                   </div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-primary">HAUL CONNECT</div>
+                  <div className="text-xl font-bold text-slate-900">HAUL CONNECT</div>
                   <div className="text-sm text-gray-500">LOGISTICS LLC</div>
                 </div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-slate-800">INVOICE</div>
-                <div className="text-primary font-medium">{invoiceNumber}</div>
+                <div className="text-slate-800 font-medium">{invoiceNumber}</div>
               </div>
             </div>
           </div>
@@ -476,21 +479,21 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
             <div className="flex flex-col md:flex-row justify-between mb-8">
               <div className="mb-4 md:mb-0">
                 <div className="flex items-center mb-2">
-                  <Calendar className="h-4 w-4 mr-2 text-primary" />
+                  <Calendar className="h-4 w-4 mr-2 text-slate-800" />
                   <span className="text-sm font-medium text-gray-500">ISSUE DATE</span>
                 </div>
                 <div className="text-lg font-medium">{invoiceDate}</div>
               </div>
               <div className="mb-4 md:mb-0">
                 <div className="flex items-center mb-2">
-                  <Calendar className="h-4 w-4 mr-2 text-primary" />
+                  <Calendar className="h-4 w-4 mr-2 text-slate-800" />
                   <span className="text-sm font-medium text-gray-500">DUE DATE</span>
                 </div>
                 <div className="text-lg font-medium">{dueDate}</div>
               </div>
               <div>
                 <div className="flex items-center mb-2">
-                  <Clipboard className="h-4 w-4 mr-2 text-primary" />
+                  <Clipboard className="h-4 w-4 mr-2 text-slate-800" />
                   <span className="text-sm font-medium text-gray-500">STATUS</span>
                 </div>
                 <Badge
@@ -512,7 +515,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {/* Carrier Info */}
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-100">
-                <div className="text-sm font-medium uppercase text-primary mb-4">
+                <div className="text-sm font-medium uppercase text-slate-800 mb-4">
                   Carrier Information
                 </div>
                 <div className="space-y-3">
@@ -544,7 +547,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
 
               {/* Customer Info */}
               <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
-                <div className="text-sm font-medium uppercase text-primary mb-4">
+                <div className="text-sm font-medium uppercase text-slate-800 mb-4">
                   Customer Information
                 </div>
                 <div className="space-y-3">
@@ -630,7 +633,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                           <div>
                             Freight transportation services from {dispatch.origin} to {dispatch.destination}
                           </div>
-                          <div className="text-sm font-medium text-primary mt-1">
+                          <div className="text-sm font-medium text-slate-800 mt-1">
                             BOL #: {dispatch.load_no}
                           </div>
                         </td>
@@ -660,7 +663,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                         <td colSpan={4} className="py-3 px-4 text-base font-bold text-slate-800">
                           Net Profit
                         </td>
-                        <td className="py-3 px-4 text-right text-base font-bold text-primary">
+                        <td className="py-3 px-4 text-right text-base font-bold text-slate-800">
                           {formatCurrency(profit)}
                         </td>
                       </tr>
@@ -674,7 +677,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
                 <div className="flex items-center mb-4">
-                  <CreditCard className="h-5 w-5 mr-2 text-primary" />
+                  <CreditCard className="h-5 w-5 mr-2 text-slate-800" />
                   <div className="text-base font-semibold text-slate-800">Payment Method</div>
                 </div>
                 <div className="space-y-3">

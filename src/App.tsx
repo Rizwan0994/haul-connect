@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -17,6 +16,8 @@ import ResetPasswordPage from '@/pages/auth/reset-password'
 import CarrierManagementPage from '@/pages/carrier-management'
 import CarrierDetailPage from '@/pages/carrier-management/carrier-detail'
 import CarrierEditPage from '@/pages/carrier-management/carrier-edit'
+import CarrierCreatePage from '@/pages/carrier-management/carrier-create'
+// import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments'
 import DispatchManagementPage from '@/pages/dispatch-management'
 import DispatchDetailPage from '@/pages/dispatch-management/dispatch-detail'
 import DispatchEditPage from '@/pages/dispatch-management/dispatch-edit'
@@ -46,8 +47,10 @@ function App() {
           <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
             <Route index element={<Navigate to="/carrier-management" replace />} />
             <Route path="carrier-management" element={<CarrierManagementPage />} />
+            <Route path="carrier-management/create" element={<CarrierCreatePage />} />
             <Route path="carrier-management/:id" element={<CarrierDetailPage />} />
             <Route path="carrier-management/:id/edit" element={<CarrierEditPage />} />
+            {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
             <Route path="dispatch-management" element={<DispatchManagementPage />} />
             <Route path="dispatch-management/new" element={<NewDispatchPage />} />
             <Route path="dispatch-management/:id" element={<DispatchDetailPage />} />

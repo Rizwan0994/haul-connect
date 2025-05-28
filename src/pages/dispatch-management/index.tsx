@@ -37,11 +37,10 @@ export default function DispatchManagement() {
   useEffect(() => {
     fetchDispatches();
   }, []);
-
   if (loading) {
     return (
-      <div className="container mx-auto max-w-full">
-        <div className="space-y-6">
+      <div className="flex flex-col h-[calc(100vh-4rem)]">
+        <div className="flex-none space-y-4 px-6 pt-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
@@ -57,7 +56,7 @@ export default function DispatchManagement() {
             </Link>
           </div>
           
-          <div className="flex items-center justify-center p-8">
+          <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Loading dispatches...</span>
           </div>
@@ -65,10 +64,9 @@ export default function DispatchManagement() {
       </div>
     );
   }
-
   return (
-    <div className="container mx-auto max-w-full">
-      <div className="space-y-6">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      <div className="flex-none space-y-4 px-6 pt-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
@@ -113,10 +111,13 @@ export default function DispatchManagement() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          </div>        )}
 
-        <DataTable columns={columns} data={dispatches} />
+        <div className="flex-grow overflow-hidden px-6 pb-6">
+          <div className="h-full overflow-auto rounded-md border">
+            <DataTable columns={columns} data={dispatches} />
+          </div>
+        </div>
       </div>
     </div>
   )

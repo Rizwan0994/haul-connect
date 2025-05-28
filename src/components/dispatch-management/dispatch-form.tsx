@@ -109,7 +109,13 @@ export function DispatchForm({
   onSubmit,
   isSubmitting = false,
 }: DispatchFormProps) {
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
+
+  // Debug log for user data
+  useEffect(() => {
+    console.log('Auth user data:', currentUser);
+  }, [currentUser]);
+
   // State to store carriers data
   const [carriers, setCarriers] = useState<
     {
@@ -151,7 +157,7 @@ export function DispatchForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       // Set the user to the current logged-in user (cannot be changed except by admin)
-      user: initialData?.user || user?.first_name + " " + user?.last_name || "Unknown User",
+      user: initialData?.user || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Unknown User"),
       // Default department should always be "Dispatch" per client requirements
       department: initialData?.department || "Dispatch",
       booking_date: initialData?.booking_date
@@ -177,7 +183,7 @@ export function DispatchForm({
       status: initialData?.status || "Scheduled",
       payment: initialData?.payment || "",
       // Dispatcher name should be auto-populated with current user if their role is dispatcher
-      dispatcher: initialData?.dispatcher || user?.first_name + " " + user?.last_name || "Unknown Dispatcher",
+      dispatcher: initialData?.dispatcher || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Unknown Dispatcher"),
       invoice_status: initialData?.invoice_status || "Not Sent",
       payment_method: initialData?.payment_method || "ACH",
     },
@@ -202,7 +208,7 @@ export function DispatchForm({
 
   // Determine if user is admin
   // TODO: Replace with actual role checking
-  const isAdmin = user?.category === "admin_manager" || user?.category === "admin_user" || user?.category === "super_admin";
+  const isAdmin = currentUser?.category === "admin_manager" || currentUser?.category === "admin_user" || currentUser?.category === "super_admin";
 
   // Form submission handler
   const handleSubmit = (values: DispatchFormValues) => {

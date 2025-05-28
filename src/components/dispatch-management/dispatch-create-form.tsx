@@ -8,7 +8,7 @@ import { useAuth } from "@/components/auth/auth-context";
 export function DispatchCreateForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: DispatchFormValues) => {

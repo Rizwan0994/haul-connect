@@ -63,9 +63,9 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div>
+    <div className="w-full h-full flex flex-col">
       {filterableColumns.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 py-4">
+        <div className="flex flex-wrap items-center gap-4 py-4 px-4 flex-none">
           {filterableColumns.map((columnId) => {
             const column = table.getColumn(columnId);
             if (!column) return null;
@@ -106,11 +106,12 @@ export function DataTable<TData, TValue>({
           })}
         </div>
       )}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+      <div className="rounded-md border overflow-hidden flex-grow">
+        <div className="overflow-x-auto h-full">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -183,8 +184,9 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 py-4 flex-none">
         <div className="flex items-center gap-1 text-sm mr-2">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}

@@ -7,6 +7,13 @@ export interface Carrier {
   us_dot_number?: string;
   company_name: string;
   owner_name: string;
+  // Driver details
+  driver_name?: string;
+  driver_phone?: string;
+  driver_email?: string;
+  driver_license_number?: string;
+  driver_license_state?: string;
+  driver_license_expiration?: string;
   phone_number: string;
   email_address: string;
   truck_type: string;

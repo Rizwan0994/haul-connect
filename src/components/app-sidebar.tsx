@@ -2,8 +2,10 @@
 "use client";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { Truck, Package, FileText, Settings, Users, LogOut, Menu } from "lucide-react";
+import { Truck, Package, FileText, Settings, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 import {
   Sidebar,
@@ -13,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -44,10 +47,15 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  className?: string;
+}
+
+export function AppSidebar({ className }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const { state } = useSidebar();
 
   const filteredMenuItems = menuItems.filter(item => {
     if (item.requiresRole && currentUser) {
@@ -56,23 +64,26 @@ export function AppSidebar() {
     return true;
   });
 
-  return (
-    <Sidebar 
-      className="border-r bg-sidebar-background h-screen flex-shrink-0 transition-all duration-200 ease-in-out" 
-      collapsible="icon"
+  return (    <Sidebar
+      className={cn(
+        "border-r border-border bg-background",
+        "fixed left-0 top-0 z-30",
+        "h-screen w-[240px]",
+        className
+      )}
+      collapsible="none"
       variant="sidebar"
-    >
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+    >      <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-sidebar-primary text-sidebar-primary-foreground flex-shrink-0">
-            <Menu className="h-4 w-4" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[antiquewhite] text-slate-900 flex-shrink-0">
+            <span className="text-lg font-bold">HC</span>
           </div>
-          <div className="group-data-[collapsible=icon]:hidden min-w-0 flex-1">
-            <h2 className="text-lg font-semibold tracking-tight text-sidebar-foreground truncate">
+          <div className="flex flex-col min-w-0 flex-1">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground truncate">
               Haul Connect
             </h2>
             {currentUser && (
-              <p className="text-xs text-sidebar-foreground/70 truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {currentUser.firstName || currentUser.email}
               </p>
             )}
@@ -80,20 +91,23 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="flex-1 px-3 py-4 overflow-y-auto">
-        <SidebarMenu className="space-y-1">
+      <SidebarContent className="p-2">
+        <SidebarMenu className="space-y-1.5">
           {filteredMenuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
               <SidebarMenuButton
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
-                className="w-full justify-start gap-3 px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors duration-150"
+                className={cn(
+                  "w-full justify-start gap-3 px-3 py-2.5",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "data-[active=true]:bg-accent data-[active=true]:text-accent-foreground",
+                  "transition-colors duration-150"
+                )}
                 tooltip={item.title}
               >
-                <item.icon className="h-4 w-4 flex-shrink-0" />
-                <span className="group-data-[collapsible=icon]:hidden truncate">
-                  {item.title}
-                </span>
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="font-medium">{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

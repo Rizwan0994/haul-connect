@@ -89,22 +89,20 @@ const menuItems = [
     title: "User Management",
     path: "/user-management",
     icon: Users,
-    requiresRole: [
-      "hr_manager",
-      "hr_user",
-      "admin_manager",
-      "admin_user",
-      "super_admin",
-    ],
-  },
-  {
+    requiresRole: ['Admin', 'Manager', 'Super Admin'],
+  },  {
     title: "Settings",
     isSection: true,
     icon: Settings, // Keep icon for section title if desired
     children: [
       {
-        title: "Settings",
+        title: "Email Settings",
         path: "/settings/smtp",
+      },
+      {
+        title: "Permissions",
+        path: "/settings/permissions",
+        requiresPermission: "permissions.manage",
       },
       // {
       //   title: "Search",
@@ -124,9 +122,16 @@ export function AppSidebar({ className }: AppSidebarProps) {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
   const { state } = useSidebar();
+  const { hasSpecificPermission } = useAuth();
 
   const renderMenuItem = (item: any) => {
+    // Check role-based permission (legacy)
     if (item.requiresRole && currentUser && !item.requiresRole.includes(currentUser.category)) {
+      return null;
+    }
+    
+    // Check specific permission (new permission system)
+    if (item.requiresPermission && !hasSpecificPermission(item.requiresPermission)) {
       return null;
     }
 

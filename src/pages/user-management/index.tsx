@@ -54,10 +54,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, MoreHorizontal, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Search, KeyRound } from 'lucide-react';
 import { userAPI, User, CreateUserRequest, UpdateUserRequest } from '@/lib/user-api';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { fetchAvailableRoles } from '@/lib/user-management';
+import PermissionGate from '@/components/auth/permission-gate';
 
+// Legacy categories - keep for backwards compatibility
 const USER_CATEGORIES = [
   { value: 'Admin', label: 'Admin' },
   { value: 'Super Admin', label: 'Super Admin' },
@@ -67,6 +70,7 @@ const USER_CATEGORIES = [
   { value: 'Manager', label: 'Manager' },
 ];
 
+// Legacy roles - keep for backwards compatibility
 const ROLES = [
   { value: 'Admin', label: 'Admin' },
   { value: 'Super Admin', label: 'Super Admin' },
@@ -85,20 +89,23 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [availableRoles, setAvailableRoles] = useState<{ value: string, label: string }[]>([]);
 
-  // Form state  const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
+  // Form state
+  const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
     email: '',
     password: '',
-    role: 'Dispatch',
-    category: 'Dispatch',
+    role: 'Dispatch',          // Legacy role
+    category: 'Dispatch',      // Legacy category
+    role_id: undefined,        // New role system
     basic_salary: 500,
     first_name: '',
     last_name: '',
     phone: '',
   });
-
   useEffect(() => {
     loadUsers();
+    loadRoles();
   }, []);
 
   const loadUsers = async () => {
@@ -111,6 +118,15 @@ export default function UserManagement() {
       console.error('Error loading users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const loadRoles = async () => {
+    try {
+      const roles = await fetchAvailableRoles();
+      setAvailableRoles(roles);
+    } catch (error) {
+      console.error('Error loading roles:', error);
     }
   };
 
@@ -173,7 +189,6 @@ export default function UserManagement() {
       setError(error.response?.data?.error || 'Failed to update user status');
     }
   };
-
   const openEditDialog = (user: User) => {
     setEditingUser(user);
     setFormData({
@@ -181,19 +196,20 @@ export default function UserManagement() {
       password: '', // Don't pre-fill password
       role: user.role,
       category: user.category,
+      role_id: user.role_id,
       basic_salary: user.basic_salary,
       first_name: user.first_name || '',
       last_name: user.last_name || '',
       phone: user.phone || '',
     });
     setIsEditDialogOpen(true);
-  };
-  const resetForm = () => {
+  };const resetForm = () => {
     setFormData({
       email: '',
       password: '',
-      role: 'Dispatch',
-      category: 'Dispatch',
+      role: 'Dispatch',        // Legacy role
+      category: 'Dispatch',    // Legacy category
+      role_id: availableRoles.length > 0 ? Number(availableRoles[0].value) : undefined,  // New role system
       basic_salary: 500,
       first_name: '',
       last_name: '',
@@ -225,13 +241,14 @@ export default function UserManagement() {
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground">Manage system users and their permissions</p>
-        </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        </div>        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add User
-            </Button>
+            <PermissionGate requiredPermission="users.create">
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </PermissionGate>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
@@ -301,9 +318,8 @@ export default function UserManagement() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label htmlFor="role">Role *</Label>
+              </div>              <div>
+                <Label htmlFor="role">Legacy Role *</Label>
                 <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -316,6 +332,31 @@ export default function UserManagement() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="pt-2 border-t">
+                <Label htmlFor="role_id" className="flex items-center gap-1">
+                  <KeyRound className="h-3 w-3" />
+                  <span>Permission Role *</span>
+                </Label>
+                <Select 
+                  value={formData.role_id?.toString() || ""} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, role_id: Number(value) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRoles.map(role => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This determines the user's permissions in the system
+                </p>
               </div>
               <div>
                 <Label htmlFor="basic_salary">Basic Salary</Label>
@@ -396,7 +437,16 @@ export default function UserManagement() {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{getCategoryLabel(user.category)}</TableCell>
-                    <TableCell className="capitalize">{user.role}</TableCell>
+                    <TableCell className="capitalize">
+                      {user.role_name ? (
+                        <div className="flex items-center gap-1">
+                          <KeyRound className="h-3 w-3 text-primary" />
+                          <span>{user.role_name}</span>
+                        </div>
+                      ) : (
+                        user.role
+                      )}
+                    </TableCell>
                     <TableCell>{getStatusBadge(user)}</TableCell>
                     <TableCell>${user.basic_salary}</TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
@@ -406,40 +456,45 @@ export default function UserManagement() {
                           <Button variant="ghost" className="h-8 w-8 p-0">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        </DropdownMenuTrigger>                        <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleUserStatus(user)}>
-                            <Switch className="h-4 w-4 mr-2" />
-                            {user.is_active ? 'Deactivate' : 'Activate'}
-                          </DropdownMenuItem>
+                          <PermissionGate requiredPermission="users.edit">
+                            <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                          </PermissionGate>
+                          <PermissionGate requiredPermission="users.status">
+                            <DropdownMenuItem onClick={() => handleToggleUserStatus(user)}>
+                              <Switch className="h-4 w-4 mr-2" />
+                              {user.is_active ? 'Deactivate' : 'Activate'}
+                            </DropdownMenuItem>
+                          </PermissionGate>
                           <DropdownMenuSeparator />
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this user? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                          <PermissionGate requiredPermission="users.delete">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Trash2 className="h-4 w-4 mr-2" />
                                   Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this user? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </PermissionGate>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -521,9 +576,8 @@ export default function UserManagement() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="edit_role">Role *</Label>
+            </div>            <div>
+              <Label htmlFor="edit_role">Legacy Role *</Label>
               <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}>
                 <SelectTrigger>
                   <SelectValue />
@@ -536,6 +590,31 @@ export default function UserManagement() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="pt-2 border-t">
+              <Label htmlFor="edit_role_id" className="flex items-center gap-1">
+                <KeyRound className="h-3 w-3" />
+                <span>Permission Role *</span>
+              </Label>
+              <Select 
+                value={formData.role_id?.toString() || ""} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, role_id: Number(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRoles.map(role => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                This determines the user's permissions in the system
+              </p>
             </div>
             <div>
               <Label htmlFor="edit_basic_salary">Basic Salary</Label>

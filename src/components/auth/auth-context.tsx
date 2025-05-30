@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient, User } from '@/lib/auth-client';
 import { jwtDecode } from "jwt-decode";
+import { Permission } from '@/lib/permission-api';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -10,6 +11,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (roles: string[]) => boolean;
+  hasSpecificPermission: (permissionName: string) => boolean;
+  userPermissions: Permission[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,10 +22,12 @@ interface DecodedToken {
   role: string;
   category: string;
   exp: number;
+  permissions?: string[];
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userPermissions, setUserPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   useEffect(() => {
@@ -45,9 +50,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Try to get user data from API
           try {
             const response = await authClient.getCurrentUser();
-            console.log('Auth init response:', response); // Debug log
-            // The API returns { status, message, data: { id, email, firstName, lastName, role, category } }
+            console.log('Auth init response:', response); // Debug log            // The API returns { status, message, data: { id, email, firstName, lastName, role, category, permissions } }
             setCurrentUser(response.data);
+            
+            // Save permissions if available
+            if (response.data.permissions) {
+              setUserPermissions(response.data.permissions);
+            }
           } catch (err) {
             console.error("Failed to fetch user data:", err);
             // If API call fails, clear token and redirect to login
@@ -64,8 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initAuth();
-  }, []);
-  const login = async (email: string, password: string) => {
+  }, []);  const login = async (email: string, password: string) => {
     const response = await authClient.login(email, password);
     console.log('Login response:', response); // Debug log
     
@@ -74,9 +82,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Update user state
     setCurrentUser(response.data.user);
+    
+    // Save permissions if available
+    if (response.data.user.permissions) {
+      setUserPermissions(response.data.user.permissions);
+    }
+    
+    // Log permissions for debugging
+    console.log('User permissions:', response.data.user.permissions || 'No permissions');
 
     // Redirect based on role
-    if (['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin'].includes(response.data.user.category)) {
+    if (['Admin', 'Manager', 'Super Admin'].includes(response.data.user.category)) {
       navigate('/user-management');
     } else {
       navigate('/carrier-management');
@@ -86,11 +102,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     authClient.logout();
     setCurrentUser(null);
+    setUserPermissions([]);
   };
-
+  // Check if user has a specific role
   const hasPermission = (allowedRoles: string[]): boolean => {
     if (!currentUser) return false;
+    
+    // If user has admin role in the new permissions system, always grant access
+    if (currentUser.role_id && userPermissions.length > 0) {
+      // Check for admin role in new system
+      if (currentUser.role_name === 'admin') {
+        return true;
+      }
+    }
+    
+    // Legacy role check
     return allowedRoles.includes(currentUser.category);
+  };
+    // Check if user has a specific permission
+  const hasSpecificPermission = (permissionName: string): boolean => {
+    if (!currentUser) return false;
+    
+    // Admin roles always have all permissions (check both systems)
+    if (
+      currentUser.role_name === 'admin' || 
+      currentUser.role_name === 'Admin' || 
+      currentUser.role_name === 'Super Admin' ||
+      currentUser.category === 'Admin' ||
+      currentUser.category === 'Super Admin' ||
+      currentUser.role === 'Admin' ||
+      currentUser.role === 'Super Admin'
+    ) {
+      return true;
+    }
+    
+    // Check if the user has this specific permission
+    return userPermissions.some(permission => permission.name === permissionName);
   };
 
   return (
@@ -101,7 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!currentUser,
         login,
         logout,
-        hasPermission
+        hasPermission,
+        hasSpecificPermission,
+        userPermissions
       }}
     >
       {children}

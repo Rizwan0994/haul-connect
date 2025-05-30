@@ -6,10 +6,11 @@ import { useAuth } from './auth-context'
 interface PrivateRouteProps {
   children: ReactNode;
   requiredRoles?: string[];
+  requiredPermission?: string;
 }
 
-export default function PrivateRoute({ children, requiredRoles }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, hasPermission, currentUser } = useAuth();
+export default function PrivateRoute({ children, requiredRoles, requiredPermission }: PrivateRouteProps) {
+  const { isAuthenticated, isLoading, hasPermission, hasSpecificPermission, currentUser } = useAuth();
 
   console.log('PrivateRoute - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'user:', currentUser); // Debug log
 
@@ -26,9 +27,15 @@ export default function PrivateRoute({ children, requiredRoles }: PrivateRoutePr
     return <Navigate to="/auth/login" replace />;
   }
 
-  // Role-based access check if requiredRoles is specified
+  // Permission-based access check if requiredPermission is specified
+  if (requiredPermission && !hasSpecificPermission(requiredPermission)) {
+    console.log('Access denied, missing required permission: ', requiredPermission); // Debug log
+    return <Navigate to="/access-denied" replace />;
+  }
+  
+  // Legacy role-based access check if requiredRoles is specified
   if (requiredRoles && !hasPermission(requiredRoles)) {
-    console.log('Access denied, insufficient permissions'); // Debug log
+    console.log('Access denied, insufficient role: ', requiredRoles); // Debug log
     return <Navigate to="/access-denied" replace />;
   }
   

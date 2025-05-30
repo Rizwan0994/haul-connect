@@ -25,6 +25,7 @@ import DispatchInvoicePage from '@/pages/dispatch-management/dispatch-invoice'
 import NewDispatchPage from '@/pages/dispatch-management/new'
 import InvoicesPage from '@/pages/invoices'
 import SMTPSettingsPage from '@/pages/settings/smtp'
+import PermissionManagementPage from '@/pages/settings/permissions'
 
 // Import user management page and access denied page
 import UserManagementPage from '@/pages/user-management'
@@ -42,31 +43,37 @@ function App() {
               <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
               <Route path="/access-denied" element={<AccessDeniedPage />} />
-          
-          {/* Protected routes */}
-          <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-            <Route index element={<Navigate to="/carrier-management" replace />} />
-            <Route path="carrier-management" element={<CarrierManagementPage />} />
-            <Route path="carrier-management/create" element={<CarrierCreatePage />} />
-            <Route path="carrier-management/:id" element={<CarrierDetailPage />} />
-            <Route path="carrier-management/:id/edit" element={<CarrierEditPage />} />
-            {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
-            <Route path="dispatch-management" element={<DispatchManagementPage />} />
-            <Route path="dispatch-management/new" element={<NewDispatchPage />} />
-            <Route path="dispatch-management/:id" element={<DispatchDetailPage />} />
-            <Route path="dispatch-management/:id/edit" element={<DispatchEditPage />} />
-            <Route path="dispatch-management/:id/invoice" element={<DispatchInvoicePage />} />
-            <Route path="user-management" element={
-              <PrivateRoute requiredRoles={['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']}>
-                <UserManagementPage />
-              </PrivateRoute>
-            } />
-            <Route path="invoices" element={<InvoicesPage />} />
-            <Route path="settings/smtp" element={<SMTPSettingsPage />} />
-          </Route>
-        </Routes>
-        <CarrierModalsContainer />
-        <Toaster />
+
+              {/* Protected routes */}
+              <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+                <Route index element={<Navigate to="/carrier-management" replace />} />
+                <Route path="carrier-management" element={<CarrierManagementPage />} />
+                <Route path="carrier-management/create" element={<CarrierCreatePage />} />
+                <Route path="carrier-management/:id" element={<CarrierDetailPage />} />
+                <Route path="carrier-management/:id/edit" element={<CarrierEditPage />} />
+                {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
+                <Route path="dispatch-management" element={<DispatchManagementPage />} />
+                <Route path="dispatch-management/new" element={<NewDispatchPage />} />
+                <Route path="dispatch-management/:id" element={<DispatchDetailPage />} />
+                <Route path="dispatch-management/:id/edit" element={<DispatchEditPage />} />
+                <Route path="dispatch-management/:id/invoice" element={<DispatchInvoicePage />} />
+                <Route path="user-management" element={
+                  <PrivateRoute requiredRoles={['Admin', 'Manager', 'Super Admin']}>
+                    <UserManagementPage />
+                  </PrivateRoute>
+
+                } />
+                <Route path="invoices" element={<InvoicesPage />} />
+                <Route path="settings/smtp" element={<SMTPSettingsPage />} />
+                <Route path="settings/permissions" element={
+                  <PrivateRoute requiredPermission="permissions.manage">
+                    <PermissionManagementPage />
+                  </PrivateRoute>
+                } />
+              </Route>
+            </Routes>
+            <CarrierModalsContainer />
+            <Toaster />
           </AuthProvider>
         </Router>
       </ModalProvider>

@@ -19,8 +19,10 @@ apiClient.interceptors.request.use((config) => {
 export interface User {
   id: number;
   email: string;
-  role: 'admin' | 'user';
-  category: 'dispatch_user' | 'sales_user' | 'sales_manager' | 'dispatch_manager' | 'accounts_user' | 'accounts_manager' | 'hr_manager' | 'hr_user' | 'admin_user' | 'admin_manager' | 'super_admin';
+  role: 'Admin' | 'Super Admin' | 'Dispatch' | 'Sales' | 'Account' | 'Manager';  // Legacy role
+  category: 'Admin' | 'Super Admin' | 'Dispatch' | 'Sales' | 'Account' | 'Manager'; // Legacy category
+  role_id?: number;  // New role ID for permission system
+  role_name?: string; // New role name for permission system
   basic_salary: number;
   first_name?: string;
   last_name?: string;
@@ -33,8 +35,9 @@ export interface User {
 export interface CreateUserRequest {
   email: string;
   password: string;
-  role?: 'admin' | 'user';
-  category: User['category'];
+  role?: 'Admin' | 'Super Admin' | 'Dispatch' | 'Sales' | 'Account' | 'Manager';  // Legacy role
+  category: User['category'];  // Legacy category
+  role_id?: number;  // New role ID from permission system
   basic_salary?: number;
   first_name?: string;
   last_name?: string;
@@ -44,8 +47,9 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   email?: string;
   password?: string;
-  role?: 'admin' | 'user';
-  category?: User['category'];
+  role?: 'Admin' | 'Super Admin' | 'Dispatch' | 'Sales' | 'Account' | 'Manager';  // Legacy role
+  category?: User['category'];  // Legacy category
+  role_id?: number;  // New role ID from permission system
   basic_salary?: number;
   first_name?: string;
   last_name?: string;

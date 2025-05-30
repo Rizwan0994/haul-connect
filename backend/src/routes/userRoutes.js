@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const { requireRole } = require('../middleware/auth');
 
 // Get all users (HR/Admin only)
-router.get('/', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.get('/', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
@@ -19,7 +19,7 @@ router.get('/', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_us
 });
 
 // Get user by ID (HR/Admin only)
-router.get('/:id', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.get('/:id', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] }
@@ -37,7 +37,7 @@ router.get('/:id', requireRole(['hr_manager', 'hr_user', 'admin_manager', 'admin
 });
 
 // Create new user (HR/Admin only)
-router.post('/', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
   try {
     const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
 
@@ -55,7 +55,7 @@ router.post('/', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'supe
     const user = await User.create({
       email,
       password: hashedPassword,
-      role: role || 'user',
+      role: role || 'Dispatch',
       category,
       basic_salary: basic_salary || 500.0,
       first_name,
@@ -73,7 +73,7 @@ router.post('/', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'supe
 });
 
 // Update user (HR/Admin only)
-router.put('/:id', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'super_admin']), async (req, res) => {
+router.put('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) => {
   try {
     const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
     
@@ -111,7 +111,7 @@ router.put('/:id', requireRole(['hr_manager', 'admin_manager', 'admin_user', 'su
 });
 
 // Delete user (HR Manager/Admin only)
-router.delete('/:id', requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
+router.delete('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
@@ -132,7 +132,7 @@ router.delete('/:id', requireRole(['hr_manager', 'admin_manager', 'super_admin']
 });
 
 // Update user status (activate/deactivate)
-router.patch('/:id/status', requireRole(['hr_manager', 'admin_manager', 'super_admin']), async (req, res) => {
+router.patch('/:id/status', requireRole(['Admin', 'Super Admin']), async (req, res) => {
   try {
     const { is_active } = req.body;
     

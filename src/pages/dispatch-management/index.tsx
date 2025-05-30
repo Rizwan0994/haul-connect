@@ -37,36 +37,11 @@ export default function DispatchManagement() {
   useEffect(() => {
     fetchDispatches();
   }, []);
-  if (loading) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-4rem)]">
-        <div className="flex-none space-y-4 px-6 pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
-              <p className="text-muted-foreground">
-                Manage your dispatches and load assignments
-              </p>
-            </div>
-            <Link to="/dispatch-management/new">
-              <Button disabled>
-                <Plus className="mr-2 h-4 w-4" />
-                New Dispatch
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Loading dispatches...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="flex-none space-y-4 px-6 pt-6">
+    <div className="flex flex-col h-full">
+      {/* Header section - always visible */}
+      <div className="flex-none space-y-4 px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
@@ -75,7 +50,7 @@ export default function DispatchManagement() {
             </p>
           </div>
           <Link to="/dispatch-management/new">
-            <Button>
+            <Button disabled={loading}>
               <Plus className="mr-2 h-4 w-4" />
               New Dispatch
             </Button>
@@ -111,14 +86,29 @@ export default function DispatchManagement() {
                 </div>
               </div>
             </div>
-          </div>        )}
-
-        <div className="flex-grow overflow-hidden px-6 pb-6">
-          <div className="h-full overflow-auto rounded-md border">
-            <DataTable columns={columns} data={dispatches} />
+          </div>
+        )}
+      </div>
+      
+      {/* Content area - scrollable */}
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center pb-6">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <span className="mt-2 block">Loading dispatches...</span>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 px-6 pb-6 overflow-hidden">
+          <div className="h-full border rounded-md overflow-hidden">
+            <DataTable 
+              columns={columns} 
+              data={dispatches}
+              searchPlaceholder="Search dispatches..."
+            />
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }

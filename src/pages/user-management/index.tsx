@@ -59,22 +59,21 @@ import { userAPI, User, CreateUserRequest, UpdateUserRequest } from '@/lib/user-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const USER_CATEGORIES = [
-  { value: 'dispatch_user', label: 'Dispatch User' },
-  { value: 'sales_user', label: 'Sales User' },
-  { value: 'sales_manager', label: 'Sales Manager' },
-  { value: 'dispatch_manager', label: 'Dispatch Manager' },
-  { value: 'accounts_user', label: 'Accounts User' },
-  { value: 'accounts_manager', label: 'Accounts Manager' },
-  { value: 'hr_manager', label: 'HR Manager' },
-  { value: 'hr_user', label: 'HR User' },
-  { value: 'admin_user', label: 'Admin User' },
-  { value: 'admin_manager', label: 'Admin Manager' },
-  { value: 'super_admin', label: 'Super Admin' },
+  { value: 'Admin', label: 'Admin' },
+  { value: 'Super Admin', label: 'Super Admin' },
+  { value: 'Dispatch', label: 'Dispatch' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'Account', label: 'Account' },
+  { value: 'Manager', label: 'Manager' },
 ];
 
 const ROLES = [
-  { value: 'user', label: 'User' },
-  { value: 'admin', label: 'Admin' },
+  { value: 'Admin', label: 'Admin' },
+  { value: 'Super Admin', label: 'Super Admin' },
+  { value: 'Dispatch', label: 'Dispatch' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'Account', label: 'Account' },
+  { value: 'Manager', label: 'Manager' },
 ];
 
 export default function UserManagement() {
@@ -87,12 +86,11 @@ export default function UserManagement() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Form state
-  const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
+  // Form state  const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
     email: '',
     password: '',
-    role: 'user',
-    category: 'dispatch_user',
+    role: 'Dispatch',
+    category: 'Dispatch',
     basic_salary: 500,
     first_name: '',
     last_name: '',
@@ -190,13 +188,12 @@ export default function UserManagement() {
     });
     setIsEditDialogOpen(true);
   };
-
   const resetForm = () => {
     setFormData({
       email: '',
       password: '',
-      role: 'user',
-      category: 'dispatch_user',
+      role: 'Dispatch',
+      category: 'Dispatch',
       basic_salary: 500,
       first_name: '',
       last_name: '',

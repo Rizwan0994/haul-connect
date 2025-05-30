@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   filterableColumns?: string[]; // Array of column IDs that can be filtered
+  searchPlaceholder?: string;
 }
 
 // Helper function to get a friendly name for a column
@@ -41,11 +42,11 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterableColumns = [],
+  searchPlaceholder,
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [searchColumn, setSearchColumn] = React.useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -64,8 +65,22 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full h-full flex flex-col">
-      {filterableColumns.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 py-4 px-4 flex-none">
+      {/* Search/Filter Section */}
+      {(filterableColumns.length > 0 || searchPlaceholder) && (
+        <div className="flex flex-wrap items-center gap-4 py-4 px-4 flex-none border-b">
+          {searchPlaceholder && (
+            <div className="flex-1">
+              <Input
+                placeholder={searchPlaceholder}
+                value={(table.getColumn("company_name")?.getFilterValue() as string) ?? ""}
+                onChange={(event) => 
+                  table.getColumn("company_name")?.setFilterValue(event.target.value)
+                }
+                className="max-w-xs"
+              />
+            </div>
+          )}
+          
           {filterableColumns.map((columnId) => {
             const column = table.getColumn(columnId);
             if (!column) return null;
@@ -106,14 +121,15 @@ export function DataTable<TData, TValue>({
           })}
         </div>
       )}
-      <div className="rounded-md border overflow-hidden flex-grow">
-        <div className="overflow-x-auto h-full">
+
+      {/* Table with fixed header and scrollable body */}
+      <div className="flex-grow flex flex-col overflow-hidden">
+        <div className="overflow-auto w-full h-full">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
+                  {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : (
                         <div
@@ -128,8 +144,7 @@ export function DataTable<TData, TValue>({
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              const handler =
-                                header.column.getToggleSortingHandler();
+                              const handler = header.column.getToggleSortingHandler();
                               if (handler) handler(event);
                             }
                           }}
@@ -150,65 +165,73 @@ export function DataTable<TData, TValue>({
                         </div>
                       )}
                     </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4 flex-none">
-        <div className="flex items-center gap-1 text-sm mr-2">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+
+      {/* Pagination - Fixed at bottom */}
+      <div className="flex items-center justify-between px-4 py-3 border-t bg-background">
+        <div className="flex items-center text-sm text-muted-foreground">
+          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+          {Math.min(
+            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+            data.length
+          )}{" "}
+          of {data.length} entries
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          aria-label="Previous page"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          aria-label="Next page"
-        >
-          Next
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Previous page"
+          >
+            Previous
+          </Button>
+          <div className="flex items-center gap-1 text-sm mx-2">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            aria-label="Next page"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

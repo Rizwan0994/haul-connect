@@ -110,9 +110,9 @@ export default function DispatchDetail() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <Button 
             onClick={() => navigate('/dispatch-management')} 
@@ -144,131 +144,134 @@ export default function DispatchDetail() {
         </div>
       </div>
 
-      {/* Status and Basic Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Truck className="w-5 h-5" />
-            <span>Dispatch Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Status</label>
-              <div className="mt-1">
-                <Badge className={getStatusColor(dispatch.status)}>
-                  {dispatch.status}
-                </Badge>
+      {/* Main info cards in a grid layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Status and Basic Info */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Truck className="w-5 h-5" />
+              <span>Dispatch Information</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                <div className="mt-1">
+                  <Badge className={getStatusColor(dispatch.status)}>
+                    {dispatch.status}
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Load Number</label>
+                <p className="mt-1 font-medium">{dispatch.load_no}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">BOL Number</label>
+                <p className="mt-1 font-medium">BOL-{dispatch.load_no}</p>
               </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Load Number</label>
-              <p className="mt-1 font-medium">{dispatch.load_no}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">BOL Number</label>
-              <p className="mt-1 font-medium">BOL-{dispatch.load_no}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Carrier Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Truck className="w-5 h-5" />
-            <span>Carrier Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Company Name</label>
-              <p className="mt-1 font-medium">{dispatch.carrier?.company_name || 'N/A'}</p>
+        {/* Carrier Information */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Truck className="w-5 h-5" />
+              <span>Carrier Information</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Company Name</label>
+                <p className="mt-1 font-medium">{dispatch.carrier?.company_name || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">MC Number</label>
+                <p className="mt-1 font-medium">{dispatch.carrier?.mc_number || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Contact Person</label>
+                <p className="mt-1 font-medium">{dispatch.carrier?.owner_name || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                <p className="mt-1 font-medium">{dispatch.carrier?.phone_number || 'N/A'}</p>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">MC Number</label>
-              <p className="mt-1 font-medium">{dispatch.carrier?.mc_number || 'N/A'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Contact Person</label>
-              <p className="mt-1 font-medium">{dispatch.carrier?.owner_name || 'N/A'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Phone</label>
-              <p className="mt-1 font-medium">{dispatch.carrier?.phone_number || 'N/A'}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Route Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MapPin className="w-5 h-5" />
-            <span>Route Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Pickup Location</label>
-              <p className="mt-1 font-medium">{dispatch.origin}</p>
+        {/* Route Information */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <MapPin className="w-5 h-5" />
+              <span>Route Information</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Pickup Location</label>
+                <p className="mt-1 font-medium">{dispatch.origin}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Delivery Location</label>
+                <p className="mt-1 font-medium">{dispatch.destination}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Pickup Date</label>
+                <p className="mt-1 font-medium">{formatDate(dispatch.pickup_date)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Delivery Date</label>
+                <p className="mt-1 font-medium">{formatDate(dispatch.dropoff_date)}</p>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Delivery Location</label>
-              <p className="mt-1 font-medium">{dispatch.destination}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Pickup Date</label>
-              <p className="mt-1 font-medium">{formatDate(dispatch.pickup_date)}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Delivery Date</label>
-              <p className="mt-1 font-medium">{formatDate(dispatch.dropoff_date)}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Financial Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CreditCard className="w-5 h-5" />
-            <span>Financial Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Total Amount</label>
-              <p className="mt-1 text-lg font-bold text-green-600">{formatCurrency(dispatch.load_amount)}</p>
+        {/* Financial Information */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <CreditCard className="w-5 h-5" />
+              <span>Financial Information</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Total Load Amount</label>
+                <p className="mt-1 text-lg font-bold text-green-600">{formatCurrency(dispatch.load_amount)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Carrier Rate (%)</label>
+                <p className="mt-1 font-medium">{dispatch.charge_percent}%</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Carrier Amount (Invoice)</label>
+                <p className="mt-1 font-medium text-blue-600">
+                  {formatCurrency((dispatch.load_amount * dispatch.charge_percent) / 100)}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Service Charge (Profit)</label>
+                <p className="mt-1 font-medium text-green-600">
+                  {formatCurrency(dispatch.load_amount - (dispatch.load_amount * dispatch.charge_percent) / 100)}
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Carrier Percentage</label>
-              <p className="mt-1 font-medium">{dispatch.charge_percent}%</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Carrier Amount</label>
-              <p className="mt-1 font-medium text-blue-600">
-                {formatCurrency((dispatch.load_amount * dispatch.charge_percent) / 100)}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Profit</label>
-              <p className="mt-1 font-medium text-green-600">
-                {formatCurrency(dispatch.load_amount - (dispatch.load_amount * dispatch.charge_percent) / 100)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Additional Information */}
+      {/* Additional Information - Full Width */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

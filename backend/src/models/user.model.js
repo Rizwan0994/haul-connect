@@ -4,7 +4,10 @@ const { Model, DataTypes } = require("sequelize");
 module.exports = (sequelize) => {
   class User extends Model {
     static associate(models) {
-      // Associations are now managed in associates/config.js
+      // Add association to the Role model
+      User.belongsTo(models.role, {
+        foreignKey: "role_id"
+      });
     }
   }
 
@@ -24,20 +27,24 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      role_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'roles',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+      // Keeping these for backward compatibility during migration
       role: {
-        type: DataTypes.ENUM("Admin", "Super Admin", "Dispatch", "Sales", "Account", "Manager"),
-        defaultValue: "Dispatch",
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       category: {
-        type: DataTypes.ENUM(
-          "Admin", 
-          "Super Admin", 
-          "Dispatch", 
-          "Sales", 
-          "Account", 
-          "Manager"
-        ),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       basic_salary: {
         type: DataTypes.DECIMAL(10, 2),

@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "seed": "node run-seeders.js",
+    "migrate:permissions": "node src/migrations/add-permissions-manager-permission.js"
   },
   "keywords": [],
   "author": "",

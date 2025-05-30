@@ -2,12 +2,12 @@
 
 const app = require("./src/app");
 const { sequelize } = require("./src/models"); // Sequelize instance for DB connection
+const { runSeeders } = require("./src/seeders"); // Seeder system
 
 const PORT = process.env.PORT || 5000;
 
 /**
- * Starts the server without initializing the database.
- * To enable DB syncing, uncomment the `initializeDatabaseAndStartServer` function below.
+ * Starts the server
  */
 function startServer() {
   app.listen(PORT, () => {
@@ -15,20 +15,32 @@ function startServer() {
   });
 }
 
-startServer();
-
 /**
- * Initializes the database and starts the server upon successful connection.
- * Uncomment this function call to enable database initialization before starting the server.
+ * Initializes the database, runs seeders, and starts the server
  */
 async function initializeDatabaseAndStartServer() {
   try {
-    await sequelize.sync(); // Synchronize all defined models with the database
+    // Synchronize all defined models with the database
+    await sequelize.sync(); 
     console.log("✅ Database synchronized successfully");
+    
+    // Run data seeders
+    console.log("🌱 Running data seeders...");
+    try {
+      const seederResults = await runSeeders();
+      console.log(`✅ Seeders completed: ${seederResults.length} seeder(s) processed`);
+    } catch (seederError) {
+      console.error("⚠️ Error running seeders:", seederError);
+      // Continue with server startup even if seeders fail
+    }
+    
+    // Start the server
     startServer();
   } catch (error) {
     console.error("❌ Unable to connect to the database:", error);
+    process.exit(1);
   }
 }
 
-initializeDatabaseAndStartServer(); // <- Enable this to start server with DB sync
+// Start the server with database initialization and seeders
+initializeDatabaseAndStartServer();

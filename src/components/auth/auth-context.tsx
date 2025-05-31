@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userPermissions, setUserPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('authToken');
@@ -50,13 +51,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Try to get user data from API
           try {
             const response = await authClient.getCurrentUser();
-            console.log('Auth init response:', response); // Debug log            // The API returns { status, message, data: { id, email, firstName, lastName, role, category, permissions } }
+            console.log('Auth init response:', response); // Debug log
+            console.log('Permissions from /auth/me:', response.data.permissions);
+            
             setCurrentUser(response.data);
             
             // Save permissions if available
             if (response.data.permissions) {
+              console.log('Setting user permissions from /auth/me:', response.data.permissions);
               setUserPermissions(response.data.permissions);
+            } else {
+              console.warn('No permissions found in auth init response');
+              setUserPermissions([]);
             }
+            
+            // Log the current user state after setting
+            console.log('Current user after auth init:', {
+              email: response.data.email,
+              role_name: response.data.role_name,
+              category: response.data.category,
+              permissions: response.data.permissions?.length || 0
+            });
           } catch (err) {
             console.error("Failed to fetch user data:", err);
             // If API call fails, clear token and redirect to login
@@ -73,7 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initAuth();
-  }, []);  const login = async (email: string, password: string) => {
+  }, []);
+  
+  const login = async (email: string, password: string) => {
     const response = await authClient.login(email, password);
     console.log('Login response:', response); // Debug log
     
@@ -85,15 +102,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Save permissions if available
     if (response.data.user.permissions) {
+      console.log('Setting user permissions from login response:', response.data.user.permissions);
       setUserPermissions(response.data.user.permissions);
+    } else {
+      console.warn('No permissions found in login response');
+      setUserPermissions([]);
     }
-    
+      
     // Log permissions for debugging
     console.log('User permissions:', response.data.user.permissions || 'No permissions');
+    console.log('User role:', response.data.user.role_name || response.data.user.category);
 
-    // Redirect based on role
-    if (['Admin', 'Manager', 'Super Admin'].includes(response.data.user.category)) {
+    // Redirect based on role - use role_name first if available, then fall back to category
+    const userRole = response.data.user.role_name || response.data.user.category;
+    
+    if (['Admin', 'admin', 'Manager', 'manager', 'Super Admin', 'super admin'].some(r => 
+        userRole?.toLowerCase() === r.toLowerCase())) {
       navigate('/user-management');
+    } else if (userRole?.toLowerCase() === 'dispatch') {
+      navigate('/dispatch-management'); // Dispatch users go directly to dispatch management
     } else {
       navigate('/carrier-management');
     }
@@ -104,40 +131,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
     setUserPermissions([]);
   };
+  
   // Check if user has a specific role
   const hasPermission = (allowedRoles: string[]): boolean => {
     if (!currentUser) return false;
     
-    // If user has admin role in the new permissions system, always grant access
-    if (currentUser.role_id && userPermissions.length > 0) {
-      // Check for admin role in new system
-      if (currentUser.role_name === 'admin') {
-        return true;
-      }
-    }
-    
-    // Legacy role check
-    return allowedRoles.includes(currentUser.category);
-  };
-    // Check if user has a specific permission
-  const hasSpecificPermission = (permissionName: string): boolean => {
-    if (!currentUser) return false;
+    console.log('Checking user role against allowed roles:', allowedRoles);
+    console.log('Current user role:', currentUser.role_name || currentUser.category);
     
     // Admin roles always have all permissions (check both systems)
     if (
-      currentUser.role_name === 'admin' || 
-      currentUser.role_name === 'Admin' || 
-      currentUser.role_name === 'Super Admin' ||
-      currentUser.category === 'Admin' ||
-      currentUser.category === 'Super Admin' ||
-      currentUser.role === 'Admin' ||
-      currentUser.role === 'Super Admin'
+      currentUser.role_name?.toLowerCase() === 'admin' || 
+      currentUser.role_name?.toLowerCase() === 'super admin' ||
+      currentUser.category?.toLowerCase() === 'admin' ||
+      currentUser.category?.toLowerCase() === 'super admin' ||
+      currentUser.role?.toLowerCase() === 'admin' ||
+      currentUser.role?.toLowerCase() === 'super admin'
     ) {
+      console.log('User has admin role, granting access to all roles');
+      return true;
+    }
+    
+    // Check both role_name (new system) and category (legacy)
+    const hasRole = 
+      (currentUser.role_name && allowedRoles.some(role => 
+        role.toLowerCase() === currentUser.role_name?.toLowerCase())) ||
+      (currentUser.category && allowedRoles.some(role => 
+        role.toLowerCase() === currentUser.category?.toLowerCase()));
+    
+    console.log(`Role check result: ${hasRole ? 'GRANTED' : 'DENIED'}`);
+    return hasRole;
+  };
+  
+  // Check if user has a specific permission
+  const hasSpecificPermission = (permissionName: string): boolean => {
+    if (!currentUser) return false;
+    
+    console.log(`Checking permission: ${permissionName}`);
+    console.log(`User permissions:`, userPermissions);
+    console.log(`Current user role: ${currentUser.role_name || currentUser.category}`);
+    
+    // Admin roles always have all permissions (check both systems)
+    if (
+      currentUser.role_name?.toLowerCase() === 'admin' || 
+      currentUser.role_name?.toLowerCase() === 'super admin' ||
+      currentUser.category?.toLowerCase() === 'admin' ||
+      currentUser.category?.toLowerCase() === 'super admin' ||
+      currentUser.role?.toLowerCase() === 'admin' ||
+      currentUser.role?.toLowerCase() === 'super admin'
+    ) {
+      console.log('User has admin role, granting all permissions');
       return true;
     }
     
     // Check if the user has this specific permission
-    return userPermissions.some(permission => permission.name === permissionName);
+    // First check if permissions array exists and has the required permission name
+    if (userPermissions && userPermissions.length > 0) {
+      const hasPermission = userPermissions.some(permission => 
+        permission.name === permissionName || 
+        permission.name?.toLowerCase() === permissionName?.toLowerCase()
+      );
+      console.log(`Permission check result for ${permissionName}: ${hasPermission ? 'GRANTED' : 'DENIED'}`);
+      return hasPermission;
+    } else {
+      console.log(`No permissions found for user, denying access to ${permissionName}`);
+      return false;
+    }
   };
 
   return (

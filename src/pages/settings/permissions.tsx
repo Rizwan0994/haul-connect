@@ -62,40 +62,57 @@ export default function PermissionManagement() {
     name: '',
     guard_name: 'api',
     description: ''
-  });
-  // Fetch all data when component mounts
+  });  // Fetch all data when component mounts
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Load roles, permissions, modules and types
+        // Load roles
         const rolesData = await roleAPI.getAllRoles();
-        const modulesData = await permissionAPI.getPermissionModules();
-        const typesData = await permissionAPI.getPermissionTypes();
-        
-        // Get permissions with current filters
-        const filters = {};
-        if (filter.module !== 'all') filters['module'] = filter.module;
-        if (filter.type !== 'all') filters['type'] = filter.type;
-        const permissionsData = await permissionAPI.getAllPermissions(filters);
-        
         setRoles(rolesData);
-        setPermissions(permissionsData);
-        setModules(modulesData);
-        setTypes(typesData);
         
-        // Set first role as selected by default
+        // Set first role as selected by default (only on initial load)
         if (rolesData.length > 0 && !selectedRole) {
           setSelectedRole(rolesData[0]);
         }
+        
+        // Load permission types and modules (these are relatively static)
+        const typesData = await permissionAPI.getPermissionTypes();
+        setTypes(typesData);
+        
+        const modulesData = await permissionAPI.getPermissionModules();
+        setModules(modulesData);
       } catch (error) {
-        console.error('Error loading permission data:', error);
+        console.error('Error loading roles and metadata:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
+  }, []);
+  
+  // Fetch permissions separately when filter changes
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      setIsLoading(true);
+      try {
+        // Get permissions with current filters
+        const filters = {};
+        if (filter.module !== 'all') filters['module'] = filter.module;
+        if (filter.type !== 'all') filters['type'] = filter.type;
+        
+        const permissionsData = await permissionAPI.getAllPermissions(filters);
+        setPermissions(permissionsData);
+        
+      } catch (error) {
+        console.error('Error loading permissions with filters:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPermissions();
   }, [filter.module, filter.type]);
 
   // Handle role selection
@@ -113,8 +130,7 @@ export default function PermissionManagement() {
         setIsLoading(false);
       }
     }
-  };
-  // Filter permissions
+  };  // Filter permissions
   const filteredPermissions = permissions.filter(permission => {
     const moduleMatch = filter.module === 'all' || permission.module === filter.module;
     const typeMatch = filter.type === 'all' || permission.type === filter.type;
@@ -270,8 +286,7 @@ export default function PermissionManagement() {
             </div>
           </div>
           <div className="col-span-3">
-            <div className="space-y-6">
-              <div className="flex flex-col gap-4">
+            <div className="space-y-6">              <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="moduleFilter">Module</Label>
@@ -298,13 +313,27 @@ export default function PermissionManagement() {
                       value={filter.type} 
                       onValueChange={(value) => setFilter({...filter, type: value})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="relative">
                         <SelectValue placeholder="Select Type" />
+                        {filter.type !== 'all' && (
+                          <span className={`absolute right-8 px-1.5 py-0.5 rounded-md text-xs font-medium ${
+                            filter.type === 'feature' ? 'bg-blue-100 text-blue-800' : 
+                            filter.type === 'route' ? 'bg-green-100 text-green-800' : 
+                            'bg-purple-100 text-purple-800'
+                          }`}>
+                            {filter.type}
+                          </span>
+                        )}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
                         {types.map(type => (
-                          <SelectItem key={type} value={type}>
+                          <SelectItem key={type} value={type} className="flex items-center gap-2">
+                            <span className={`inline-block w-2 h-2 rounded-full ${
+                              type === 'feature' ? 'bg-blue-500' : 
+                              type === 'route' ? 'bg-green-500' : 
+                              'bg-purple-500'
+                            }`}></span>
                             {type.charAt(0).toUpperCase() + type.slice(1)}
                           </SelectItem>
                         ))}
@@ -321,6 +350,21 @@ export default function PermissionManagement() {
                     />
                   </div>
                 </div>
+                
+                {filter.type !== 'all' && (
+                  <div className="bg-muted/40 p-3 rounded-md text-sm">
+                    <strong className="font-medium">
+                      {filter.type === 'feature' ? 'Feature Permissions: ' : 
+                       filter.type === 'route' ? 'Route Permissions: ' :
+                       'Column Permissions: '}
+                    </strong>
+                    <span className="text-muted-foreground">
+                      {filter.type === 'feature' ? 'Control access to specific features and actions' : 
+                       filter.type === 'route' ? 'Control access to pages and sidebar menu visibility' :
+                       'Control visibility of data columns in tables and forms'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Permission Grid View */}
@@ -349,9 +393,14 @@ export default function PermissionManagement() {
                             </TableCell>
                             <TableCell>
                               {permission.description}
-                            </TableCell>
-                            <TableCell>
-                              <span className="capitalize">{permission.type}</span>
+                            </TableCell>                            <TableCell>
+                              <span className={`capitalize px-2 py-1 rounded-md text-xs font-medium ${
+                                permission.type === 'feature' ? 'bg-blue-100 text-blue-800' : 
+                                permission.type === 'route' ? 'bg-green-100 text-green-800' : 
+                                'bg-purple-100 text-purple-800'
+                              }`}>
+                                {permission.type}
+                              </span>
                             </TableCell>
                             <TableCell>
                               <Switch

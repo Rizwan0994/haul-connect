@@ -1,5 +1,8 @@
 import {
+  Bell,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Github,
   LucideIcon,
   LucideProps,
@@ -42,6 +45,9 @@ export const Icons = {
   more: MoreHorizontal,
   check: Check,
   mail: Mail,
+  bell: Bell,
+  chevronLeft: ChevronLeft,
+  chevronRight: ChevronRight,
   gitHub: Github,
   google: ({ ...props }: LucideProps) => (
     <svg

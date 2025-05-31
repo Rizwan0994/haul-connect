@@ -13,6 +13,7 @@ import {
   Calendar,
   Plus,
   Search,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -34,16 +35,25 @@ const menuItems = [
     title: "Dashboard",
     path: "/dashboard",
     icon: LayoutDashboard,
+    requiresPermission: "route.dashboard",
   },
-  {
-    title: "Messages",
-    path: "/messages",
-    icon: MessageSquare,
-  },
+        {
+        title: "Notifications",
+        path: "/notifications",
+        icon: Bell,
+        requiresPermission: "notifications.view",
+      },
+  // {
+  //   title: "Messages",
+  //   path: "/messages",
+  //   icon: MessageSquare,
+  //   requiresPermission: "route.messages",
+  // },
   {
     title: "Calendar",
     path: "/calendar",
     icon: Calendar,
+    requiresPermission: "route.calendar",
   },
   {
     title: "Carrier Management",
@@ -53,14 +63,17 @@ const menuItems = [
       {
         title: "Carrier Profiles",
         path: "/carrier-management",
+        requiresPermission: "route.carrier-profiles",
       },
       {
         title: "Add New Carrier",
         path: "/carrier-management/create",
+        requiresPermission: "route.add-carrier",
       },
       {
         title: "Followup Sheets",
         path: "/carrier-management/followup-sheets",
+        requiresPermission: "route.followup-sheets",
       },
     ],
   },
@@ -72,38 +85,50 @@ const menuItems = [
       {
         title: "Active Dispatches",
         path: "/dispatch-management/",
+        requiresPermission: "route.active-dispatches",
       },
       {
         title: "Create Dispatch",
         path: "/dispatch-management/new",
         icon: Plus, // Icon for specific menu item
+        requiresPermission: "route.create-dispatch",
       },
     ],
-  },
-  {
+  },  {
     title: "Invoices",
     path: "/invoices",
     icon: FileText,
+    requiresPermission: "route.invoices",
   },
   {
-    title: "User Management",
-    path: "/user-management",
-    icon: Users,
-    requiresRole: ['Admin', 'Manager', 'Super Admin'],
-  },  {
     title: "Settings",
     isSection: true,
     icon: Settings, // Keep icon for section title if desired
     children: [
       {
-        title: "Email Settings",
-        path: "/settings/smtp",
+        title: "User Management",
+        path: "/user-management",
+        requiresPermission: "route.user-management",
+        requiresRole: ['Admin', 'Manager', 'Super Admin'],
       },
-      {
+       {
         title: "Permissions",
         path: "/settings/permissions",
         requiresPermission: "permissions.manage",
       },
+        {
+        title: "Notification Management",
+        path: "/admin/notifications",
+        // icon: Bell,
+        requiresPermission: "notifications.manage",
+      },
+          {
+        title: "Email Settings",
+        path: "/settings/smtp",
+        requiresPermission: "route.email-settings",
+      }, 
+      
+
       // {
       //   title: "Search",
       //   path: "/settings/search",

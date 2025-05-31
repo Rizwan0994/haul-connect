@@ -10,9 +10,13 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children, requiredRoles, requiredPermission }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, hasPermission, hasSpecificPermission, currentUser } = useAuth();
+  const { isAuthenticated, isLoading, hasPermission, hasSpecificPermission, currentUser, userPermissions } = useAuth();
 
-  console.log('PrivateRoute - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'user:', currentUser); // Debug log
+  console.log('PrivateRoute - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  console.log('PrivateRoute - User:', currentUser?.email, 'Role:', currentUser?.role_name || currentUser?.category);
+  console.log('PrivateRoute - Required permission:', requiredPermission);
+  console.log('PrivateRoute - Required roles:', requiredRoles);
+  console.log('PrivateRoute - User permissions:', userPermissions);
 
   // Still loading, show a loading indicator
   if (isLoading) {

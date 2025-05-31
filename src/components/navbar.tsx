@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function Navbar() {
   return (
@@ -31,6 +32,7 @@ export function Navbar() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <NotificationBell />
           <ThemeSwitch />
           <Link
             to="/profile"

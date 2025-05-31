@@ -30,6 +30,8 @@ import PermissionManagementPage from '@/pages/settings/permissions'
 // Import user management page and access denied page
 import UserManagementPage from '@/pages/user-management'
 import AccessDeniedPage from '@/pages/access-denied'
+import NotificationsPage from '@/pages/notifications'
+import AdminNotificationsPage from '@/pages/admin/notifications'
 
 function App() {
   return (
@@ -47,27 +49,80 @@ function App() {
               {/* Protected routes */}
               <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
                 <Route index element={<Navigate to="/carrier-management" replace />} />
-                <Route path="carrier-management" element={<CarrierManagementPage />} />
-                <Route path="carrier-management/create" element={<CarrierCreatePage />} />
-                <Route path="carrier-management/:id" element={<CarrierDetailPage />} />
-                <Route path="carrier-management/:id/edit" element={<CarrierEditPage />} />
+                <Route path="carrier-management" element={
+                  <PrivateRoute requiredPermission="route.carrier-profiles">
+                    <CarrierManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="carrier-management/create" element={
+                  <PrivateRoute requiredPermission="route.add-carrier">
+                    <CarrierCreatePage />
+                  </PrivateRoute>
+                } />
+                <Route path="carrier-management/:id" element={
+                  <PrivateRoute requiredPermission="carriers.view">
+                    <CarrierDetailPage />
+                  </PrivateRoute>
+                } />
+                <Route path="carrier-management/:id/edit" element={
+                  <PrivateRoute requiredPermission="carriers.edit">
+                    <CarrierEditPage />
+                  </PrivateRoute>
+                } />
                 {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
-                <Route path="dispatch-management" element={<DispatchManagementPage />} />
-                <Route path="dispatch-management/new" element={<NewDispatchPage />} />
-                <Route path="dispatch-management/:id" element={<DispatchDetailPage />} />
-                <Route path="dispatch-management/:id/edit" element={<DispatchEditPage />} />
-                <Route path="dispatch-management/:id/invoice" element={<DispatchInvoicePage />} />
+                <Route path="dispatch-management" element={
+                  <PrivateRoute requiredPermission="route.active-dispatches">
+                    <DispatchManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="dispatch-management/new" element={
+                  <PrivateRoute requiredPermission="route.create-dispatch">
+                    <NewDispatchPage />
+                  </PrivateRoute>
+                } />
+                <Route path="dispatch-management/:id" element={
+                  <PrivateRoute requiredPermission="dispatch.view">
+                    <DispatchDetailPage />
+                  </PrivateRoute>
+                } />
+                <Route path="dispatch-management/:id/edit" element={
+                  <PrivateRoute requiredPermission="dispatch.edit">
+                    <DispatchEditPage />
+                  </PrivateRoute>
+                } />
+                <Route path="dispatch-management/:id/invoice" element={
+                  <PrivateRoute requiredPermission="invoices.view">
+                    <DispatchInvoicePage />
+                  </PrivateRoute>
+                } />
                 <Route path="user-management" element={
-                  <PrivateRoute requiredRoles={['Admin', 'Manager', 'Super Admin']}>
+                  <PrivateRoute requiredPermission="route.user-management">
                     <UserManagementPage />
                   </PrivateRoute>
-
                 } />
-                <Route path="invoices" element={<InvoicesPage />} />
-                <Route path="settings/smtp" element={<SMTPSettingsPage />} />
+                <Route path="invoices" element={
+                  <PrivateRoute requiredPermission="route.invoices">
+                    <InvoicesPage />
+                  </PrivateRoute>
+                } />
+                <Route path="settings/smtp" element={
+                  <PrivateRoute requiredPermission="route.email-settings">
+                    <SMTPSettingsPage />
+                  </PrivateRoute>
+                } />
                 <Route path="settings/permissions" element={
                   <PrivateRoute requiredPermission="permissions.manage">
                     <PermissionManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="notifications" element={
+                  <PrivateRoute requiredPermission="notifications.view">
+                    <NotificationsPage />
+                  </PrivateRoute>
+                } />
+                <Route path="admin/notifications" element={
+                  <PrivateRoute requiredPermission="notifications.manage">
+                    <AdminNotificationsPage />
                   </PrivateRoute>
                 } />
               </Route>

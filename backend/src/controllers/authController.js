@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { user: User } = require("../models");
+const { user: User, role: Role, permission: Permission } = require("../models");
 const { successResponse, errorResponse } = require("../utils/responseUtils");
 
 const register = async (req, res) => {
@@ -40,7 +40,24 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    // Include role and permissions in the query
+    const user = await User.findOne({ 
+      where: { email },
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          include: [
+            {
+              model: Permission,
+              as: 'permissions',
+              through: { attributes: [] } // Don't include the join table
+            }
+          ]
+        }
+      ]
+    });
+    
     if (!user) {
       return res.status(401).json(errorResponse("Invalid credentials"));
     }
@@ -75,7 +92,10 @@ const login = async (req, res) => {
           firstName: user.first_name || '',
           lastName: user.last_name || '',
           role: user.role,
-          category: user.category 
+          category: user.category,
+          role_id: user.role_id,
+          role_name: user.userRole?.name,
+          permissions: user.userRole?.permissions || []
         },
         token,
       }),
@@ -88,8 +108,22 @@ const login = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
   try {
+    // We need to query with the role and permissions
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category', 'is_active']
+      attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category', 'is_active', 'role_id'],
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          include: [
+            {
+              model: Permission,
+              as: 'permissions',
+              through: { attributes: [] } // Don't include the join table
+            }
+          ]
+        }
+      ]
     });
 
     if (!user) {
@@ -100,6 +134,7 @@ const getCurrentUser = async (req, res) => {
       return res.status(403).json(errorResponse("Account is inactive"));
     }
 
+    // Include role name and permissions in the response
     res.json(
       successResponse("User data retrieved successfully", {
         id: user.id,
@@ -107,7 +142,10 @@ const getCurrentUser = async (req, res) => {
         firstName: user.first_name || '',
         lastName: user.last_name || '',
         role: user.role,
-        category: user.category
+        category: user.category,
+        role_id: user.role_id,
+        role_name: user.userRole?.name,
+        permissions: user.userRole?.permissions || []
       })
     );
   } catch (error) {

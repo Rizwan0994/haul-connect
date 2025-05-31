@@ -4,11 +4,13 @@ const {
   invoice: Invoice, 
   dispatch: Dispatch, 
   carrier_profile: Carrier, 
-  user: User 
+  user: User,
+  notification: Notification 
 } = require('../models');
 const { sendEmail, sendInvoiceEmail } = require('../services/emailService');
 const { successResponse, errorResponse } = require('../utils/responseUtils');
 const { generateInvoicePDF } = require('../services/pdfService');
+const NotificationService = require('../services/notificationService');
 const { format } = require('date-fns');
 
 const invoiceController = {
@@ -91,6 +93,50 @@ const invoiceController = {
           }
         ]
       });
+      
+      // Create notification for invoice creation
+      try {
+        // Notify the user who created the invoice (current user)
+        if (req.user && req.user.id) {
+          await NotificationService.createForUser({
+            userId: req.user.id,
+            message: `Invoice ${invoice_number} created for dispatch ${dispatch.load_no || dispatch.id}`,
+            type: 'success',
+            link: `/invoices/${invoice.id}`
+          });
+        }
+        
+        // Notify the dispatch creator if different from current user
+        const dispatchCreatorId = dispatch.user_id;
+        if (dispatchCreatorId && dispatchCreatorId !== req.user.id) {
+          await NotificationService.createForUser({
+            userId: dispatchCreatorId,
+            message: `Invoice ${invoice_number} created for your dispatch ${dispatch.load_no || dispatch.id}`,
+            type: 'info',
+            link: `/invoices/${invoice.id}`
+          });
+        }
+        
+        // Notify carrier by email if available
+        if (dispatch.carrier?.email_address) {
+          await NotificationService.createForEmail({
+            email: dispatch.carrier.email_address,
+            message: `Invoice ${invoice_number} has been generated for your services on dispatch ${dispatch.load_no || dispatch.id}`,
+            type: 'info',
+            link: `/invoices/${invoice.id}`
+          });
+        }
+        
+        // Notify admins about new invoice
+        await NotificationService.createForAdmins({
+          message: `New invoice ${invoice_number} created with amount $${total_amount} (profit: $${profit_amount})`,
+          type: 'info',
+          link: `/invoices/${invoice.id}`
+        });
+      } catch (notifError) {
+        console.error("Failed to create invoice notification:", notifError);
+        // Don't fail the request if notification creation fails
+      }
 
       res.status(201).json(successResponse('Invoice created successfully', createdInvoice));
     } catch (error) {
@@ -246,6 +292,11 @@ const invoiceController = {
         }
       }
 
+      // Check if status is being updated
+      const oldStatus = invoice.status;
+      const newStatus = updateData.status;
+      const statusChanged = newStatus && oldStatus !== newStatus;
+      
       await invoice.update(updateData);
 
       const updatedInvoice = await Invoice.findByPk(id, {
@@ -268,6 +319,70 @@ const invoiceController = {
           }
         ]
       });
+      
+      // Create notification for status change
+      if (statusChanged) {
+        try {
+          // Determine notification type based on new status
+          let notificationType = 'info';
+          if (newStatus.toLowerCase() === 'paid') {
+            notificationType = 'success';
+          } else if (newStatus.toLowerCase() === 'overdue') {
+            notificationType = 'error';
+          } else if (newStatus.toLowerCase() === 'pending' || newStatus.toLowerCase() === 'draft') {
+            notificationType = 'warning';
+          }
+          
+          // Notify the invoice creator
+          if (req.user && req.user.id) {
+            await NotificationService.createForUser({
+              userId: req.user.id,
+              message: `You updated invoice ${updatedInvoice.invoice_number} status to ${newStatus}`,
+              type: notificationType,
+              link: `/invoices/${updatedInvoice.id}`
+            });
+          }
+          
+          // Notify the dispatch creator if different from current user
+          const dispatchCreatorId = updatedInvoice.dispatch?.user_id;
+          if (dispatchCreatorId && dispatchCreatorId !== req.user.id) {
+            await NotificationService.createForUser({
+              userId: dispatchCreatorId,
+              message: `Invoice ${updatedInvoice.invoice_number} status updated to ${newStatus}`,
+              type: notificationType,
+              link: `/invoices/${updatedInvoice.id}`
+            });
+          }
+          
+          // For paid invoices, notify account users
+          if (newStatus.toLowerCase() === 'paid') {
+            // Find users with Account roles
+            const accountUsers = await User.findAll({
+              where: {
+                [require('sequelize').Op.or]: [
+                  { category: 'Account' },
+                  { role: 'Account' }
+                ],
+                is_active: true
+              }
+            });
+            
+            // Create notifications for account users
+            const userIds = accountUsers.map(user => user.id).filter(id => id !== req.user.id && id !== dispatchCreatorId);
+            if (userIds.length > 0) {
+              await NotificationService.createForUsers({
+                userIds,
+                message: `Invoice ${updatedInvoice.invoice_number} has been marked as paid`,
+                type: 'success',
+                link: `/invoices/${updatedInvoice.id}`
+              });
+            }
+          }
+        } catch (notifError) {
+          console.error("Failed to create invoice status notification:", notifError);
+          // Don't fail the request if notification creation fails
+        }
+      }
 
       res.json(successResponse('Invoice updated successfully', updatedInvoice));
     } catch (error) {
@@ -340,6 +455,50 @@ const invoiceController = {
 
         // Update invoice status to 'sent'
         await invoice.update({ status: 'sent' });
+        
+        // Create notification for email sent
+        try {
+          // Notify the user who sent the email
+          if (req.user && req.user.id) {
+            await NotificationService.createForUser({
+              userId: req.user.id,
+              message: `Invoice ${invoice.invoice_number} sent to ${emailTo}`,
+              type: 'success',
+              link: `/invoices/${invoice.id}`
+            });
+          }
+          
+          // Also notify the dispatch creator if different
+          const dispatchCreatorId = invoice.dispatch?.user_id;
+          if (dispatchCreatorId && dispatchCreatorId !== req.user.id) {
+            await NotificationService.createForUser({
+              userId: dispatchCreatorId,
+              message: `Invoice ${invoice.invoice_number} has been emailed to carrier`,
+              type: 'info',
+              link: `/invoices/${invoice.id}`
+            });
+          }
+          
+          // Create email notification for carrier if email doesn't match existing user
+          if (emailTo) {
+            await NotificationService.createForEmail({
+              email: emailTo,
+              message: `Invoice ${invoice.invoice_number} has been sent to you`,
+              type: 'info',
+              link: `/invoices/${invoice.id}`
+            });
+          }
+          
+          // Notify admins about invoice being sent
+          await NotificationService.createForAdmins({
+            message: `Invoice ${invoice.invoice_number} has been sent to ${emailTo}`,
+            type: 'info',
+            link: `/invoices/${invoice.id}`
+          });
+        } catch (notifError) {
+          console.error("Failed to create invoice email notification:", notifError);
+          // Don't fail the request if notification creation fails
+        }
 
         res.json(successResponse('Invoice email sent successfully'));
       } finally {
@@ -369,7 +528,50 @@ const invoiceController = {
         return res.status(400).json(errorResponse('Cannot delete paid invoices'));
       }
 
+      // Keep invoice information for notification before deleting
+      const invoiceNumber = invoice.invoice_number;
+      const invoiceDispatchId = invoice.dispatch_id;
+      
+      // Get dispatch details if needed for notification
+      let dispatchCreatorId = null;
+      try {
+        const dispatch = await Dispatch.findByPk(invoiceDispatchId);
+        dispatchCreatorId = dispatch?.user_id;
+      } catch (err) {
+        console.error("Error fetching dispatch for invoice deletion notification:", err);
+      }
+      
       await invoice.destroy();
+      
+      // Create notification for invoice deletion
+      try {
+        // Notify the user who deleted the invoice
+        if (req.user && req.user.id) {
+          await NotificationService.createForUser({
+            userId: req.user.id,
+            message: `You deleted invoice ${invoiceNumber}`,
+            type: 'warning'
+          });
+        }
+        
+        // Also notify the dispatch creator if different
+        if (dispatchCreatorId && dispatchCreatorId !== req.user.id) {
+          await NotificationService.createForUser({
+            userId: dispatchCreatorId,
+            message: `Invoice ${invoiceNumber} for your dispatch has been deleted`,
+            type: 'warning'
+          });
+        }
+        
+        // Notify admins about invoice deletion
+        await NotificationService.createForAdmins({
+          message: `Invoice ${invoiceNumber} has been deleted by ${req.user?.first_name || 'a user'}`,
+          type: 'warning'
+        });
+      } catch (notifError) {
+        console.error("Failed to create invoice deletion notification:", notifError);
+        // Don't fail the request if notification creation fails
+      }
 
       res.json(successResponse('Invoice deleted successfully'));
     } catch (error) {

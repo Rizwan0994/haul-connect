@@ -179,8 +179,7 @@ const systemPermissions = [
     action: 'edit',
     description: 'Edit invoices'
   },
-  
-  // Settings module permissions
+    // Settings module permissions
   {
     name: 'settings.smtp',
     type: 'feature',
@@ -188,6 +187,32 @@ const systemPermissions = [
     resource: 'smtp',
     action: 'manage',
     description: 'Configure SMTP settings'
+  },
+  
+  // Notification module permissions
+  {
+    name: 'notifications.view',
+    type: 'feature',
+    module: 'Notifications',
+    resource: 'notifications',
+    action: 'view',
+    description: 'View notifications'
+  },
+  {
+    name: 'notifications.create',
+    type: 'feature',
+    module: 'Notifications',
+    resource: 'notifications',
+    action: 'create',
+    description: 'Create notifications for users'
+  },
+  {
+    name: 'notifications.manage',
+    type: 'feature',
+    module: 'Notifications',
+    resource: 'notifications',
+    action: 'manage',
+    description: 'Manage all notifications in the system'
   }
 ];
 

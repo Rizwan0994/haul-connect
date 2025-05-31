@@ -54,35 +54,68 @@ const rolePermissions = {
   
   // Manager permissions
   'manager': [
+    // Feature permissions
     'users.view', 'users.create', 'users.edit', 'users.status',
     'carriers.view', 'carriers.create', 'carriers.edit',
     'dispatch.view', 'dispatch.create', 'dispatch.edit',
     'invoices.view', 'invoices.create', 'invoices.edit',
-    'role.view'
+    'role.view',
+    
+    // Route permissions
+    'route.dashboard', 'route.messages', 'route.calendar',
+    'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
+    'route.active-dispatches', 'route.create-dispatch',
+    'route.invoices', 'route.user-management',
+    'route.email-settings'
   ],
-  
-  // Dispatch role permissions
+    // Dispatch role permissions
   'dispatch': [
-    'carriers.view',
-    'dispatch.view', 'dispatch.create', 'dispatch.edit'
+    // Feature permissions
+    'carriers.view', // Can only view carriers in list, not details
+    'dispatch.view', 'dispatch.create', 'dispatch.edit',
+    'invoices.view', // Can view invoices but not edit
+    
+    // Route permissions
+    'route.dashboard',
+    'route.carrier-profiles', // Access to carrier list page only
+    'route.active-dispatches', 'route.create-dispatch',
+    'route.invoices'
   ],
   
   // Sales role permissions
   'sales': [
+    // Feature permissions
     'carriers.view', 'carriers.create', 'carriers.edit',
-    'dispatch.view', 'dispatch.create'
+    'dispatch.view', 'dispatch.create',
+    
+    // Route permissions
+    'route.dashboard', 'route.messages',
+    'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
+    'route.active-dispatches', 'route.create-dispatch'
   ],
   
   // Account role permissions
   'account': [
+    // Feature permissions
     'invoices.view', 'invoices.create', 'invoices.edit',
     'carriers.view',
-    'dispatch.view'
+    'dispatch.view',
+    
+    // Route permissions
+    'route.dashboard',
+    'route.carrier-profiles',
+    'route.active-dispatches',
+    'route.invoices'
   ],
   
   // Carrier role permissions (very limited)
   'carrier': [
-    'dispatch.view'
+    // Feature permissions
+    'dispatch.view',
+    
+    // Route permissions
+    'route.dashboard',
+    'route.active-dispatches'
   ]
 };
 

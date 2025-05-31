@@ -2,8 +2,8 @@
 exports.userModel = (db) => {
   db.user.hasMany(db.carrier_profile, { foreignKey: 'agent_name', as: 'managedCarriers' });
   db.user.hasMany(db.dispatch, { foreignKey: 'user_id', as: 'dispatches' });
+  db.user.hasMany(db.notification, { foreignKey: 'user_id', as: 'notifications' });
   // db.user.hasMany(db.FollowupSheet, { foreignKey: 'agent_name', as: 'followups' });
-  // db.user.hasMany(db.Notification, { foreignKey: 'username', as: 'notifications' });
   
   // New association for role-based permissions
   db.user.belongsTo(db.role, { foreignKey: 'role_id', as: 'userRole' });
@@ -38,6 +38,7 @@ exports.rolePermissionModel = (db) => {
   // This is a join table, associations defined in the role and permission models
 };
 
-// exports.NotificationModel = (db) => {
-//   db.Notification.belongsTo(db.User, { foreignKey: 'username', as: 'user' });
-// };
+exports.notificationModel = (db) => {
+  db.notification.belongsTo(db.user, { foreignKey: 'user_id', as: 'user' });
+  db.notification.belongsTo(db.user, { foreignKey: 'sender_id', as: 'sender' });
+};

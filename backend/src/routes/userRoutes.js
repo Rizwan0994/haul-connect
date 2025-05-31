@@ -3,6 +3,7 @@ const router = express.Router();
 const { user: User  } = require('../models');
 const bcrypt = require('bcrypt');
 const { requireRole } = require('../middleware/auth');
+const NotificationService = require('../services/notificationService');
 
 // Get all users (HR/Admin only)
 router.get('/', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, res) => {
@@ -49,9 +50,7 @@ router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
 
     // Hash password
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user
+    const hashedPassword = await bcrypt.hash(password, saltRounds);    // Create user
     const user = await User.create({
       email,
       password: hashedPassword,
@@ -62,6 +61,37 @@ router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
       last_name,
       phone
     });
+    
+    // Create comprehensive notifications for user creation
+    try {
+      // Notify the creator
+      if (req.user && req.user.id) {
+        await NotificationService.createForUser(
+          req.user.id,
+          `You created a new user: ${first_name} ${last_name} (${email})`,
+          'info',
+          `/user-management/${user.id}`
+        );
+      }
+      
+      // Notify all admin users about new user creation
+      await NotificationService.createForAdmins(
+        `New user created: ${first_name} ${last_name} (${email}) by ${req.user?.first_name || 'Admin'}`,
+        'info',
+        `/user-management/${user.id}`
+      );
+      
+      // Create welcome notification for the new user
+      await NotificationService.createForUser(
+        user.id,
+        `Welcome to Haul Connect! Your account has been created successfully.`,
+        'success',
+        `/dashboard`
+      );
+    } catch (notifError) {
+      console.error("Failed to create user notification:", notifError);
+      // Don't fail the request if notification creation fails
+    }
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user.toJSON();
@@ -82,6 +112,12 @@ router.put('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Store original values for comparison
+    const originalEmail = user.email;
+    const originalRole = user.role;
+    const originalCategory = user.category;
+    const originalName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
     // Update fields
     const updateData = {
       email,
@@ -100,6 +136,49 @@ router.put('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) => {
     }
 
     await user.update(updateData);
+
+    // Create notifications for significant changes
+    try {
+      const newName = `${first_name || ''} ${last_name || ''}`.trim();
+      const changes = [];
+      
+      if (originalEmail !== email) changes.push(`email changed from ${originalEmail} to ${email}`);
+      if (originalRole !== role) changes.push(`role changed from ${originalRole} to ${role}`);
+      if (originalCategory !== category) changes.push(`category changed from ${originalCategory} to ${category}`);
+      if (originalName !== newName) changes.push(`name changed from ${originalName} to ${newName}`);
+      if (password) changes.push('password updated');
+
+      if (changes.length > 0) {
+        // Notify the updater
+        if (req.user && req.user.id) {
+          await NotificationService.createForUser(
+            req.user.id,
+            `You updated user ${newName || email}: ${changes.join(', ')}`,
+            'info',
+            `/user-management/${user.id}`
+          );
+        }
+
+        // Notify all admin users about user updates
+        await NotificationService.createForAdmins(
+          `User ${newName || email} updated by ${req.user?.first_name || 'Admin'}: ${changes.join(', ')}`,
+          'info',
+          `/user-management/${user.id}`
+        );
+
+        // Notify the user if their profile was updated by someone else
+        if (req.user.id !== user.id) {
+          await NotificationService.createForUser(
+            user.id,
+            `Your profile has been updated: ${changes.join(', ')}`,
+            'info',
+            `/profile`
+          );
+        }
+      }
+    } catch (notifError) {
+      console.error("Failed to create user update notification:", notifError);
+    }
 
     // Return updated user without password
     const { password: _, ...userWithoutPassword } = user.toJSON();
@@ -123,7 +202,32 @@ router.delete('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) =>
       return res.status(403).json({ error: 'Only super admin can delete super admin users' });
     }
 
+    const deletedUserName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;
+
     await user.destroy();
+
+    // Create notifications for user deletion
+    try {
+      // Notify the deleter
+      if (req.user && req.user.id) {
+        await NotificationService.createForUser(
+          req.user.id,
+          `You deleted user: ${deletedUserName}`,
+          'warning',
+          `/user-management`
+        );
+      }
+
+      // Notify all admin users about user deletion
+      await NotificationService.createForAdmins(
+        `User ${deletedUserName} was deleted by ${req.user?.first_name || 'Admin'}`,
+        'warning',
+        `/user-management`
+      );
+    } catch (notifError) {
+      console.error("Failed to create user deletion notification:", notifError);
+    }
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -140,8 +244,54 @@ router.patch('/:id/status', requireRole(['Admin', 'Super Admin']), async (req, r
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
+    
+    // Check if status is actually changing
+    const statusChanging = user.is_active !== is_active;
+    
     await user.update({ is_active });
+      // Create notification if status changed
+    if (statusChanging) {
+      try {
+        const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;
+        
+        // Notify the user who made the change
+        if (req.user && req.user.id) {
+          await NotificationService.createForUser(
+            req.user.id,
+            `You ${is_active ? 'activated' : 'deactivated'} user: ${userName}`,
+            is_active ? 'success' : 'warning',
+            `/user-management/${user.id}`
+          );
+        }
+        
+        // Notify all admin users about status change
+        await NotificationService.createForAdmins(
+          `User ${userName} was ${is_active ? 'activated' : 'deactivated'} by ${req.user?.first_name || 'Admin'}`,
+          is_active ? 'success' : 'warning',
+          `/user-management/${user.id}`
+        );
+        
+        // Notify the user whose status changed
+        if (is_active) {
+          await NotificationService.createForUser(
+            user.id,
+            `Your account has been activated. You can now access the system.`,
+            'success',
+            `/dashboard`
+          );
+        } else {
+          await NotificationService.createForUser(
+            user.id,
+            `Your account has been deactivated. Please contact an administrator if you believe this is an error.`,
+            'warning',
+            `/dashboard`
+          );
+        }
+      } catch (notifError) {
+        console.error("Failed to create user status notification:", notifError);
+        // Don't fail the request if notification creation fails
+      }
+    }
 
     const { password: _, ...userWithoutPassword } = user.toJSON();
     res.json(userWithoutPassword);

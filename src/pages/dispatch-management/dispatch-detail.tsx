@@ -44,11 +44,12 @@ export default function DispatchDetail() {
     fetchDispatch()
   }, [id]) // Removed toast dependency
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | Date) => {
     try {
-      return format(new Date(dateString), 'MMM dd, yyyy')
+      const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+      return format(date, 'MMM dd, yyyy')
     } catch {
-      return dateString
+      return typeof dateString === 'string' ? dateString : dateString?.toString()
     }
   }
 
@@ -251,19 +252,13 @@ export default function DispatchDetail() {
                 <p className="mt-1 text-lg font-bold text-green-600">{formatCurrency(dispatch.load_amount)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Carrier Rate (%)</label>
+                <label className="text-sm font-medium text-muted-foreground">Carrier Rate</label>
                 <p className="mt-1 font-medium">{dispatch.charge_percent}%</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Carrier Amount (Invoice)</label>
+                <label className="text-sm font-medium text-muted-foreground">Service Charge</label>
                 <p className="mt-1 font-medium text-blue-600">
-                  {formatCurrency((dispatch.load_amount * dispatch.charge_percent) / 100)}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Service Charge (Profit)</label>
-                <p className="mt-1 font-medium text-green-600">
-                  {formatCurrency(dispatch.load_amount - (dispatch.load_amount * dispatch.charge_percent) / 100)}
+                  {formatCurrency((dispatch.load_amount * 8) / 100)}
                 </p>
               </div>
             </div>

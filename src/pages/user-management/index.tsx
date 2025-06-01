@@ -319,7 +319,7 @@ export default function UserManagement() {
               <div className="pt-2 border-t">
                 <Label htmlFor="role_id" className="flex items-center gap-1">
                   <KeyRound className="h-3 w-3" />
-                  <span>Role *</span>
+                  <span>Category Role *</span>
                 </Label>
                 <Select 
                   value={formData.role_id?.toString() || ""} 

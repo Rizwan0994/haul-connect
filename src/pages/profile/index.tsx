@@ -23,6 +23,24 @@ import {
   type DocumentInfo,
 } from "@/lib/profile-api";
 
+// Helper function to get the base URL for images
+const getImageUrl = (path: string) => {
+  const baseUrl = import.meta.env.VITE_PUBLIC_BACKEND_API_URL;
+  
+  if (!baseUrl) {
+    console.warn('VITE_PUBLIC_BACKEND_API_URL is not defined');
+    return path; // Return the path as-is if no base URL is configured
+  }
+  
+  // Remove '/api' from the base URL since image paths are relative to the server root
+  const serverBaseUrl = baseUrl.replace('/api', '');
+  
+  // Ensure the path starts with '/'
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  
+  return `${serverBaseUrl}${normalizedPath}`;
+};
+
 export default function ProfilePage() {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -74,9 +92,8 @@ export default function ProfilePage() {
         lastLoginIp: currentUser.lastLoginIp || "",
         photoUrl: currentUser.photoUrl || "",
       });
-      
-      if (currentUser.photoUrl) {
-        setImagePreview(`${import.meta.env.VITE_API_URL}${currentUser.photoUrl}`);
+        if (currentUser.photoUrl) {
+        setImagePreview(getImageUrl(currentUser.photoUrl));
       }
     }
     
@@ -105,9 +122,8 @@ export default function ProfilePage() {
           lastLoginIp: response.user.lastLoginIp || "",
           photoUrl: response.user.photoUrl || "",
         });
-        
-        if (response.user.photoUrl) {
-          setImagePreview(`${import.meta.env.VITE_API_URL}${response.user.photoUrl}`);
+          if (response.user.photoUrl) {
+          setImagePreview(getImageUrl(response.user.photoUrl));
         }
       }
     } catch (error) {
@@ -522,11 +538,10 @@ export default function ProfilePage() {
                                 {format(new Date(doc.uploadedAt), "PPP")}
                               </span>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Button
+                            <div className="flex items-center space-x-2">                              <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => window.open(`${import.meta.env.VITE_API_URL}${doc.filePath}`, '_blank')}
+                                onClick={() => window.open(getImageUrl(doc.filePath), '_blank')}
                               >
                                 <Download className="w-4 h-4" />
                               </Button>

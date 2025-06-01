@@ -9,6 +9,12 @@ module.exports = (sequelize) => {
         foreignKey: "role_id"
       });
     }
+
+    // Instance method to compare passwords
+    async comparePassword(candidatePassword) {
+      const bcrypt = require('bcrypt');
+      return await bcrypt.compare(candidatePassword, this.password);
+    }
   }
 
   User.init(
@@ -53,6 +59,47 @@ module.exports = (sequelize) => {
       phone: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      // New profile fields
+      fatherName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'father_name'
+      },
+      address: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      contact: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      cnic: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      experience: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      department: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      photoUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'photo_url'
+      },
+      lastLogin: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'last_login'
+      },
+      lastLoginIp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'last_login_ip'
       },
       is_active: {
         type: DataTypes.BOOLEAN,

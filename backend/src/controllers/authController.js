@@ -91,6 +91,14 @@ const login = async (req, res) => {
           email: user.email,
           firstName: user.first_name || '',
           lastName: user.last_name || '',
+          username: user.username || '',
+          fatherName: user.fatherName || '',
+          address: user.address || '',
+          contact: user.contact || '',
+          cnic: user.cnic || '',
+          experience: user.experience || '',
+          department: user.department || '',
+          photoUrl: user.photoUrl || '',
           role: user.role,
           category: user.category,
           role_id: user.role_id,
@@ -110,7 +118,7 @@ const getCurrentUser = async (req, res) => {
   try {
     // We need to query with the role and permissions
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category', 'is_active', 'role_id'],
+      attributes: ['id', 'email', 'first_name', 'last_name', 'username', 'fatherName', 'address', 'contact', 'cnic', 'experience', 'department', 'photoUrl', 'role', 'category', 'is_active', 'role_id', 'createdAt', 'lastLogin', 'lastLoginIp'],
       include: [
         {
           model: Role,
@@ -141,6 +149,17 @@ const getCurrentUser = async (req, res) => {
         email: user.email,
         firstName: user.first_name || '',
         lastName: user.last_name || '',
+        username: user.username || '',
+        fatherName: user.fatherName || '',
+        address: user.address || '',
+        contact: user.contact || '',
+        cnic: user.cnic || '',
+        experience: user.experience || '',
+        department: user.department || '',
+        photoUrl: user.photoUrl || '',
+        onboardDate: user.createdAt,
+        lastLogin: user.lastLogin,
+        lastLoginIp: user.lastLoginIp,
         role: user.role,
         category: user.category,
         role_id: user.role_id,

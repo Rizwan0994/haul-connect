@@ -31,6 +31,7 @@ const invoiceRoutes = require('./routes/invoiceRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
 const notificationRoutes = require('./routes/notification.routes');
+const profileRoutes = require('./routes/profile');
 
 // Public routes (no authentication required)
 app.use('/api/auth', authRoutes);
@@ -43,4 +44,5 @@ app.use('/api/invoices', authenticateToken, invoiceRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api', profileRoutes); // Profile routes
 module.exports = app;

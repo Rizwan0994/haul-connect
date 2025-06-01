@@ -1,4 +1,4 @@
-const { notification: Notification, user: User } = require("../models");
+const { notification: Notification, user: User,role: Role, } = require("../models");
 const { successResponse, errorResponse } = require("../utils/responseUtils");
 const { Op } = require("sequelize");
 
@@ -216,6 +216,11 @@ const getAllUsersForNotification = async (req, res) => {
       where: {
         is_active: true
       },
+        include: [  {
+              model: Role,
+              as: 'userRole',
+      }  ],     
+        
       attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category'],
       order: [['first_name', 'ASC'], ['last_name', 'ASC']]
     });
@@ -230,8 +235,8 @@ const getAllUsersForNotification = async (req, res) => {
 // Send custom notification to selected users (Admin only)
 const sendCustomNotification = async (req, res) => {
   try {
-    const { userIds, emails, message, type = 'info', link, title } = req.body;
-    
+    const { user_ids, emails, message, type = 'info', link, title } = req.body;
+    const userIds=user_ids;
     if (!message) {
       return res.status(400).json(errorResponse("Message is required"));
     }

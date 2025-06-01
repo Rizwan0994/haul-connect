@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -12,11 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { CalendarIcon, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -90,19 +84,15 @@ const formSchema = z.object({
 export type DispatchFormValues = z.infer<typeof formSchema>;
 
 interface DispatchFormProps {
-  initialData?: Partial<Dispatch>;
+  initialData?: Partial<Dispatch> & {
+    carrier_id?: number;
+    carrier?: string | { id: number; company_name: string; mc_number: string; owner_name: string; phone_number: string; email_address: string; truck_type: string; status: "active" | "inactive" | "pending" | "suspended"; };
+    user?: string | { first_name: string; last_name: string; id: number; email: string; };
+  };
   onSubmit: (data: DispatchFormValues) => void;
   isSubmitting?: boolean;
 }
 
-// Mock data for the current user session
-// TODO: Replace with actual auth management system
-const mockCurrentUser = {
-  id: "user1",
-  name: "John Doe",
-  role: "dispatcher", // or "admin", "sales", etc.
-  department: "Dispatch",
-};
 
 export function DispatchForm({
   initialData,
@@ -111,10 +101,11 @@ export function DispatchForm({
 }: DispatchFormProps) {
   const { currentUser } = useAuth();
 
-  // Debug log for user data
-  useEffect(() => {
-    console.log('Auth user data:', currentUser);
-  }, [currentUser]);
+  // Type guard for user object
+  const isUserObject = (user: any): user is { first_name: string; last_name: string; } => {
+    return user && typeof user === 'object' && 'first_name' in user && 'last_name' in user;
+  };
+
 
   // State to store carriers data
   const [carriers, setCarriers] = useState<
@@ -137,7 +128,7 @@ export function DispatchForm({
         // Use the real carrier API service instead of mock data
         const allCarriers = await carrierApiService.getAllCarriers();
         const formattedCarriers = allCarriers.map((carrier) => ({
-          value: carrier.id.toString(),
+          value: carrier.id?.toString() || "",
           label: `${carrier.company_name} (${carrier.mc_number})`,
           percentage: carrier.agreed_percentage?.toString() || "0",
         }));
@@ -157,7 +148,9 @@ export function DispatchForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       // Set the user to the current logged-in user (cannot be changed except by admin)
-      user: initialData?.user || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Unknown User"),
+      user: isUserObject(initialData?.user) 
+        ? `${initialData.user.first_name} ${initialData.user.last_name}`
+        : (typeof initialData?.user === 'string' ? initialData.user : (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Unknown User")),
       // Default department should always be "Dispatch" per client requirements
       department: initialData?.department || "Dispatch",
       booking_date: initialData?.booking_date
@@ -170,7 +163,7 @@ export function DispatchForm({
       dropoff_date: initialData?.dropoff_date
         ? new Date(initialData.dropoff_date)
         : new Date(),
-      carrier: initialData?.carrier || "",
+      carrier: initialData?.carrier_id ? initialData.carrier_id.toString() : "",
       origin: initialData?.origin || "",
       destination: initialData?.destination || "",
       brokerage_company: initialData?.brokerage_company || "",
@@ -343,34 +336,21 @@ export function DispatchForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Booking Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                        onChange={(e) => {
+                          const dateValue = e.target.value;
+                          if (dateValue) {
+                            field.onChange(new Date(dateValue));
+                          } else {
+                            field.onChange(undefined);
+                          }
+                        }}
+                        className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -460,34 +440,21 @@ export function DispatchForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Pickup Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                        onChange={(e) => {
+                          const dateValue = e.target.value;
+                          if (dateValue) {
+                            field.onChange(new Date(dateValue));
+                          } else {
+                            field.onChange(undefined);
+                          }
+                        }}
+                        className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -513,34 +480,21 @@ export function DispatchForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Dropoff Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                        onChange={(e) => {
+                          const dateValue = e.target.value;
+                          if (dateValue) {
+                            field.onChange(new Date(dateValue));
+                          } else {
+                            field.onChange(undefined);
+                          }
+                        }}
+                        className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

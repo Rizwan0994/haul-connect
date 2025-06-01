@@ -32,6 +32,7 @@ import UserManagementPage from '@/pages/user-management'
 import AccessDeniedPage from '@/pages/access-denied'
 import NotificationsPage from '@/pages/notifications'
 import AdminNotificationsPage from '@/pages/admin/notifications'
+import ProfilePage from '@/pages/profile'
 
 function App() {
   return (
@@ -123,6 +124,11 @@ function App() {
                 <Route path="admin/notifications" element={
                   <PrivateRoute requiredPermission="notifications.manage">
                     <AdminNotificationsPage />
+                  </PrivateRoute>
+                } />
+                <Route path="profile" element={
+                  <PrivateRoute>
+                    <ProfilePage />
                   </PrivateRoute>
                 } />
               </Route>

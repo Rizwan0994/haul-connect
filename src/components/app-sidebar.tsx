@@ -14,6 +14,7 @@ import {
   Plus,
   Search,
   Bell,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -65,11 +66,11 @@ const menuItems = [
         path: "/carrier-management",
         requiresPermission: "route.carrier-profiles",
       },
-      {
-        title: "Add New Carrier",
-        path: "/carrier-management/create",
-        requiresPermission: "route.add-carrier",
-      },
+      // {
+      //   title: "Add New Carrier",
+      //   path: "/carrier-management/create",
+      //   requiresPermission: "route.add-carrier",
+      // },
       {
         title: "Followup Sheets",
         path: "/carrier-management/followup-sheets",
@@ -87,12 +88,12 @@ const menuItems = [
         path: "/dispatch-management/",
         requiresPermission: "route.active-dispatches",
       },
-      {
-        title: "Create Dispatch",
-        path: "/dispatch-management/new",
-        icon: Plus, // Icon for specific menu item
-        requiresPermission: "route.create-dispatch",
-      },
+      // {
+      //   title: "Create Dispatch",
+      //   path: "/dispatch-management/new",
+      //   icon: Plus, // Icon for specific menu item
+      //   requiresPermission: "route.create-dispatch",
+      // },
     ],
   },  {
     title: "Invoices",
@@ -109,7 +110,7 @@ const menuItems = [
         title: "User Management",
         path: "/user-management",
         requiresPermission: "route.user-management",
-        requiresRole: ['Admin', 'Manager', 'Super Admin'],
+        // requiresRole: ['Admin', 'Manager', 'Super Admin'],
       },
        {
         title: "Permissions",
@@ -232,10 +233,20 @@ export function AppSidebar({ className }: AppSidebarProps) {
         <SidebarMenu className="space-y-1.5">
           {menuItems.map(renderMenuItem)}
         </SidebarMenu>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-gray-700 p-3">
-        <SidebarMenu>
+      </SidebarContent>      <SidebarFooter className="border-t border-gray-700 p-3">
+        <SidebarMenu className="space-y-1.5">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate("/profile")}
+              className="w-full justify-start gap-3 px-3 py-2 rounded-md text-white hover:bg-gray-700 transition-colors duration-150"
+              tooltip="My Profile"
+            >
+              <User className="h-4 w-4 flex-shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden truncate">
+                My Profile
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={logout}

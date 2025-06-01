@@ -5,11 +5,22 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  username?: string;
   role: string;           // Legacy role field
   category: string;       // Legacy category field
   role_id?: number;       // New role ID for permission system
   role_name?: string;     // New role name for permission system
   permissions?: any[];    // User permissions
+  fatherName?: string;
+  address?: string;
+  contact?: string;
+  cnic?: string;
+  experience?: string;
+  department?: string;
+  onboardDate?: string;
+  lastLogin?: string;
+  lastLoginIp?: string;
+  photoUrl?: string;
 }
 
 export interface LoginResponse {

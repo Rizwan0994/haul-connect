@@ -255,12 +255,12 @@ export default function UserManagement() {
           <p className="text-muted-foreground">Manage system users and their permissions</p>
         </div>        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <PermissionGate requiredPermission="users.create">
+            {/* <PermissionGate requiredPermission="users.create"> */}
               <Button onClick={resetForm}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
-            </PermissionGate>
+            {/* </PermissionGate> */}
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>

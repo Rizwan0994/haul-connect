@@ -42,8 +42,13 @@ export interface User {
   email: string;
   first_name: string | null;
   last_name: string | null;
-  category: string;
-  role: string;
+  category: string | null;
+  role: string | null;
+  userRole?: {
+    id: number;
+    name: string;
+    description?: string;
+  } | null;
 }
 
 export interface NotificationStats {

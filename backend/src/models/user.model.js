@@ -37,15 +37,7 @@ module.exports = (sequelize) => {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      // Keeping these for backward compatibility during migration
-      role: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      category: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+
       basic_salary: {
         type: DataTypes.DECIMAL(10, 2),
         defaultValue: 500.0,

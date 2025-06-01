@@ -60,25 +60,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { fetchAvailableRoles } from '@/lib/user-management';
 import PermissionGate from '@/components/auth/permission-gate';
 
-// Legacy categories - keep for backwards compatibility
-const USER_CATEGORIES = [
-  { value: 'Admin', label: 'Admin' },
-  { value: 'Super Admin', label: 'Super Admin' },
-  { value: 'Dispatch', label: 'Dispatch' },
-  { value: 'Sales', label: 'Sales' },
-  { value: 'Account', label: 'Account' },
-  { value: 'Manager', label: 'Manager' },
-];
-
-// Legacy roles - keep for backwards compatibility
-const ROLES = [
-  { value: 'Admin', label: 'Admin' },
-  { value: 'Super Admin', label: 'Super Admin' },
-  { value: 'Dispatch', label: 'Dispatch' },
-  { value: 'Sales', label: 'Sales' },
-  { value: 'Account', label: 'Account' },
-  { value: 'Manager', label: 'Manager' },
-];
+// Legacy categories removed - now using permission-based roles only
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -90,13 +72,11 @@ export default function UserManagement() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [availableRoles, setAvailableRoles] = useState<{ value: string, label: string }[]>([]);
-
   // Form state
   const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
     email: '',
     password: '',
-    role: 'Dispatch',          // Legacy role
-    category: 'Dispatch',      // Legacy category
+    category: 'Dispatch',      // Legacy category - still needed for backend compatibility
     role_id: undefined,        // New role system
     basic_salary: 500,
     first_name: '',
@@ -129,12 +109,29 @@ export default function UserManagement() {
       console.error('Error loading roles:', error);
     }
   };
-
   const handleCreateUser = async () => {
     try {
       setError('');
+      
+      // Validate required fields
+      if (!formData.email || !formData.password || !formData.role_id) {
+        setError('Email, password, and role are required');
+        return;
+      }
+      
       const { id, ...userData } = formData;
-      await userAPI.createUser(userData);
+      
+      // Map role_id to category for backward compatibility
+      const selectedRole = availableRoles.find(role => Number(role.value) === formData.role_id);
+      const mappedCategory = selectedRole?.label || 'Dispatch'; // Default fallback
+      
+      // Prepare user data with mapped category
+      const userDataWithCategory = {
+        ...userData,
+        category: mappedCategory as User['category']
+      };
+      
+      await userAPI.createUser(userDataWithCategory);
       setSuccess('User created successfully');
       setIsCreateDialogOpen(false);
       resetForm();
@@ -143,12 +140,18 @@ export default function UserManagement() {
       setError(error.response?.data?.error || 'Failed to create user');
     }
   };
-
   const handleUpdateUser = async () => {
     if (!editingUser) return;
     
     try {
       setError('');
+      
+      // Validate required fields
+      if (!formData.email || !formData.role_id) {
+        setError('Email and role are required');
+        return;
+      }
+      
       const { id, password, ...userData } = formData;
       const updateData: UpdateUserRequest = userData;
       
@@ -156,6 +159,11 @@ export default function UserManagement() {
       if (password) {
         updateData.password = password;
       }
+      
+      // Map role_id to category for backward compatibility
+      const selectedRole = availableRoles.find(role => Number(role.value) === formData.role_id);
+      const mappedCategory = selectedRole?.label || editingUser.category;
+      updateData.category = mappedCategory as User['category'];
       
       await userAPI.updateUser(editingUser.id, updateData);
       setSuccess('User updated successfully');
@@ -188,14 +196,12 @@ export default function UserManagement() {
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to update user status');
     }
-  };
-  const openEditDialog = (user: User) => {
+  };  const openEditDialog = (user: User) => {
     setEditingUser(user);
     setFormData({
       email: user.email,
       password: '', // Don't pre-fill password
-      role: user.role,
-      category: user.category,
+      category: user.category, // Legacy category - still needed for backend compatibility
       role_id: user.role_id,
       basic_salary: user.basic_salary,
       first_name: user.first_name || '',
@@ -203,12 +209,11 @@ export default function UserManagement() {
       phone: user.phone || '',
     });
     setIsEditDialogOpen(true);
-  };const resetForm = () => {
+  };  const resetForm = () => {
     setFormData({
       email: '',
       password: '',
-      role: 'Dispatch',        // Legacy role
-      category: 'Dispatch',    // Legacy category
+      category: 'Dispatch',    // Legacy category - still needed for backend compatibility
       role_id: availableRoles.length > 0 ? Number(availableRoles[0].value) : undefined,  // New role system
       basic_salary: 500,
       first_name: '',
@@ -216,9 +221,17 @@ export default function UserManagement() {
       phone: '',
     });
   };
-
   const getCategoryLabel = (category: string) => {
-    return USER_CATEGORIES.find(c => c.value === category)?.label || category;
+    // Map legacy categories to display names
+    const categoryMap: { [key: string]: string } = {
+      'Admin': 'Admin',
+      'Super Admin': 'Super Admin', 
+      'Dispatch': 'Dispatch',
+      'Sales': 'Sales',
+      'Account': 'Account',
+      'Manager': 'Manager'
+    };
+    return categoryMap[category] || category;
   };
 
   const getStatusBadge = (user: User) => {
@@ -227,12 +240,11 @@ export default function UserManagement() {
     }
     return <Badge variant="default">Active</Badge>;
   };
-
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.first_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (user.last_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    getCategoryLabel(user.category).toLowerCase().includes(searchTerm.toLowerCase())
+    (user.role_name?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -302,42 +314,12 @@ export default function UserManagement() {
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as any }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {USER_CATEGORIES.map(category => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>              <div>
-                <Label htmlFor="role">Legacy Role *</Label>
-                <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLES.map(role => (
-                      <SelectItem key={role.value} value={role.value}>
-                        {role.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+                />              </div>
+              
               <div className="pt-2 border-t">
                 <Label htmlFor="role_id" className="flex items-center gap-1">
                   <KeyRound className="h-3 w-3" />
-                  <span>Permission Role *</span>
+                  <span>Role *</span>
                 </Label>
                 <Select 
                   value={formData.role_id?.toString() || ""} 
@@ -413,12 +395,10 @@ export default function UserManagement() {
           {loading ? (
             <div className="text-center py-8">Loading users...</div>
           ) : (
-            <Table>
-              <TableHeader>
+            <Table>              <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Category</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Salary</TableHead>
@@ -427,8 +407,7 @@ export default function UserManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
+                {filteredUsers.map((user) => (                  <TableRow key={user.id}>
                     <TableCell>
                       {user.first_name || user.last_name
                         ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
@@ -436,7 +415,6 @@ export default function UserManagement() {
                       }
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{getCategoryLabel(user.category)}</TableCell>
                     <TableCell className="capitalize">
                       {user.role_name ? (
                         <div className="flex items-center gap-1">
@@ -444,7 +422,7 @@ export default function UserManagement() {
                           <span>{user.role_name}</span>
                         </div>
                       ) : (
-                        user.role
+                        <span className="text-muted-foreground">No role assigned</span>
                       )}
                     </TableCell>
                     <TableCell>{getStatusBadge(user)}</TableCell>
@@ -560,42 +538,12 @@ export default function UserManagement() {
                 id="edit_phone"
                 value={formData.phone}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit_category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as any }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {USER_CATEGORIES.map(category => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>            <div>
-              <Label htmlFor="edit_role">Legacy Role *</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map(role => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              />              </div>
             
             <div className="pt-2 border-t">
               <Label htmlFor="edit_role_id" className="flex items-center gap-1">
                 <KeyRound className="h-3 w-3" />
-                <span>Permission Role *</span>
+                <span>Role *</span>
               </Label>
               <Select 
                 value={formData.role_id?.toString() || ""} 

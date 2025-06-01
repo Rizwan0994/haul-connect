@@ -54,8 +54,6 @@ router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
     const user = await User.create({
       email,
       password: hashedPassword,
-      role: role || 'Dispatch',
-      category,
       basic_salary: basic_salary || 500.0,
       first_name,
       last_name,
@@ -121,8 +119,6 @@ router.put('/:id', requireRole(['Admin', 'Super Admin']), async (req, res) => {
     // Update fields
     const updateData = {
       email,
-      role,
-      category,
       basic_salary,
       first_name,
       last_name,

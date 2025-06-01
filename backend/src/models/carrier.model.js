@@ -21,12 +21,12 @@ module.exports = (sequelize) => {
       },
       mc_number: {
         type: DataTypes.STRING,
-        unique: true,
+        // unique: true,
         //  allowNull: false
       },
       us_dot_number: {
         type: DataTypes.STRING,
-        unique: true,
+        // unique: true,
       },
       company_name: {
         type: DataTypes.STRING,
@@ -43,9 +43,9 @@ module.exports = (sequelize) => {
       email_address: {
         type: DataTypes.STRING,
         // allowNull: false,
-        validate: {
-          isEmail: true,
-        },
+        // validate: {
+        //   isEmail: true,
+        // },
       },
       address: DataTypes.STRING,
       ein_number: DataTypes.STRING,
@@ -78,6 +78,42 @@ module.exports = (sequelize) => {
       notes_additional_preferences: DataTypes.TEXT,
       notes_parking_space: DataTypes.STRING,
       notes_average_gross: DataTypes.STRING,
+
+      // Office use fields
+      office_use_carrier_no: DataTypes.STRING,
+      office_use_team_assigned: DataTypes.STRING,
+      office_use_special_notes: DataTypes.TEXT,
+
+      // Driver information fields
+      driver_name: DataTypes.STRING,
+      driver_phone: DataTypes.STRING,
+      driver_email: DataTypes.STRING,
+      driver_license_number: DataTypes.STRING,
+      driver_license_state: DataTypes.STRING,
+      driver_license_expiration: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+
+      // Admin only fields - DAT Information
+      dat_username: DataTypes.STRING,
+      dat_password: DataTypes.STRING,
+
+      // Admin only fields - Truckstop Information
+      truckstop_username: DataTypes.STRING,
+      truckstop_password: DataTypes.STRING,
+      truckstop_carrier_id: DataTypes.STRING,
+      truckstop_carrier_zip: DataTypes.STRING,
+
+      // Admin only fields - ELD Information
+      eld_provider: DataTypes.STRING,
+      eld_site: DataTypes.STRING,
+      eld_username: DataTypes.STRING,
+      eld_password: DataTypes.STRING,
+
+      // Admin only fields - MyCarrierPackets Information
+      mycarrierpackets_username: DataTypes.STRING,
+      mycarrierpackets_password: DataTypes.STRING,
     },
     {
       sequelize,

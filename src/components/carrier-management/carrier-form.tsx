@@ -88,11 +88,24 @@ const carrierFormSchema = z.object({
   notes_average_gross: z.string().optional(),
   notes_parking_space: z.string().optional(),
   notes_additional_preferences: z.string().optional(),
-  
-  // Office use
+    // Office use
   office_use_carrier_no: z.string().optional(),
   office_use_team_assigned: z.string().optional(),
   office_use_special_notes: z.string().optional(),
+  
+  // Admin only fields
+  dat_username: z.string().optional(),
+  dat_password: z.string().optional(),
+  truckstop_username: z.string().optional(),
+  truckstop_password: z.string().optional(),
+  truckstop_carrier_id: z.string().optional(),
+  truckstop_carrier_zip: z.string().optional(),
+  eld_provider: z.string().optional(),
+  eld_site: z.string().optional(),
+  eld_username: z.string().optional(),
+  eld_password: z.string().optional(),
+  mycarrierpackets_username: z.string().optional(),
+  mycarrierpackets_password: z.string().optional(),
 });
 
 export type CarrierFormValues = z.infer<typeof carrierFormSchema>;
@@ -163,11 +176,24 @@ export function CarrierForm({
       notes_average_gross: initialData?.notes_average_gross || "",
       notes_parking_space: initialData?.notes_parking_space || "",
       notes_additional_preferences: initialData?.notes_additional_preferences || "",
-      
-      // Office use
+        // Office use
       office_use_carrier_no: initialData?.office_use_carrier_no || "",
       office_use_team_assigned: initialData?.office_use_team_assigned || "",
       office_use_special_notes: initialData?.office_use_special_notes || "",
+      
+      // Admin only fields
+      dat_username: initialData?.dat_username || "",
+      dat_password: initialData?.dat_password || "",
+      truckstop_username: initialData?.truckstop_username || "",
+      truckstop_password: initialData?.truckstop_password || "",
+      truckstop_carrier_id: initialData?.truckstop_carrier_id || "",
+      truckstop_carrier_zip: initialData?.truckstop_carrier_zip || "",
+      eld_provider: initialData?.eld_provider || "",
+      eld_site: initialData?.eld_site || "",
+      eld_username: initialData?.eld_username || "",
+      eld_password: initialData?.eld_password || "",
+      mycarrierpackets_username: initialData?.mycarrierpackets_username || "",
+      mycarrierpackets_password: initialData?.mycarrierpackets_password || "",
     },
   });
 
@@ -179,14 +205,14 @@ export function CarrierForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-6 mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">          <TabsList className="grid grid-cols-7 mb-8">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="driver">Driver Details</TabsTrigger>
             <TabsTrigger value="vehicle">Vehicle Details</TabsTrigger>
             <TabsTrigger value="insurance">Insurance</TabsTrigger>
             <TabsTrigger value="factoring">Factoring</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
+            <TabsTrigger value="admin">Admin Only</TabsTrigger>
           </TabsList>
 
           {/* Basic Information Tab */}
@@ -828,9 +854,223 @@ export function CarrierForm({
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                )}              />
             </div>
+          </TabsContent>
+
+          {/* Admin Only Tab */}
+          <TabsContent value="admin" className="space-y-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-amber-600 mt-0.5">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-amber-800">Restricted Access</h4>
+                      <p className="text-sm text-amber-700 mt-1">
+                        This information is restricted to administrators only. Please do not share these credentials.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* DAT Information */}
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">DAT Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="dat_username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>DAT Username / Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="DAT username or email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="dat_password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>DAT Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="DAT password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Truckstop Information */}
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">Truckstop Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="truckstop_username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Truckstop User / Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Truckstop username or email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="truckstop_password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Truckstop Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Truckstop password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="truckstop_carrier_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Truckstop / RMIS Carrier ID</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Carrier ID" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="truckstop_carrier_zip"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Truckstop / RMIS Carrier Zip</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Carrier ZIP code" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* ELD Information */}
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">ELD Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="eld_provider"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ELD Provider</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Name of ELD provider" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="eld_site"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ELD Site</FormLabel>
+                            <FormControl>
+                              <Input placeholder="ELD website URL" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="eld_username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ELD Username / Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="ELD username or email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="eld_password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ELD Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="ELD password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* MyCarrierPackets Information */}
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">My Carrier Packets Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="mycarrierpackets_username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>MyCarrierPackets Username / Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="MyCarrierPackets username or email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="mycarrierpackets_password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>MyCarrierPackets Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="MyCarrierPackets password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 

@@ -64,6 +64,14 @@ module.exports = (sequelize) => {
         type: DataTypes.ENUM("ACH", "ZELLE", "OTHER"),
         defaultValue: "ACH",
       },
+            created_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
     },
     {
       sequelize,

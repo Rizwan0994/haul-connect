@@ -33,6 +33,8 @@ import AccessDeniedPage from '@/pages/access-denied'
 import NotificationsPage from '@/pages/notifications'
 import AdminNotificationsPage from '@/pages/admin/notifications'
 import ProfilePage from '@/pages/profile'
+import DashboardPage from '@/pages/dashboard'
+import FollowupSheetsPage from '@/pages/carrier-management/followup-sheets'
 
 function App() {
   return (
@@ -49,10 +51,20 @@ function App() {
 
               {/* Protected routes */}
               <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-                <Route index element={<Navigate to="/carrier-management" replace />} />
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={
+                  <PrivateRoute requiredPermission="route.dashboard">
+                    <DashboardPage />
+                  </PrivateRoute>
+                } />
                 <Route path="carrier-management" element={
                   <PrivateRoute requiredPermission="route.carrier-profiles">
                     <CarrierManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="carrier-management/followup-sheets" element={
+                  <PrivateRoute requiredPermission="route.followup-sheets">
+                    <FollowupSheetsPage />
                   </PrivateRoute>
                 } />
                 <Route path="carrier-management/create" element={

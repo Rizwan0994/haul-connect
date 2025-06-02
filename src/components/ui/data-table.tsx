@@ -29,6 +29,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   filterableColumns?: string[]; // Array of column IDs that can be filtered
   searchPlaceholder?: string;
+  searchColumn?: string; // Column ID to use for the main search functionality
 }
 
 // Helper function to get a friendly name for a column
@@ -43,10 +44,10 @@ export function DataTable<TData, TValue>({
   data,
   filterableColumns = [],
   searchPlaceholder,
+  searchColumn = "company_name", // Default to "company_name" for backward compatibility
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [searchColumn, setSearchColumn] = React.useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -57,6 +58,17 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    initialState: {
+      columnVisibility: {
+        // Hide columns that have meta.isHidden = true
+        ...columns.reduce((acc, column) => {
+          if (column.meta && (column.meta as any).isHidden) {
+            acc[column.id || ''] = false;
+          }
+          return acc;
+        }, {} as Record<string, boolean>),
+      },
+    },
     state: {
       columnFilters,
       sorting,
@@ -72,9 +84,9 @@ export function DataTable<TData, TValue>({
             <div className="flex-1">
               <Input
                 placeholder={searchPlaceholder}
-                value={(table.getColumn("company_name")?.getFilterValue() as string) ?? ""}
+                value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ""}
                 onChange={(event) => 
-                  table.getColumn("company_name")?.setFilterValue(event.target.value)
+                  table.getColumn(searchColumn)?.setFilterValue(event.target.value)
                 }
                 className="max-w-xs"
               />

@@ -205,14 +205,55 @@ const systemPermissions = [
     resource: 'notifications',
     action: 'create',
     description: 'Create notifications for users'
-  },
-  {
+  },  {
     name: 'notifications.manage',
     type: 'feature',
     module: 'Notifications',
     resource: 'notifications',
     action: 'manage',
     description: 'Manage all notifications in the system'
+  },
+
+  // Followup Sheets module permissions
+  {
+    name: 'followup_sheets.view',
+    type: 'feature',
+    module: 'Followup Sheets',
+    resource: 'followup_sheets',
+    action: 'view',
+    description: 'View followup sheets'
+  },
+  {
+    name: 'followup_sheets.create',
+    type: 'feature',
+    module: 'Followup Sheets',
+    resource: 'followup_sheets',
+    action: 'create',
+    description: 'Create new followup sheets'
+  },
+  {
+    name: 'followup_sheets.read',
+    type: 'feature',
+    module: 'Followup Sheets',
+    resource: 'followup_sheets',
+    action: 'read',
+    description: 'Read followup sheets data'
+  },
+  {
+    name: 'followup_sheets.update',
+    type: 'feature',
+    module: 'Followup Sheets',
+    resource: 'followup_sheets',
+    action: 'update',
+    description: 'Update followup sheets'
+  },
+  {
+    name: 'followup_sheets.delete',
+    type: 'feature',
+    module: 'Followup Sheets',
+    resource: 'followup_sheets',
+    action: 'delete',
+    description: 'Delete followup sheets'
   }
 ];
 

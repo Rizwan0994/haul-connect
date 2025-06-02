@@ -110,7 +110,7 @@ export function TopDispatchers({ dispatches, loading }: TopDispatchersProps) {
             dispatchers.map((dispatcher, index) => (
               <div
                 key={dispatcher.name}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center space-x-3">
                   <div className="relative">

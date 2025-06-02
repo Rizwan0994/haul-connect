@@ -112,11 +112,11 @@ export default function DispatchManagement() {
           </div>
           
           {/* Data Table */}
-          <div className="border rounded-md">
-            <DataTable 
+          <div className="border rounded-md">            <DataTable 
               columns={columns} 
               data={dispatches}
-              searchPlaceholder="Search dispatches..."
+              searchPlaceholder="Search by carrier company name..."
+              searchColumn="carrier_company_name"
             />
           </div>
         </div>

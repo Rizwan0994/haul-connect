@@ -27,6 +27,18 @@ import {
 } from "@/components/ui/tooltip";
 
 export const columns: ColumnDef<Dispatch>[] = [
+  // Hidden column specifically for searching carrier company names
+  {
+    id: "carrier_company_name",
+    accessorFn: (row) => row.carrier?.company_name || "",
+    header: () => null,
+    cell: () => null,
+    enableSorting: false,
+    enableHiding: true,
+    meta: {
+      isHidden: true,
+    },
+  },
   {
     accessorKey: "load_no",
     header: "Load No.",
@@ -41,7 +53,7 @@ export const columns: ColumnDef<Dispatch>[] = [
         </Link>
       );
     },
-  },  {
+  },{
     accessorKey: "carrier",
     header: ({ column }) => {
       return (
@@ -90,6 +102,19 @@ export const columns: ColumnDef<Dispatch>[] = [
       const carrierA = rowA.original.carrier?.company_name || "";
       const carrierB = rowB.original.carrier?.company_name || "";
       return carrierA.localeCompare(carrierB);
+    },
+    filterFn: (row, columnId, value) => {
+      const carrier = row.original.carrier;
+      if (!carrier || !value) return true;
+      
+      const searchValue = value.toLowerCase();
+      const companyName = carrier.company_name?.toLowerCase() || "";
+      const mcNumber = carrier.mc_number?.toLowerCase() || "";
+      const ownerName = carrier.owner_name?.toLowerCase() || "";
+      
+      return companyName.includes(searchValue) || 
+             mcNumber.includes(searchValue) || 
+             ownerName.includes(searchValue);
     },
   },
   {
@@ -313,9 +338,8 @@ export const columns: ColumnDef<Dispatch>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(dispatch.id)}
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(dispatch.id.toString())}
               >
                 Copy dispatch ID
               </DropdownMenuItem>

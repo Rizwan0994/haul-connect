@@ -3,9 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import UserAssignmentDialog from "./user-assignment-dialog";
 import AssignedUsersList from "./assigned-users-list";
-
-// Mock storage for assigned user counts
-const mockAssignedCounts: Record<string, number> = {};
+import { userAssignmentApi } from "@/services/userAssignmentApi";
 
 // Create a context to hold all dialog states
 interface UserAssignmentContextType {
@@ -13,6 +11,7 @@ interface UserAssignmentContextType {
   openUsersList: (carrierId: string, carrierName: string) => void;
   getAssignedUserCount: (carrierId: string) => number;
   updateAssignedUserCount: (carrierId: string, count: number) => void;
+  refreshAssignedCounts: () => void;
 }
 
 const UserAssignmentContext = createContext<UserAssignmentContextType | null>(
@@ -48,25 +47,20 @@ export const UserAssignmentProvider = ({
   // Assigned user counts state
   const [assignedCounts, setAssignedCounts] = useState<Record<string, number>>({});
 
-  // Initialize mock data on first load
-  useEffect(() => {
-    // Initialize random counts for testing purposes
-    const initializeMockCounts = () => {
-      // For demo purposes only - in a real app this would be fetched from an API
-      const carrierIds = ["carrier1", "carrier2", "carrier3", "carrier4", "carrier5"];
-      const newCounts = { ...mockAssignedCounts };
-      
-      carrierIds.forEach(id => {
-        if (!newCounts[id]) {
-          newCounts[id] = Math.floor(Math.random() * 6); // Random count between 0-5
-        }
-      });
-
-      setAssignedCounts(newCounts);
-    };
-
-    initializeMockCounts();
+  // Fetch assigned user counts for all carriers
+  const fetchAssignedCounts = useCallback(async () => {
+    try {
+      // This could be optimized by fetching all carrier counts in a single API call
+      // For now, we'll fetch counts as needed when dialogs are opened
+    } catch (error) {
+      console.error("Error fetching assigned counts:", error);
+    }
   }, []);
+
+  // Initialize data on first load
+  useEffect(() => {
+    fetchAssignedCounts();
+  }, [fetchAssignedCounts]);
 
   // Open assignment dialog
   const openAssignmentDialog = useCallback(
@@ -109,10 +103,12 @@ export const UserAssignmentProvider = ({
       ...prev,
       [carrierId]: count
     }));
-    
-    // Also update our mock storage for persistence
-    mockAssignedCounts[carrierId] = count;
   }, []);
+
+  // Refresh assigned counts (can be called when assignments change)
+  const refreshAssignedCounts = useCallback(async () => {
+    await fetchAssignedCounts();
+  }, [fetchAssignedCounts]);
 
   // Context value
   const contextValue = {
@@ -120,6 +116,7 @@ export const UserAssignmentProvider = ({
     openUsersList,
     getAssignedUserCount,
     updateAssignedUserCount,
+    refreshAssignedCounts,
   };
 
   return (

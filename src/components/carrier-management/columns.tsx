@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import UserAssignmentButton from "./user-assignment-button";
 
 export type Carrier = {
   id: string;
@@ -35,7 +36,7 @@ export type Carrier = {
   phone_number: string;
   email_address: string;
   truck_type: string;
-  status: "Active" | "Temporary" | "Blacklist";
+  status: "active" | "inactive" | "pending" | "suspended";
   created_at: string;
 };
 
@@ -113,17 +114,33 @@ export const columns: ColumnDef<Carrier>[] = [
         <Badge
           variant="outline"
           className={
-            status === "Active"
+            status === "active"
               ? "bg-green-100 text-green-800 border-green-200"
-              : status === "Temporary"
+              : status === "pending"
               ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-              : status === "Blacklist"
+              : status === "suspended"
               ? "bg-red-100 text-red-800 border-red-200"
-              : "bg-gray-100 text-gray-800 border-gray-200"
+              : status === "inactive"
+              ? "bg-gray-100 text-gray-800 border-gray-200"
+              : "bg-blue-100 text-blue-800 border-blue-200"
           }
         >
-          {status}
+          {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
+      );
+    },
+  },
+  {
+    id: "assign_users",
+    header: "Assign",
+    cell: ({ row }) => {
+      const carrier = row.original;
+      return (
+        <UserAssignmentButton
+          carrierId={carrier.id}
+          carrierName={`${carrier.company_name} (${carrier.mc_number})`}
+          status={carrier.status}
+        />
       );
     },
   },

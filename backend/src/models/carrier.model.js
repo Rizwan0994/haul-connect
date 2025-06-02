@@ -114,6 +114,14 @@ module.exports = (sequelize) => {
       // Admin only fields - MyCarrierPackets Information
       mycarrierpackets_username: DataTypes.STRING,
       mycarrierpackets_password: DataTypes.STRING,
+      created_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
     },
     {
       sequelize,

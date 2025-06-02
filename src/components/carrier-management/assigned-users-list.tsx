@@ -11,47 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { userAssignmentApi, AssignedUser } from "@/services/userAssignmentApi";
+import { useToast } from "@/components/ui/use-toast";
+import { useUserAssignment } from "./user-assignment-provider";
 
-// Mock user data - would be replaced with real API calls in production
-const mockUsers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: "",
-    role: "Admin",
-    assignedDate: "2023-05-15",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    avatar: "",
-    role: "Dispatcher",
-    assignedDate: "2023-06-22",
-  },
-  {
-    id: "3",
-    name: "Robert Johnson",
-    email: "robert@example.com",
-    avatar: "",
-    role: "Account Manager",
-    assignedDate: "2023-07-11",
-  },
-  {
-    id: "4",
-    name: "Emily Davis",
-    email: "emily@example.com",
-    avatar: "",
-    role: "Operations",
-    assignedDate: "2023-08-04",
-  },
-];
-
-interface AssignedUser {
+// Local interface for transformed user data
+interface DisplayUser {
   id: string;
   name: string;
   email: string;
@@ -74,32 +42,61 @@ const AssignedUsersList: React.FC<AssignedUsersListProps> = ({
   carrierName,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [assignedUsers, setAssignedUsers] = useState<AssignedUser[]>([]);
+  const [assignedUsers, setAssignedUsers] = useState<DisplayUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { updateAssignedUserCount } = useUserAssignment();
 
-  // In a real app, you would fetch the assigned users here
+  // Fetch assigned users when dialog opens
   useEffect(() => {
     const fetchAssignedUsers = async () => {
-      // This would be an API call in a real application
-      // For now, just use some of the mock users
-      const randomSelection = mockUsers.filter(() => Math.random() > 0.3);
-      setAssignedUsers(randomSelection);
-
-      // In a real implementation, you would update the context here:
-      // if (updateAssignedUserCount) {
-      //   updateAssignedUserCount(carrierId, randomSelection.length);
-      // }
+      if (!isOpen || !carrierId) return;
+      
+      setLoading(true);
+      try {
+        const users = await userAssignmentApi.getCarrierUsers(carrierId);
+        
+        // Transform API response to display format
+        const transformedUsers: DisplayUser[] = users.map(user => ({
+          id: user.id.toString(),
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email,
+          avatar: '', // API doesn't provide avatar
+          role: user.role || user.category || 'User',
+          assignedDate: user.assigned_at
+        }));
+        
+        setAssignedUsers(transformedUsers);
+        // Update the context with the current count
+        updateAssignedUserCount(carrierId, users.length);
+      } catch (error) {
+        console.error("Error fetching assigned users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load assigned users. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (isOpen) {
-      fetchAssignedUsers();
+    fetchAssignedUsers();
+  }, [isOpen, carrierId]); // Removed toast and updateAssignedUserCount from dependencies
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery("");
+      setAssignedUsers([]);
     }
-  }, [isOpen, carrierId]);
+  }, [isOpen]);
 
   const filteredUsers = assignedUsers.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+      (user.role && user.role.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getInitials = (name: string) => {
@@ -140,11 +137,24 @@ const AssignedUsersList: React.FC<AssignedUsersListProps> = ({
         </div>
 
         <div className="mb-2 text-sm text-muted-foreground">
-          {assignedUsers.length} user{assignedUsers.length !== 1 ? "s" : ""}{" "}
-          assigned
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading users...
+            </div>
+          ) : (
+            <>
+              {assignedUsers.length} user{assignedUsers.length !== 1 ? "s" : ""}{" "}
+              assigned
+            </>
+          )}
         </div>
 
-        {assignedUsers.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : assignedUsers.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             No users assigned to this carrier
           </div>

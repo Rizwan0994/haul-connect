@@ -9,4 +9,9 @@ router.get('/:id', carrierController.getCarrierById);
 router.put('/:id', carrierController.updateCarrier);
 router.delete('/:id', carrierController.deleteCarrier);
 
+// User assignment routes
+router.get('/:id/users', carrierController.getCarrierUsers);
+router.post('/:id/users', carrierController.assignUsersToCarrier);
+router.delete('/:id/users/:userId', carrierController.removeUserFromCarrier);
+
 module.exports = router;

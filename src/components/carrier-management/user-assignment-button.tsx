@@ -32,7 +32,7 @@ const UserAssignmentButton: React.FC<UserAssignmentButtonProps> = ({
   const { openAssignmentDialog, openUsersList, getAssignedUserCount } =
     useUserAssignment();
   const assignedUserCount = getAssignedUserCount(carrierId);
-  const isBlacklisted = status === "Blacklist";
+  const isBlacklisted = status === "suspended";
 
   const handleAssignUsers = () => {
     if (isBlacklisted) return;
@@ -55,11 +55,11 @@ const UserAssignmentButton: React.FC<UserAssignmentButtonProps> = ({
               disabled
             >
               <AlertCircle className="h-4 w-4" />
-              <span className="sr-only">Carrier blacklisted</span>
+              <span className="sr-only">Carrier suspended</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>User management disabled - carrier is blacklisted</p>
+            <p>User management disabled - carrier is suspended</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

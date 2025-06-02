@@ -6,6 +6,9 @@ import { Plus, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { dispatchAPI, Dispatch } from '@/lib/dispatch-api'
 import { useToast } from '@/components/ui/use-toast'
+import { DashboardStats } from '@/components/dispatch-management/dashboard-stats'
+import { CommissionDistribution } from '@/components/dispatch-management/commission-distribution'
+import { TopDispatchers } from '@/components/dispatch-management/top-dispatchers'
 
 export default function DispatchManagement() {
   const { toast } = useToast();
@@ -89,8 +92,7 @@ export default function DispatchManagement() {
           </div>
         )}
       </div>
-      
-      {/* Content area - scrollable */}
+        {/* Content area - scrollable */}
       {loading ? (
         <div className="flex-1 flex items-center justify-center pb-6">
           <div className="text-center">
@@ -99,8 +101,18 @@ export default function DispatchManagement() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 px-6 pb-6 overflow-hidden">
-          <div className="h-full border rounded-md overflow-hidden">
+        <div className="flex-1 px-6 pb-6 overflow-auto space-y-6">
+          {/* Dashboard Statistics */}
+          <DashboardStats dispatches={dispatches} loading={loading} />
+          
+          {/* Commission and Top Dispatchers Row */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <CommissionDistribution dispatches={dispatches} loading={loading} />
+            <TopDispatchers dispatches={dispatches} loading={loading} />
+          </div>
+          
+          {/* Data Table */}
+          <div className="border rounded-md">
             <DataTable 
               columns={columns} 
               data={dispatches}

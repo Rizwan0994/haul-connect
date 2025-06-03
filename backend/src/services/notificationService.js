@@ -1,6 +1,7 @@
 "use strict";
 
-const { notification: Notification, user: User } = require("../models");
+const { where } = require("sequelize");
+const { notification: Notification, user: User, role: Role } = require("../models");
 
 /**
  * Utility service for creating notifications
@@ -26,9 +27,10 @@ class NotificationService {
    * @param {string} options.link Optional link for the notification
    * @returns {Promise<Object>} Created notification
    */
-  static async createForUser(options) {
+  static async createForUser(userId, message, type = 'info', link) {
+    console.log("options",userId, message, type, link);
     try {
-      const { userId, message, type = 'info', link } = options;
+      // const { userId, message, type = 'info', link } = options;
       
       if (!userId) {
         throw new Error("User ID is required");
@@ -237,9 +239,9 @@ class NotificationService {
    * @param {string} options.link Optional link for the notification
    * @returns {Promise<Object[]>} Array of created notifications
    */
-  static async createForAdmins(options) {
+  static async createForAdmins( message, type = 'info', link ) {
     try {
-      const { message, type = 'info', link } = options;
+      // const { message, type = 'info', link } = options;
       
       if (!message) {
         throw new Error("Message is required");
@@ -247,13 +249,15 @@ class NotificationService {
       
       // Find all admin users
       const adminUsers = await User.findAll({
-        where: {
-          // Check both new role system and legacy category
-          [User.sequelize.Op.or]: [
-            { category: 'Admin' },
-            { category: 'Super Admin' }
-          ]
-        },
+        include : [
+          {
+            model: Role,
+            as: 'userRole',
+            where: {
+              name: 'Super Admin' 
+            }
+          }
+        ],
         attributes: ['id']
       });
       

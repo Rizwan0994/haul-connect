@@ -101,8 +101,10 @@ exports.updateCarrier = async (req, res) => {
       
       // Notify the updater
       if (req.user && req.user.id) {
+        const userId = req.user.id || req.user.dataValues.id;
+
         await NotificationService.createForUser(
-          req.user.id,
+          userId,
           `You updated carrier: ${carrierName}`,
           'info',
           `/carrier-management/${carrier.id}`

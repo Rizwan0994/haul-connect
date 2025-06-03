@@ -3,15 +3,24 @@
 const app = require("./src/app");
 const { sequelize } = require("./src/models"); // Sequelize instance for DB connection
 const { runSeeders } = require("./src/seeders"); // Seeder system
+const http = require("http");
+const socketService = require("./src/services/socketService");
 
 const PORT = process.env.PORT || 5000;
 
 /**
- * Starts the server
+ * Starts the server with Socket.IO integration
  */
 function startServer() {
-  app.listen(PORT, () => {
+  // Create HTTP server
+  const server = http.createServer(app);
+  
+  // Initialize Socket.IO
+  socketService.initialize(server);
+  
+  server.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`📡 Socket.IO real-time notifications enabled`);
   });
 }
 

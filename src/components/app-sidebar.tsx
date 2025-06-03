@@ -17,6 +17,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
+import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -149,6 +150,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
   const { currentUser, logout } = useAuth();
   const { state } = useSidebar();
   const { hasSpecificPermission } = useAuth();
+  const { unreadCount } = useNotifications();
 
   const renderMenuItem = (item: any) => {
     // Check role-based permission (legacy)
@@ -173,9 +175,8 @@ export function AppSidebar({ className }: AppSidebarProps) {
           </SidebarMenu>
         </div>
       );
-    }
-
-    const isActive = location.pathname === item.path;
+    }    const isActive = location.pathname === item.path;
+    const isNotificationsItem = item.path === "/notifications";
 
     return (
       <SidebarMenuItem key={item.path}>
@@ -194,6 +195,11 @@ export function AppSidebar({ className }: AppSidebarProps) {
         >
           {item.icon && <item.icon className="h-5 w-5 flex-shrink-0" />}
           <span className="font-medium">{item.title}</span>
+          {isNotificationsItem && unreadCount > 0 && (
+            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </SidebarMenuButton>
       </SidebarMenuItem>
     );

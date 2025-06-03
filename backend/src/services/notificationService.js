@@ -7,6 +7,16 @@ const { notification: Notification, user: User } = require("../models");
  */
 class NotificationService {
   /**
+   * Get Socket.IO service instance
+   */
+  static getSocketService() {
+    try {
+      return require("./socketService");
+    } catch (error) {
+      console.warn("Socket service not available:", error.message);
+      return null;
+    }
+  }  /**
    * Create a notification for a specific user
    * 
    * @param {Object} options Notification options
@@ -35,6 +45,19 @@ class NotificationService {
         link,
         read: false
       });
+
+      // Send real-time notification via Socket.IO
+      const socketService = this.getSocketService();
+      if (socketService) {
+        socketService.sendToUser(userId, {
+          id: notification.id,
+          message: notification.message,
+          type: notification.type,
+          link: notification.link,
+          read: notification.read,
+          created_at: notification.created_at
+        });
+      }
       
       return notification;
     } catch (error) {
@@ -42,8 +65,7 @@ class NotificationService {
       throw error;
     }
   }
-  
-  /**
+    /**
    * Create a notification for a user by email
    * 
    * @param {Object} options Notification options
@@ -76,6 +98,19 @@ class NotificationService {
         link,
         read: false
       });
+
+      // Send real-time notification via Socket.IO if user exists
+      const socketService = this.getSocketService();
+      if (socketService && user) {
+        socketService.sendToUser(user.id, {
+          id: notification.id,
+          message: notification.message,
+          type: notification.type,
+          link: notification.link,
+          read: notification.read,
+          created_at: notification.created_at
+        });
+      }
       
       return notification;
     } catch (error) {
@@ -83,8 +118,7 @@ class NotificationService {
       throw error;
     }
   }
-  
-  /**
+    /**
    * Create notifications for multiple users
    * 
    * @param {Object} options Notification options
@@ -125,6 +159,19 @@ class NotificationService {
           // Continue with other notifications even if one fails
         }
       }));
+
+      // Send real-time notifications via Socket.IO
+      const socketService = this.getSocketService();
+      if (socketService && notifications.length > 0) {
+        const notificationData = {
+          message,
+          type,
+          link,
+          read: false,
+          created_at: new Date()
+        };
+        socketService.sendToUsers(userIds, notificationData);
+      }
       
       return notifications;
     } catch (error) {

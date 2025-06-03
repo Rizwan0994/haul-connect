@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModalProvider } from '@/components/carrier-management/modal-context'
 import { AuthProvider } from '@/components/auth/auth-context'
+import { SocketProvider } from '@/contexts/SocketContext'
 import CarrierModalsContainer from '@/components/carrier-management/carrier-modals-container'
 import DashboardLayout from '@/components/dashboard-layout'
 import PrivateRoute from '@/components/auth/private-route'
@@ -42,12 +43,13 @@ function App() {
       <ModalProvider>
         <Router>
           <AuthProvider>
-            <Routes>
-              {/* Auth routes */}
-              <Route path="/auth/login" element={<LoginPage />} />
-              <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/access-denied" element={<AccessDeniedPage />} />
+            <SocketProvider>
+              <Routes>
+                {/* Auth routes */}
+                <Route path="/auth/login" element={<LoginPage />} />
+                <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/access-denied" element={<AccessDeniedPage />} />
 
               {/* Protected routes */}
               <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
@@ -147,6 +149,7 @@ function App() {
             </Routes>
             <CarrierModalsContainer />
             <Toaster />
+            </SocketProvider>
           </AuthProvider>
         </Router>
       </ModalProvider>

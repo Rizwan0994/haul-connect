@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BellIcon, CheckIcon } from '@/components/notifications/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,75 +8,37 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { notificationService, Notification } from '@/lib/notification-service';
-import { format, formatDistanceToNow } from 'date-fns';
+import { Notification } from '@/lib/notification-service';
+import { formatDistanceToNow } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export function NotificationBell() {
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
-  const [unreadNotifications, setUnreadNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const intervalRef = useRef<number | null>(null);
   const navigate = useNavigate();
+  const {
+    unreadCount,
+    allNotifications,
+    unreadNotifications,
+    isLoading,
+    isConnected,
+    handleNotificationClick,
+    handleMarkAllAsRead,
+    loadNotificationsForDropdown,
+  } = useNotifications();
 
-  // Function to fetch notifications
-  const fetchNotifications = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch unread count
-      const countResponse = await notificationService.getUnreadCount();
-      setUnreadCount(countResponse.count);
-      
-      if (isOpen) {
-        // Fetch all notifications when dropdown is open
-        const unreadResponse = await notificationService.getUserNotifications(1, 10, false);
-        setUnreadNotifications(unreadResponse.notifications);
-        
-        const allResponse = await notificationService.getUserNotifications(1, 10);
-        setAllNotifications(allResponse.notifications);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Set up polling for notifications
-  useEffect(() => {
-    // Fetch immediately on mount
-    fetchNotifications();
-    
-    // Set up polling interval (every 30 seconds)
-    intervalRef.current = window.setInterval(() => {
-      fetchNotifications();
-    }, 30000);
-    
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
-  
-  // Fetch notifications when dropdown opens
+  // Load notifications when dropdown opens
   useEffect(() => {
     if (isOpen) {
-      fetchNotifications();
+      loadNotificationsForDropdown();
     }
-  }, [isOpen]);
+  }, [isOpen, loadNotificationsForDropdown]);
 
-  // Handle notification click
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark notification as read if it's not already
-    if (!notification.read) {
-      await notificationService.markAsRead([notification.id]);
-      fetchNotifications(); // Refresh data
-    }
+  // Handle notification click with navigation
+  const onNotificationClick = async (notification: Notification) => {
+    await handleNotificationClick(notification);
     
     // Navigate to link if provided
     if (notification.link) {
@@ -86,13 +48,8 @@ export function NotificationBell() {
   };
 
   // Mark all as read
-  const handleMarkAllAsRead = async () => {
-    try {
-      await notificationService.markAllAsRead();
-      fetchNotifications(); // Refresh data
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-    }
+  const onMarkAllAsRead = async () => {
+    await handleMarkAllAsRead();
   };
 
   // Function to get notification type color
@@ -104,7 +61,6 @@ export function NotificationBell() {
       default: return 'bg-blue-500';
     }
   };
-
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -114,6 +70,10 @@ export function NotificationBell() {
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
+          )}
+          {/* Connection status indicator (optional) */}
+          {!isConnected && (
+            <span className="absolute bottom-0 left-0 flex h-2 w-2 rounded-full bg-amber-500" title="Using offline mode" />
           )}
         </Button>
       </PopoverTrigger>
@@ -140,10 +100,9 @@ export function NotificationBell() {
               <>
                 <ScrollArea className="h-[calc(100vh-15rem)] max-h-[400px]">
                   {unreadNotifications.map((notification) => (
-                    <div key={notification.id} className="group">
-                      <button
+                    <div key={notification.id} className="group">                      <button
                         className="flex w-full cursor-pointer items-start space-x-3 p-4 hover:bg-muted/50"
-                        onClick={() => handleNotificationClick(notification)}
+                        onClick={() => onNotificationClick(notification)}
                       >
                         <div className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", getNotificationTypeColor(notification.type))} />
                         <div className="flex-1 space-y-1 text-left">
@@ -156,9 +115,8 @@ export function NotificationBell() {
                       <Separator />
                     </div>
                   ))}
-                </ScrollArea>
-                <div className="border-t p-2">
-                  <Button variant="ghost" size="sm" className="w-full" onClick={handleMarkAllAsRead}>
+                </ScrollArea>                <div className="border-t p-2">
+                  <Button variant="ghost" size="sm" className="w-full" onClick={onMarkAllAsRead}>
                     <CheckIcon className="mr-2 h-4 w-4" />
                     Mark all as read
                   </Button>
@@ -180,12 +138,11 @@ export function NotificationBell() {
               <ScrollArea className="h-[calc(100vh-15rem)] max-h-[400px]">
                 {allNotifications.map((notification) => (
                   <div key={notification.id} className="group">
-                    <button
-                      className={cn(
+                    <button                      className={cn(
                         "flex w-full cursor-pointer items-start space-x-3 p-4 hover:bg-muted/50",
                         !notification.read && "bg-muted/30"
                       )}
-                      onClick={() => handleNotificationClick(notification)}
+                      onClick={() => onNotificationClick(notification)}
                     >
                       <div className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", getNotificationTypeColor(notification.type))} />
                       <div className="flex-1 space-y-1 text-left">

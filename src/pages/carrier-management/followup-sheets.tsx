@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -83,6 +83,190 @@ const initialFormData: FollowupSheetFormData = {
   comments: ''
 };
 
+// Move FormDialog component outside to prevent re-creation on every render
+const FormDialog = React.memo(({ 
+  isOpen, 
+  onOpenChange, 
+  title, 
+  description, 
+  formData, 
+  onInputChange, 
+  onSubmit, 
+  submitting, 
+  editingSheet, 
+  onCancel 
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  formData: FollowupSheetFormData;
+  onInputChange: (field: keyof FollowupSheetFormData, value: string | number) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  submitting: boolean;
+  editingSheet: FollowupSheet | null;
+  onCancel: () => void;
+}) => (
+  <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      
+      <form onSubmit={onSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="agent_name">Agent Name</Label>
+            <Input
+              id="agent_name"
+              value={formData.agent_name}
+              onChange={(e) => onInputChange('agent_name', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={formData.date}
+              onChange={(e) => onInputChange('date', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="name">Company Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => onInputChange('name', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="mc_no">MC Number</Label>
+            <Input
+              id="mc_no"
+              value={formData.mc_no}
+              onChange={(e) => onInputChange('mc_no', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="contact">Contact Number</Label>
+            <Input
+              id="contact"
+              value={formData.contact}
+              onChange={(e) => onInputChange('contact', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => onInputChange('email', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="truck_type">Truck Type</Label>
+            <Input
+              id="truck_type"
+              value={formData.truck_type}
+              onChange={(e) => onInputChange('truck_type', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="equipment">Equipment</Label>
+            <Input
+              id="equipment"
+              value={formData.equipment}
+              onChange={(e) => onInputChange('equipment', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="preferred_lanes">Preferred Lanes</Label>
+            <Input
+              id="preferred_lanes"
+              value={formData.preferred_lanes}
+              onChange={(e) => onInputChange('preferred_lanes', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="zip_code">Zip Code</Label>
+            <Input
+              id="zip_code"
+              value={formData.zip_code}
+              onChange={(e) => onInputChange('zip_code', e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="percentage">Percentage (%)</Label>
+            <Input
+              id="percentage"
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              value={formData.percentage}
+              onChange={(e) => onInputChange('percentage', parseFloat(e.target.value) || 0)}
+              required
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="comments">Comments</Label>
+          <Textarea
+            id="comments"
+            value={formData.comments}
+            onChange={(e) => onInputChange('comments', e.target.value)}
+            rows={3}
+          />
+        </div>
+        
+        <DialogFooter>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {editingSheet ? 'Updating...' : 'Creating...'}
+              </>
+            ) : (
+              editingSheet ? 'Update' : 'Create'
+            )}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
+));
+
 export default function FollowupSheets() {
   const [followupSheets, setFollowupSheets] = useState<FollowupSheet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +275,8 @@ export default function FollowupSheets() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingSheet, setEditingSheet] = useState<FollowupSheet | null>(null);
-  const [formData, setFormData] = useState<FollowupSheetFormData>(initialFormData);  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState<FollowupSheetFormData>(initialFormData);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -116,13 +301,13 @@ export default function FollowupSheets() {
       setLoading(false);
     }
   };
-
-  const handleInputChange = (field: keyof FollowupSheetFormData, value: string | number) => {
+  // Use useCallback to prevent re-creation on every render
+  const handleInputChange = useCallback((field: keyof FollowupSheetFormData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,8 +365,7 @@ export default function FollowupSheets() {
       comments: sheet.comments
     });
     setIsEditDialogOpen(true);
-  };
-  const handleDelete = async (id: number) => {
+  };  const handleDelete = async (id: number) => {
     try {
       await followupSheetApi.delete(id);
       setFollowupSheets(prev => prev.filter(sheet => sheet.id !== id));
@@ -199,181 +383,20 @@ export default function FollowupSheets() {
     }
   };
 
-  const filteredSheets = followupSheets.filter(sheet =>
-    sheet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sheet.mc_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sheet.agent_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleCancel = useCallback(() => {
+    setIsCreateDialogOpen(false);
+    setIsEditDialogOpen(false);
+    setFormData(initialFormData);
+    setEditingSheet(null);
+  }, []);
 
-  const FormDialog = ({ isOpen, onOpenChange, title, description }: {
-    isOpen: boolean;
-    onOpenChange: (open: boolean) => void;
-    title: string;
-    description: string;
-  }) => (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="agent_name">Agent Name</Label>
-              <Input
-                id="agent_name"
-                value={formData.agent_name}
-                onChange={(e) => handleInputChange('agent_name', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="name">Company Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="mc_no">MC Number</Label>
-              <Input
-                id="mc_no"
-                value={formData.mc_no}
-                onChange={(e) => handleInputChange('mc_no', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="contact">Contact Number</Label>
-              <Input
-                id="contact"
-                value={formData.contact}
-                onChange={(e) => handleInputChange('contact', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="truck_type">Truck Type</Label>
-              <Input
-                id="truck_type"
-                value={formData.truck_type}
-                onChange={(e) => handleInputChange('truck_type', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="equipment">Equipment</Label>
-              <Input
-                id="equipment"
-                value={formData.equipment}
-                onChange={(e) => handleInputChange('equipment', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="preferred_lanes">Preferred Lanes</Label>
-              <Input
-                id="preferred_lanes"
-                value={formData.preferred_lanes}
-                onChange={(e) => handleInputChange('preferred_lanes', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="zip_code">Zip Code</Label>
-              <Input
-                id="zip_code"
-                value={formData.zip_code}
-                onChange={(e) => handleInputChange('zip_code', e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="percentage">Percentage (%)</Label>
-              <Input
-                id="percentage"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={formData.percentage}
-                onChange={(e) => handleInputChange('percentage', parseFloat(e.target.value) || 0)}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="comments">Comments</Label>
-            <Textarea
-              id="comments"
-              value={formData.comments}
-              onChange={(e) => handleInputChange('comments', e.target.value)}
-              rows={3}
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => {
-                onOpenChange(false);
-                setFormData(initialFormData);
-                setEditingSheet(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {editingSheet ? 'Updating...' : 'Creating...'}
-                </>
-              ) : (
-                editingSheet ? 'Update' : 'Create'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+  // Memoize filtered sheets to prevent unnecessary re-calculations
+  const filteredSheets = useMemo(() => 
+    followupSheets.filter(sheet =>
+      sheet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sheet.mc_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sheet.agent_name.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [followupSheets, searchTerm]  );
 
   return (
     <div className="space-y-6">
@@ -464,62 +487,61 @@ export default function FollowupSheets() {
                     <TableHead>Percentage</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
+                </TableHeader>                <TableBody>
                   {filteredSheets.map((sheet) => (
                     <TableRow key={sheet.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{sheet.agent_name}</span>
+                      <TableCell className="min-w-[120px]">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-sm">{sheet.agent_name}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>{format(new Date(sheet.date), 'MMM dd, yyyy')}</span>
+                      <TableCell className="min-w-[120px]">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm">{format(new Date(sheet.date), 'MMM dd, yyyy')}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{sheet.name}</div>
-                          <div className="text-sm text-muted-foreground flex items-center space-x-1">
-                            <MapPin className="h-3 w-3" />
+                      <TableCell className="min-w-[150px]">
+                        <div className="space-y-1">
+                          <div className="font-medium text-sm">{sheet.name}</div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
                             <span>{sheet.zip_code}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{sheet.mc_no}</Badge>
+                      <TableCell className="min-w-[100px]">
+                        <Badge variant="outline" className="text-xs">{sheet.mc_no}</Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-[160px]">
                         <div className="space-y-1">
-                          <div className="flex items-center space-x-1 text-sm">
-                            <Phone className="h-3 w-3" />
-                            <span>{sheet.contact}</span>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{sheet.contact}</span>
                           </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            <span>{sheet.email}</span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Mail className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">{sheet.email}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="flex items-center space-x-1">
-                            <Truck className="h-3 w-3" />
-                            <span className="text-sm">{sheet.truck_type}</span>
+                      <TableCell className="min-w-[120px]">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1">
+                            <Truck className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium">{sheet.truck_type}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground">{sheet.equipment}</div>
+                          <div className="text-xs text-muted-foreground pl-4">{sheet.equipment}</div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <Percent className="h-3 w-3" />
-                          <span className="font-medium">{sheet.percentage}%</span>
+                      <TableCell className="min-w-[80px]">
+                        <div className="flex items-center gap-1">
+                          <Percent className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-sm">{sheet.percentage}%</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-[50px]">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -572,14 +594,18 @@ export default function FollowupSheets() {
             </div>
           )}
         </CardContent>
-      </Card>
-
-      {/* Dialogs */}
+      </Card>      {/* Dialogs */}
       <FormDialog
         isOpen={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         title="Create Followup Sheet"
         description="Add a new carrier followup sheet with contact and equipment information."
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        editingSheet={editingSheet}
+        onCancel={handleCancel}
       />
 
       <FormDialog
@@ -587,6 +613,12 @@ export default function FollowupSheets() {
         onOpenChange={setIsEditDialogOpen}
         title="Edit Followup Sheet"
         description="Update the carrier followup sheet information."
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        editingSheet={editingSheet}
+        onCancel={handleCancel}
       />
     </div>
   );

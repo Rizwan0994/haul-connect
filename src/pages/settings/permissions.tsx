@@ -30,6 +30,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -41,6 +52,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
+import { Trash2 } from 'lucide-react';
 // Ensure we're importing the latest version of the APIs
 import { roleAPI, permissionAPI, Role, Permission } from '@/lib/permission-api';
 
@@ -96,9 +108,8 @@ export default function PermissionManagement() {
   useEffect(() => {
     const fetchPermissions = async () => {
       setIsLoading(true);
-      try {
-        // Get permissions with current filters
-        const filters = {};
+      try {        // Get permissions with current filters
+        const filters: Record<string, string> = {};
         if (filter.module !== 'all') filters['module'] = filter.module;
         if (filter.type !== 'all') filters['type'] = filter.type;
         
@@ -174,7 +185,6 @@ export default function PermissionManagement() {
       alert('Error updating permission. Please check the console for details.');
     }
   };
-
   // Create new role
   const handleCreateRole = async () => {
     try {
@@ -193,6 +203,30 @@ export default function PermissionManagement() {
       setRoles(rolesData);
     } catch (error) {
       console.error('Error creating role:', error);
+    }
+  };
+
+  // Delete role
+  const handleDeleteRole = async (roleId: number) => {
+    try {
+      await roleAPI.deleteRole(roleId);
+      
+      // If the deleted role was selected, clear selection
+      if (selectedRole?.id === roleId) {
+        setSelectedRole(null);
+      }
+      
+      // Reload roles
+      const rolesData = await roleAPI.getAllRoles();
+      setRoles(rolesData);
+      
+      // Set first role as selected if none selected
+      if (rolesData.length > 0 && (!selectedRole || selectedRole.id === roleId)) {
+        setSelectedRole(rolesData[0]);
+      }
+    } catch (error) {
+      console.error('Error deleting role:', error);
+      alert('Error deleting role. Please check the console for details.');
     }
   };
 
@@ -268,19 +302,48 @@ export default function PermissionManagement() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-1">
-            <div className="space-y-4">
+          <div className="col-span-1">            <div className="space-y-4">
               <div className="font-medium">Roles</div>
-              <div className="space-y-2">
-                {roles.map(role => (
-                  <Button
-                    key={role.id}
-                    variant={selectedRole?.id === role.id ? "default" : "outline"}
-                    className="w-full justify-start"
-                    onClick={() => handleRoleSelect(role.id)}
-                  >
-                    {role.name}
-                  </Button>
+              <div className="space-y-2">                {roles.map(role => (
+                  <div key={role.id} className="flex items-center gap-2">
+                    <Button
+                      variant={selectedRole?.id === role.id ? "default" : "outline"}
+                      className="flex-1 justify-start"
+                      onClick={() => handleRoleSelect(role.id)}
+                    >
+                      {role.name}
+                    </Button>
+                    {/* Show delete button for all roles */}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Role</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete the role "{role.name}"? 
+                            This action cannot be undone and will remove all permissions associated with this role.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteRole(role.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete Role
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 ))}
               </div>
             </div>

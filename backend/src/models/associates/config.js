@@ -31,12 +31,24 @@ exports.carrierModel = (db) => {
     otherKey: 'user_id',
     as: 'assignedUsers' 
   });
+  
+  // Carrier approval workflow associations
+  db.carrier_profile.belongsTo(db.user, { foreignKey: 'approved_by_manager', as: 'managerApprover' });
+  db.carrier_profile.belongsTo(db.user, { foreignKey: 'approved_by_accounts', as: 'accountsApprover' });
+  db.carrier_profile.belongsTo(db.user, { foreignKey: 'rejected_by', as: 'rejectedBy' });
+  db.carrier_profile.belongsTo(db.user, { foreignKey: 'disabled_by', as: 'disabledBy' });
 };
 
 exports.dispatchModel = (db) => {
   db.dispatch.belongsTo(db.user, { foreignKey: 'user_id', as: 'user' });
   db.dispatch.belongsTo(db.carrier_profile, { foreignKey: 'carrier_id', as: 'carrier' });
   db.dispatch.hasOne(db.invoice, { foreignKey: 'dispatch_id', as: 'invoice' });
+  
+  // Approval workflow associations
+  db.dispatch.belongsTo(db.user, { foreignKey: 'approved_by_manager', as: 'managerApprover' });
+  db.dispatch.belongsTo(db.user, { foreignKey: 'approved_by_accounts', as: 'accountsApprover' });
+  db.dispatch.belongsTo(db.user, { foreignKey: 'rejected_by', as: 'rejectedBy' });
+  db.dispatch.belongsTo(db.user, { foreignKey: 'disabled_by', as: 'disabledBy' });
 };
 
 exports.invoiceModel = (db) => {

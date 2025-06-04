@@ -1,0 +1,349 @@
+const { carrier_profile, user, notification } = require('../models');
+const { Op } = require('sequelize');
+// const permissionMiddleware = require('../middleware/permissionMiddleware');
+
+const carrierApprovalController = {
+  // Get pending carrier profiles requiring approval
+  getPendingCarriers: async (req, res) => {
+    try {
+      const { status = 'pending' } = req.query;
+      
+      // Build where clause based on status
+      let whereClause = {};
+      
+      if (status === 'pending') {
+        whereClause.approval_status = 'pending';
+      } else if (status === 'manager_approved') {
+        whereClause.approval_status = 'manager_approved';
+      } else if (status === 'approved') {
+        whereClause.approval_status = 'approved';
+      } else if (status === 'rejected') {
+        whereClause.approval_status = 'rejected';
+      } else if (status === 'disabled') {
+        whereClause.is_disabled = true;
+      }
+
+      const carriers = await carrier_profile.findAll({
+        where: whereClause,
+        include: [
+          {
+            model: user,
+            as: 'managerApprover',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'accountsApprover',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'rejectedBy',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'disabledBy',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          }
+        ],
+        order: [['created_at', 'DESC']]
+      });
+
+      res.json({
+        success: true,
+        data: carriers
+      });
+    } catch (error) {
+      console.error('Error fetching pending carriers:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching pending carriers',
+        error: error.message
+      });
+    }
+  },
+
+  // Approve carrier as manager
+  approveAsManager: async (req, res) => {
+    try {
+      const { carrierId } = req.params;
+      const userId = req.user.id;
+
+      const carrierProfile = await carrier_profile.findByPk(carrierId);
+      if (!carrierProfile) {
+        return res.status(404).json({
+          success: false,
+          message: 'Carrier not found'
+        });
+      }
+
+      if (carrierProfile.approval_status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'Carrier is not in pending status'
+        });
+      }
+
+      await carrierProfile.update({
+        approval_status: 'manager_approved',
+        approved_by_manager: userId,
+        manager_approved_at: new Date()
+      });
+
+      // Create notification for accounts team
+      await notification.create({
+        user_id: null, // Will be sent to all accounts users
+        title: 'Carrier Approved by Manager',
+        message: `Carrier ${carrierProfile.company_name} has been approved by manager and requires final approval`,
+        type: 'approval',
+        metadata: {
+          carrier_id: carrierId,
+          action: 'manager_approved'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Carrier approved by manager successfully'
+      });
+    } catch (error) {
+      console.error('Error approving carrier as manager:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error approving carrier',
+        error: error.message
+      });
+    }
+  },
+
+  // Approve carrier as accounts (final approval)
+  approveAsAccounts: async (req, res) => {
+    try {
+      const { carrierId } = req.params;
+      const userId = req.user.id;
+
+      const carrierProfile = await carrier_profile.findByPk(carrierId);
+      if (!carrierProfile) {
+        return res.status(404).json({
+          success: false,
+          message: 'Carrier not found'
+        });
+      }
+
+      if (carrierProfile.approval_status !== 'manager_approved') {
+        return res.status(400).json({
+          success: false,
+          message: 'Carrier must be approved by manager first'
+        });
+      }
+
+      await carrierProfile.update({
+        approval_status: 'approved',
+        approved_by_accounts: userId,
+        accounts_approved_at: new Date(),
+        status: 'active' // Update the main status to active
+      });
+
+      // Create notification for the creator
+      await notification.create({
+        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        title: 'Carrier Profile Approved',
+        message: `Your carrier profile for ${carrierProfile.company_name} has been fully approved and is now active`,
+        type: 'approval',
+        metadata: {
+          carrier_id: carrierId,
+          action: 'approved'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Carrier approved successfully'
+      });
+    } catch (error) {
+      console.error('Error approving carrier as accounts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error approving carrier',
+        error: error.message
+      });
+    }
+  },
+
+  // Reject carrier
+  rejectCarrier: async (req, res) => {
+    try {
+      const { carrierId } = req.params;
+      const { reason } = req.body;
+      const userId = req.user.id;
+
+      if (!reason || reason.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Rejection reason is required'
+        });
+      }
+
+      const carrierProfile = await carrier_profile.findByPk(carrierId);
+      if (!carrierProfile) {
+        return res.status(404).json({
+          success: false,
+          message: 'Carrier not found'
+        });
+      }
+
+      if (!['pending', 'manager_approved'].includes(carrierProfile.approval_status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Carrier cannot be rejected in current status'
+        });
+      }
+
+      await carrierProfile.update({
+        approval_status: 'rejected',
+        rejected_by: userId,
+        rejected_at: new Date(),
+        rejection_reason: reason,
+        status: 'suspended' // Update main status to suspended
+      });
+
+      // Create notification for the creator
+      await notification.create({
+        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        title: 'Carrier Profile Rejected',
+        message: `Your carrier profile for ${carrierProfile.company_name} has been rejected. Reason: ${reason}`,
+        type: 'rejection',
+        metadata: {
+          carrier_id: carrierId,
+          action: 'rejected',
+          reason: reason
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Carrier rejected successfully'
+      });
+    } catch (error) {
+      console.error('Error rejecting carrier:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error rejecting carrier',
+        error: error.message
+      });
+    }
+  },
+
+  // Disable carrier
+  disableCarrier: async (req, res) => {
+    try {
+      const { carrierId } = req.params;
+      const userId = req.user.id;
+
+      const carrierProfile = await carrier_profile.findByPk(carrierId);
+      if (!carrierProfile) {
+        return res.status(404).json({
+          success: false,
+          message: 'Carrier not found'
+        });
+      }
+
+      await carrierProfile.update({
+        is_disabled: true,
+        disabled_by: userId,
+        disabled_at: new Date(),
+        status: 'suspended' // Update main status to suspended
+      });
+
+      // Create notification for the creator
+      await notification.create({
+        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        title: 'Carrier Profile Disabled',
+        message: `Your carrier profile for ${carrierProfile.company_name} has been disabled`,
+        type: 'info',
+        metadata: {
+          carrier_id: carrierId,
+          action: 'disabled'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Carrier disabled successfully'
+      });
+    } catch (error) {
+      console.error('Error disabling carrier:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error disabling carrier',
+        error: error.message
+      });
+    }
+  },
+
+  // Get approval status for a specific carrier
+  getApprovalStatus: async (req, res) => {
+    try {
+      const { carrierId } = req.params;
+
+      const carrierProfile = await carrier_profile.findByPk(carrierId, {
+        include: [
+          {
+            model: user,
+            as: 'managerApprover',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'accountsApprover',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'rejectedBy',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          },
+          {
+            model: user,
+            as: 'disabledBy',
+            attributes: ['id', 'first_name', 'last_name', 'email']
+          }
+        ]
+      });
+
+      if (!carrierProfile) {
+        return res.status(404).json({
+          success: false,
+          message: 'Carrier not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          approval_status: carrierProfile.approval_status,
+          manager_approved_at: carrierProfile.manager_approved_at,
+          accounts_approved_at: carrierProfile.accounts_approved_at,
+          rejected_at: carrierProfile.rejected_at,
+          rejection_reason: carrierProfile.rejection_reason,
+          is_disabled: carrierProfile.is_disabled,
+          disabled_at: carrierProfile.disabled_at,
+          managerApprover: carrierProfile.managerApprover,
+          accountsApprover: carrierProfile.accountsApprover,
+          rejectedBy: carrierProfile.rejectedBy,
+          disabledBy: carrierProfile.disabledBy
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching approval status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching approval status',
+        error: error.message
+      });
+    }
+  }
+};
+
+module.exports = carrierApprovalController;

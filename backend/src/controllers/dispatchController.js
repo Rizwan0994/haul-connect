@@ -8,6 +8,7 @@ const createDispatch = async (req, res) => {
     const dispatch = await Dispatch.create({
       ...req.body,
       user_id: req.user.id,
+      approval_status: 'pending', // New dispatches start as pending
     });
 
     // Fetch the created dispatch with associations
@@ -31,7 +32,7 @@ const createDispatch = async (req, res) => {
       // Notify the creator
       await NotificationService.createForUser({
         userId: req.user.id,
-        message: `You created dispatch #${createdDispatch.id} with load number ${createdDispatch.load_no || 'N/A'}`,
+        message: `You created dispatch #${createdDispatch.id} with load number ${createdDispatch.load_no || 'N/A'} - now pending manager approval`,
         type: 'success',
         link: `/dispatch-management/${createdDispatch.id}`
       });
@@ -40,21 +41,20 @@ const createDispatch = async (req, res) => {
       if (createdDispatch.carrier && createdDispatch.carrier.email_address) {
         await NotificationService.createForEmail({
           email: createdDispatch.carrier.email_address,
-          message: `New dispatch #${createdDispatch.id} has been assigned to your company (${createdDispatch.carrier.company_name})`,
+          message: `New dispatch #${createdDispatch.id} has been assigned to your company (${createdDispatch.carrier.company_name}) - pending approval`,
           type: 'info',
           link: `/dispatch-management/${createdDispatch.id}`
         });
       }
       
-      // Notify dispatchers and managers about the new dispatch
-      const dispatchNotification = {
-        message: `New dispatch #${createdDispatch.id} created by ${req.user.first_name || 'a user'} (Load: ${createdDispatch.load_no || 'N/A'})`,
+      // Notify managers about the new dispatch requiring approval
+      await NotificationService.createForRoles({
+        roles: ['Manager', 'manager', 'Admin', 'admin', 'Super Admin'],
+        message: `New dispatch #${createdDispatch.id} created by ${req.user.first_name || 'a user'} (Load: ${createdDispatch.load_no || 'N/A'}) - requires manager approval`,
         type: 'info',
-        link: `/dispatch-management/${createdDispatch.id}`
-      };
-      
-      // Notify admin users about new dispatch
-      await NotificationService.createForAdmins(dispatchNotification);
+        link: `/dispatch-management/approvals`,
+        excludeUserId: req.user.id
+      });
     } catch (notifError) {
       console.error("Failed to create dispatch notifications:", notifError);
       // Don't fail the request if notification creation fails

@@ -21,8 +21,7 @@ export default function CarrierManagement() {
       setError(null)
       
       // Using the carriers data service for fetching
-      const carrierData = await carrierApiService.getAllCarriers()
-      // Convert CarrierProfile[] to Carrier[]
+      const carrierData = await carrierApiService.getAllCarriers()      // Convert CarrierProfile[] to Carrier[]
       const formattedCarriers = carrierData.map(c => ({
         id: c.id?.toString() || '',
         mc_number: c.mc_number || '',
@@ -35,7 +34,12 @@ export default function CarrierManagement() {
         email_address: c.email_address || '',
         truck_type: c.truck_type || '',
         status: c.status || 'pending',
-        created_at: c.created_at || ''
+        created_at: c.created_at || '',
+        approval_status: c.approval_status || 'pending',
+        approved_by_manager: c.approved_by_manager || '',
+        approved_by_accounts: c.approved_by_accounts || '',
+        manager_approved_at: c.manager_approved_at || '',
+        accounts_approved_at: c.accounts_approved_at || ''
       }))
       setCarriers(formattedCarriers)
     } catch (err: any) {

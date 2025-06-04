@@ -246,8 +246,7 @@ export const columns: ColumnDef<Dispatch>[] = [
         </Badge>
       );
     },
-  },
-  {
+  },  {
     accessorKey: "invoice_status",
     header: "Invoice Status",
     cell: ({ row }) => {
@@ -271,6 +270,40 @@ export const columns: ColumnDef<Dispatch>[] = [
       return (
         <Badge variant="outline" className={getInvoiceStatusColor(invoiceStatus)}>
           {invoiceStatus}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "approval_status",
+    header: "Approval Status",
+    cell: ({ row }) => {
+      const dispatch = row.original;
+      const approvalStatus = dispatch.approval_status;
+      if (!approvalStatus) return <Badge variant="outline">N/A</Badge>;
+
+      return (
+        <Badge
+          variant="outline"
+          className={
+            approvalStatus === "accounts_approved"
+              ? "bg-green-100 text-green-800 border-green-200"
+              : approvalStatus === "manager_approved"
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : approvalStatus === "pending"
+              ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+              : approvalStatus === "rejected"
+              ? "bg-red-100 text-red-800 border-red-200"
+              : approvalStatus === "disabled"
+              ? "bg-gray-100 text-gray-800 border-gray-200"
+              : "bg-blue-100 text-blue-800 border-blue-200"
+          }
+        >
+          {approvalStatus === "accounts_approved" ? "Approved" : 
+           approvalStatus === "manager_approved" ? "Manager Approved" :
+           approvalStatus === "pending" ? "Pending" :
+           approvalStatus === "rejected" ? "Rejected" :
+           approvalStatus === "disabled" ? "Disabled" : approvalStatus}
         </Badge>
       );
     },

@@ -51,13 +51,13 @@ const systemRoles = [
 // Role permission assignments - define permissions for each role
 const rolePermissions = {
   // Admin has all permissions (will be assigned separately)
-  
-  // Manager permissions
-  'manager': [
-    // Feature permissions
+    // Manager permissions
+  'manager': [    // Feature permissions
     'users.view', 'users.create', 'users.edit', 'users.status',
     'carriers.view', 'carriers.create', 'carriers.edit',
+    'carrier.approve.manager', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.create', 'dispatch.edit',
+    'dispatch.approve.manager', 'dispatch.reject', 'dispatch.view.pending',
     'invoices.view', 'invoices.create', 'invoices.edit',
     'role.view',
     
@@ -93,13 +93,12 @@ const rolePermissions = {
     'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
     'route.active-dispatches', 'route.create-dispatch'
   ],
-  
-  // Account role permissions
-  'account': [
-    // Feature permissions
+    // Account role permissions
+  'account': [    // Feature permissions
     'invoices.view', 'invoices.create', 'invoices.edit',
     'carriers.view',
-    'dispatch.view',
+    'carrier.approve.accounts', 'carrier.reject', 'carrier.view.pending',
+    'dispatch.view', 'dispatch.approve.accounts', 'dispatch.reject', 'dispatch.view.pending',
     
     // Route permissions
     'route.dashboard',

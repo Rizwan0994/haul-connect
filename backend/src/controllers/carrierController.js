@@ -4,7 +4,14 @@ const NotificationService = require("../services/notificationService");
 
 exports.createCarrier = async (req, res) => {
   try {
-    const carrier = await CarrierProfile.create(req.body);
+    // Set initial approval status for new carriers
+    const carrierData = {
+      ...req.body,
+      approval_status: 'pending',
+      status: 'pending' // Also set the main status to pending
+    };
+    
+    const carrier = await CarrierProfile.create(carrierData);
     
     // Create comprehensive notifications for carrier creation
     try {
@@ -14,38 +21,25 @@ exports.createCarrier = async (req, res) => {
       if (req.user && req.user.id) {
         await NotificationService.createForUser(
           req.user.id,
-          `You created a new carrier: ${carrierName}`,
+          `You created a new carrier: ${carrierName} - Pending approval`,
           'success',
           `/carrier-management/${carrier.id}`
         );
       }
       
-      // Find users with Sales roles and notify them about new carriers
-      const salesUsers = await User.findAll({
-        where: {
-          [Op.or]: [
-            { category: 'Sales' },
-            { role: 'Sales' }
-          ],
-          is_active: true
-        }
-      });
-      
-      if (salesUsers.length > 0) {
-        const salesUserIds = salesUsers.map(user => user.id);
-        await NotificationService.createForUsers(
-          salesUserIds,
-          `New carrier added: ${carrierName}`,
-          'info',
-          `/carrier-management/${carrier.id}`
-        );
-      }
+      // Notify managers about new carrier requiring approval
+      await NotificationService.createForRole(
+        'manager',
+        `New carrier requires approval: ${carrierName}`,
+        'approval',
+        `/carrier-management/approvals`
+      );
       
       // Notify all admin users about new carrier
       await NotificationService.createForAdmins(
-        `New carrier created by ${req.user?.first_name || 'User'}: ${carrierName}`,
+        `New carrier created by ${req.user?.first_name || 'User'}: ${carrierName} - Requires approval`,
         'info',
-        `/carrier-management/${carrier.id}`
+        `/carrier-management/approvals`
       );
     } catch (notifError) {
       console.error("Failed to create carrier notification:", notifError);

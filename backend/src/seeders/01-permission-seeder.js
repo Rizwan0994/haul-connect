@@ -144,14 +144,96 @@ const systemPermissions = [
     resource: 'dispatches',
     action: 'edit',
     description: 'Edit dispatches'
-  },
-  {
+  },  {
     name: 'dispatch.delete',
     type: 'feature',
     module: 'Dispatch',
     resource: 'dispatches',
     action: 'delete',
     description: 'Delete dispatches'
+  },
+  
+  // Dispatch approval workflow permissions
+  {
+    name: 'dispatch.approve.manager',
+    type: 'feature',
+    module: 'Dispatch',
+    resource: 'dispatches',
+    action: 'approve_manager',
+    description: 'Approve dispatches as manager'
+  },
+  {
+    name: 'dispatch.approve.accounts',
+    type: 'feature',
+    module: 'Dispatch',
+    resource: 'dispatches',
+    action: 'approve_accounts',
+    description: 'Approve dispatches as accounts team'
+  },
+  {
+    name: 'dispatch.reject',
+    type: 'feature',
+    module: 'Dispatch',
+    resource: 'dispatches',
+    action: 'reject',
+    description: 'Reject dispatches'
+  },
+  {
+    name: 'dispatch.disable',
+    type: 'feature',
+    module: 'Dispatch',
+    resource: 'dispatches',
+    action: 'disable',
+    description: 'Disable dispatches'
+  },
+  {
+    name: 'dispatch.view.pending',
+    type: 'feature',
+    module: 'Dispatch',
+    resource: 'dispatches',
+    action: 'view_pending',
+    description: 'View pending dispatches requiring approval'  },
+  
+  // Carrier approval workflow permissions
+  {
+    name: 'carrier.approve.manager',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'approve_manager',
+    description: 'Approve carrier profiles as manager'
+  },
+  {
+    name: 'carrier.approve.accounts',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'approve_accounts',
+    description: 'Approve carrier profiles as accounts team'
+  },
+  {
+    name: 'carrier.reject',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'reject',
+    description: 'Reject carrier profiles'
+  },
+  {
+    name: 'carrier.disable',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'disable',
+    description: 'Disable carrier profiles'
+  },
+  {
+    name: 'carrier.view.pending',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'view_pending',
+    description: 'View pending carrier profiles requiring approval'
   },
   
   // Invoice module permissions

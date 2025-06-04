@@ -38,6 +38,11 @@ export type Carrier = {
   truck_type: string;
   status: "active" | "inactive" | "pending" | "suspended";
   created_at: string;
+  approval_status?: "pending" | "manager_approved" | "accounts_approved" | "rejected" | "disabled";
+  approved_by_manager?: string;
+  approved_by_accounts?: string;
+  manager_approved_at?: string;
+  accounts_approved_at?: string;
 };
 
 export const columns: ColumnDef<Carrier>[] = [
@@ -126,6 +131,39 @@ export const columns: ColumnDef<Carrier>[] = [
           }
         >
           {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "approval_status",
+    header: "Approval Status",
+    cell: ({ row }) => {
+      const approvalStatus = row.getValue("approval_status") as string;
+      if (!approvalStatus) return <Badge variant="outline">N/A</Badge>;
+
+      return (
+        <Badge
+          variant="outline"
+          className={
+            approvalStatus === "accounts_approved"
+              ? "bg-green-100 text-green-800 border-green-200"
+              : approvalStatus === "manager_approved"
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : approvalStatus === "pending"
+              ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+              : approvalStatus === "rejected"
+              ? "bg-red-100 text-red-800 border-red-200"
+              : approvalStatus === "disabled"
+              ? "bg-gray-100 text-gray-800 border-gray-200"
+              : "bg-blue-100 text-blue-800 border-blue-200"
+          }
+        >
+          {approvalStatus === "accounts_approved" ? "Approved" : 
+           approvalStatus === "manager_approved" ? "Manager Approved" :
+           approvalStatus === "pending" ? "Pending" :
+           approvalStatus === "rejected" ? "Rejected" :
+           approvalStatus === "disabled" ? "Disabled" : approvalStatus}
         </Badge>
       );
     },

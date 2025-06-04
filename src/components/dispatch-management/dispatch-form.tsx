@@ -17,8 +17,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Info } from "lucide-react";
+import { Info, Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -368,32 +381,63 @@ export function DispatchForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              <FormField
+              />              <FormField
                 control={form.control}
                 name="carrier"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Carrier</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={isLoadingCarriers}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a carrier" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {carriers.map((carrier) => (
-                          <SelectItem key={carrier.value} value={carrier.value}>
-                            {carrier.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                            disabled={isLoadingCarriers}
+                          >
+                            {field.value
+                              ? carriers.find(
+                                  (carrier) => carrier.value === field.value
+                                )?.label
+                              : "Select a carrier"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                          <CommandInput placeholder="Search carriers..." />
+                          <CommandList>
+                            <CommandEmpty>No carrier found.</CommandEmpty>
+                            <CommandGroup>
+                              {carriers.map((carrier) => (
+                                <CommandItem
+                                  value={carrier.label}
+                                  key={carrier.value}
+                                  onSelect={() => {
+                                    form.setValue("carrier", carrier.value);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      carrier.value === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {carrier.label}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

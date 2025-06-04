@@ -114,6 +114,71 @@ module.exports = (sequelize) => {
       // Admin only fields - MyCarrierPackets Information
       mycarrierpackets_username: DataTypes.STRING,
       mycarrierpackets_password: DataTypes.STRING,
+
+      // Approval workflow fields
+      approval_status: {
+        type: DataTypes.ENUM('pending', 'manager_approved', 'approved', 'rejected', 'disabled'),
+        defaultValue: 'pending',
+        allowNull: false,
+      },
+      approved_by_manager: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
+      manager_approved_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      approved_by_accounts: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
+      accounts_approved_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      rejected_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
+      rejected_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      rejection_reason: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      is_disabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+      disabled_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
+      disabled_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
       created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

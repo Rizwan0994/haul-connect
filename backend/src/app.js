@@ -29,7 +29,9 @@ app.get("/", (req, res) => {
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const carrierRoutes = require('./routes/carrierRoutes');
+const carrierApprovalRoutes = require('./routes/carrierApprovalRoutes');
 const dispatchRoutes = require('./routes/dispatchRoutes');
+const dispatchApprovalRoutes = require('./routes/dispatchApprovalRoutes');
 const userRoutes = require('./routes/userRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const roleRoutes = require('./routes/roleRoutes');
@@ -43,7 +45,9 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes (authentication required)
 app.use('/api/carriers', authenticateToken, carrierRoutes);
+app.use('/api/carrier-approvals', authenticateToken, carrierApprovalRoutes);
 app.use('/api/dispatches', authenticateToken, dispatchRoutes);
+app.use('/api/dispatch-approvals', authenticateToken, dispatchApprovalRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/invoices', authenticateToken, invoiceRoutes);
 app.use('/api/followup-sheets', authenticateToken, followupSheetRoutes);

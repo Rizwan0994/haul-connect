@@ -30,6 +30,11 @@ export interface Dispatch extends DispatchFormData {
   carrier_id: number;
   created_at: string;
   updated_at: string;
+  approval_status?: "pending" | "manager_approved" | "accounts_approved" | "rejected" | "disabled";
+  approved_by_manager?: number;
+  approved_by_accounts?: number;
+  manager_approved_at?: string;
+  accounts_approved_at?: string;
   carrier?: {
     id: number;
     company_name: string;

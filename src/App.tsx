@@ -36,6 +36,8 @@ import AdminNotificationsPage from '@/pages/admin/notifications'
 import ProfilePage from '@/pages/profile'
 import DashboardPage from '@/pages/dashboard'
 import FollowupSheetsPage from '@/pages/carrier-management/followup-sheets'
+import DispatchApprovalsPage from '@/pages/dispatch-management/approvals'
+import CarrierApprovalsPage from '@/pages/carrier-management/approvals'
 
 function App() {
   return (
@@ -69,6 +71,11 @@ function App() {
                     <FollowupSheetsPage />
                   </PrivateRoute>
                 } />
+                <Route path="carrier-management/approvals" element={
+                  <PrivateRoute requiredPermission="carrier.approval.view">
+                    <CarrierApprovalsPage />
+                  </PrivateRoute>
+                } />
                 <Route path="carrier-management/create" element={
                   <PrivateRoute requiredPermission="route.add-carrier">
                     <CarrierCreatePage />
@@ -93,6 +100,11 @@ function App() {
                 <Route path="dispatch-management/new" element={
                   <PrivateRoute requiredPermission="route.create-dispatch">
                     <NewDispatchPage />
+                  </PrivateRoute>
+                } />
+                <Route path="dispatch-management/approvals" element={
+                  <PrivateRoute requiredPermission="dispatch.approval.view">
+                    <DispatchApprovalsPage />
                   </PrivateRoute>
                 } />
                 <Route path="dispatch-management/:id" element={

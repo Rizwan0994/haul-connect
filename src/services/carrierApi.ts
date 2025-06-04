@@ -43,10 +43,14 @@ export interface CarrierProfile {
   notes_days_working?: string;
   notes_preferred_lanes?: string;
   notes_additional_preferences?: string;
-  notes_parking_space?: string;
-  notes_average_gross?: string;
+  notes_parking_space?: string;  notes_average_gross?: string;
   created_at?: string;
   updated_at?: string;
+  approval_status?: "pending" | "manager_approved" | "accounts_approved" | "rejected" | "disabled";
+  approved_by_manager?: string;
+  approved_by_accounts?: string;
+  manager_approved_at?: string;
+  accounts_approved_at?: string;
 }
 
 export interface ApiResponse<T> {

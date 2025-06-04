@@ -31,6 +31,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import path from "path";
 
 const menuItems = [
   {
@@ -72,6 +73,11 @@ const menuItems = [
       //   path: "/carrier-management/create",
       //   requiresPermission: "route.add-carrier",
       // },
+        {
+        title: "Carrier Approvals",
+        path: "/carrier-management/approvals",
+        requiresPermission: "carrier.approval.view",
+      },
       {
         title: "Followup Sheets",
         path: "/carrier-management/followup-sheets",
@@ -88,6 +94,11 @@ const menuItems = [
         title: "Active Dispatches",
         path: "/dispatch-management/",
         requiresPermission: "route.active-dispatches",
+      },
+      {
+        title: "Dispatch Approvals",
+        path: "/dispatch-management/approvals",
+        requiresPermission: "dispatch.approval.view",
       },
       // {
       //   title: "Create Dispatch",

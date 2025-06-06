@@ -10,7 +10,7 @@ const createTransporter = async () => {
     
     if (dbSMTPSettings) {
       console.log('Using database SMTP settings:', dbSMTPSettings.name);
-      return nodemailer.createTransport({
+      return nodemailer.createTransporter({
         host: dbSMTPSettings.host,
         port: dbSMTPSettings.port,
         secure: dbSMTPSettings.secure,

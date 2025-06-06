@@ -39,6 +39,7 @@ const permissionRoutes = require('./routes/permissionRoutes');
 const notificationRoutes = require('./routes/notification.routes');
 const profileRoutes = require('./routes/profile');
 const followupSheetRoutes = require('./routes/followupSheetRoutes');
+const smtpRoutes = require('./routes/smtpRoutes');
 
 // Public routes (no authentication required)
 app.use('/api/auth', authRoutes);
@@ -54,5 +55,6 @@ app.use('/api/followup-sheets', authenticateToken, followupSheetRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/smtp-settings', smtpRoutes);
 app.use('/api', profileRoutes); // Profile routes
 module.exports = app;

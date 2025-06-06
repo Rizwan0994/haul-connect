@@ -60,13 +60,12 @@ const rolePermissions = {
     'dispatch.approve.manager', 'dispatch.reject', 'dispatch.view.pending',
     'invoices.view', 'invoices.create', 'invoices.edit',
     'role.view',
-    
-    // Route permissions
+      // Route permissions
     'route.dashboard', 'route.messages', 'route.calendar',
     'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
     'route.active-dispatches', 'route.create-dispatch',
     'route.invoices', 'route.user-management',
-    'route.email-settings'
+    'settings.smtp'
   ],
     // Dispatch role permissions
   'dispatch': [

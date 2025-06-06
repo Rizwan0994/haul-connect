@@ -134,12 +134,11 @@ const menuItems = [
         path: "/admin/notifications",
         // icon: Bell,
         requiresPermission: "notifications.manage",
-      },
-          {
+      },          {
         title: "Email Settings",
         path: "/settings/smtp",
-        requiresPermission: "route.email-settings",
-      }, 
+        requiresPermission: "settings.smtp",
+      },
       
 
       // {

@@ -29,6 +29,7 @@ export interface CreateSMTPSettingsRequest {
   from_email: string;
   from_name?: string;
   is_default?: boolean;
+  is_active?: boolean;
 }
 
 export interface UpdateSMTPSettingsRequest extends Partial<CreateSMTPSettingsRequest> {}

@@ -1,5 +1,5 @@
 const { smtp_settings: SMTPSettings } = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -10,7 +10,7 @@ const IV_LENGTH = 16; // For AES, this is always 16
 // Encrypt password before storing
 const encryptPassword = (password) => {
   const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipher('aes-256-cbc', ENCRYPTION_KEY);
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv);
   let encrypted = cipher.update(password, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   return iv.toString('hex') + ':' + encrypted;
@@ -22,7 +22,7 @@ const decryptPassword = (encryptedPassword) => {
     const textParts = encryptedPassword.split(':');
     const iv = Buffer.from(textParts.shift(), 'hex');
     const encryptedText = textParts.join(':');
-    const decipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv);
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
@@ -446,9 +446,7 @@ const testSMTPSettings = async (req, res) => {
 
     // Decrypt password for testing
     const decryptedPassword = decryptPassword(smtpSettings.password);
-    console.log("decryptedPassword",decryptedPassword)
-
-    // Create test transporter
+    console.log("decryptedPassword",decryptedPassword)    // Create test transporter
     const transporter = nodemailer.createTransport({
       host: smtpSettings.host,
       port: smtpSettings.port,
@@ -456,10 +454,15 @@ const testSMTPSettings = async (req, res) => {
       auth: {
         user: smtpSettings.username,
         pass: decryptedPassword
+      },
+      // Add additional options for better compatibility
+      tls: {
+        rejectUnauthorized: false
       }
     });
 
     // Test connection first
+    console.log('Testing SMTP connection...');
     await transporter.verify();
 
     // Send test email
@@ -538,12 +541,21 @@ Haul Connect Logistics Team
     const result = await transporter.sendMail(testEmailContent);
 
     // Update test information in database
-    await smtpSettings.update({
-      test_email,
-      last_tested_at: new Date(),
-      test_status: 'success',
-      test_error: null
-    });
+// Update test information in database
+await SMTPSettings.update(
+  {
+    test_email,
+    last_tested_at: new Date(),
+    test_status: 'success',
+    test_error: null
+  },
+  {
+    where: {
+      id: smtpSettings.id
+    }
+  }
+);
+
 
     res.json({
       success: true,

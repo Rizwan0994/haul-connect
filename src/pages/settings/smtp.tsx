@@ -189,9 +189,8 @@ export default function SMTPSettings() {
     setTestResult(null)
     setIsTestDialogOpen(true)
   }
-
   // Check permissions
-  const canManageSMTP = hasPermission('settings.smtp')
+  const canManageSMTP = hasPermission(['settings.smtp'])
 
   if (!canManageSMTP) {
     return (
@@ -207,8 +206,7 @@ export default function SMTPSettings() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto py-6 space-y-6">      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">SMTP Settings</h1>
           <p className="text-muted-foreground">Manage email server configurations</p>
@@ -224,6 +222,57 @@ export default function SMTPSettings() {
             <DialogHeader>
               <DialogTitle>Create SMTP Configuration</DialogTitle>
             </DialogHeader>
+              {/* Common SMTP Settings Help */}
+            <div className="bg-muted p-4 rounded-md">
+              <h4 className="font-medium mb-2">Common SMTP Settings:</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium">Gmail</p>
+                  <p>Host: smtp.gmail.com</p>
+                  <p>Port: 465 (SSL) or 587 (TLS)</p>
+                  <p>Note: Use App Password, not regular password</p>
+                </div>
+                <div>
+                  <p className="font-medium">Outlook/Hotmail</p>
+                  <p>Host: smtp-mail.outlook.com</p>
+                  <p>Port: 587 (TLS)</p>
+                  <p>Secure: No (uses STARTTLS)</p>
+                </div>
+              </div>              <div className="mt-3 flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    secure: true
+                  }))}
+                >
+                  Use Gmail SSL
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false
+                  }))}
+                >
+                  Use Gmail TLS
+                </Button>
+              </div>
+              <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Gmail Users:</strong> You must use an App Password instead of your regular Gmail password. 
+                  Go to Gmail Settings → Security → 2-Step Verification → App passwords to generate one.
+                </p>
+              </div>
+            </div>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -431,20 +480,19 @@ export default function SMTPSettings() {
                       <p className="font-medium text-muted-foreground">From</p>
                       <p>"{smtp.from_name}" &lt;{smtp.from_email}&gt;</p>
                     </div>
-                  </div>
-                  {smtp.last_test_at && (
+                  </div>                  {smtp.last_tested_at && (
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex items-center space-x-2 text-sm">
-                        {smtp.last_test_status === 'success' ? (
+                        {smtp.test_status === 'success' ? (
                           <CheckCircle className="h-4 w-4 text-green-500" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-red-500" />
                         )}
                         <span className="text-muted-foreground">
-                          Last tested: {new Date(smtp.last_test_at).toLocaleString()}
+                          Last tested: {new Date(smtp.last_tested_at).toLocaleString()}
                         </span>
-                        {smtp.last_test_status === 'failed' && smtp.last_test_error && (
-                          <span className="text-red-500">- {smtp.last_test_error}</span>
+                        {smtp.test_status === 'failed' && smtp.test_error && (
+                          <span className="text-red-500">- {smtp.test_error}</span>
                         )}
                       </div>
                     </div>

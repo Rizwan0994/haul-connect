@@ -2,9 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModalProvider } from '@/components/carrier-management/modal-context'
+import { ModalProvider as DispatchModalProvider } from '@/components/dispatch-management/modal-context'
 import { AuthProvider } from '@/components/auth/auth-context'
 import { SocketProvider } from '@/contexts/SocketContext'
 import CarrierModalsContainer from '@/components/carrier-management/carrier-modals-container'
+import DispatchModalsContainer from '@/components/dispatch-management/dispatch-modals-container'
 import DashboardLayout from '@/components/dashboard-layout'
 import PrivateRoute from '@/components/auth/private-route'
 
@@ -43,9 +45,10 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <ModalProvider>
-        <Router>
-          <AuthProvider>
-            <SocketProvider>
+        <DispatchModalProvider>
+          <Router>
+            <AuthProvider>
+              <SocketProvider>
               <Routes>
                 {/* Auth routes */}
                 <Route path="/auth/login" element={<LoginPage />} />
@@ -157,15 +160,16 @@ function App() {
                     <ProfilePage />
                   </PrivateRoute>
                 } />
-              </Route>
-            </Routes>
+              </Route>            </Routes>
             <CarrierModalsContainer />
+            <DispatchModalsContainer />
             <Toaster />
             </SocketProvider>
           </AuthProvider>
         </Router>
-      </ModalProvider>
-    </ThemeProvider>
+      </DispatchModalProvider>
+    </ModalProvider>
+  </ThemeProvider>
   )
 }
 

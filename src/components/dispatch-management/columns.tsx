@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Pencil,
   FileText,
+  ExternalLink,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDispatchModal } from "@/hooks/use-dispatch-modal";
 
 export const columns: ColumnDef<Dispatch>[] = [
   // Hidden column specifically for searching carrier company names
@@ -307,14 +309,29 @@ export const columns: ColumnDef<Dispatch>[] = [
         </Badge>
       );
     },
-  },
-  {
+  },  {
     id: "actions",
     cell: ({ row }) => {
       const dispatch = row.original;
+      const { openDispatchModal } = useDispatchModal();
 
       return (
         <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() =>
+              openDispatchModal(
+                dispatch.id.toString(),
+                `Dispatch #${dispatch.load_no}`
+              )
+            }
+            aria-label="Open in popup"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -377,6 +394,16 @@ export const columns: ColumnDef<Dispatch>[] = [
                 Copy dispatch ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  openDispatchModal(
+                    dispatch.id.toString(),
+                    `Dispatch #${dispatch.load_no}`
+                  )
+                }
+              >
+                View dispatch profile
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to={`/dispatch-management/${dispatch.id}`}>
                   View dispatch details
@@ -387,6 +414,18 @@ export const columns: ColumnDef<Dispatch>[] = [
                   Edit dispatch
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  openDispatchModal(
+                    dispatch.id.toString(),
+                    `Dispatch #${dispatch.load_no}`
+                  )
+                }
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in popup window
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to={`/dispatch-management/${dispatch.id}/invoice`}>
                   View invoice

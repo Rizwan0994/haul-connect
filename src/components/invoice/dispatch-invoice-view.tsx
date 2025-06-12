@@ -572,7 +572,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
             </div>
 
             {/* Route Details */}
-            <div className="mb-8 bg-slate-50 p-4 rounded-lg flex items-center justify-between">
+            {/* <div className="mb-8 bg-slate-50 p-4 rounded-lg flex items-center justify-between">
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
                   <MapPin className="h-5 w-5" />
@@ -599,7 +599,7 @@ export function DispatchInvoiceView({ dispatch }: DispatchInvoiceViewProps) {
                   <MapPin className="h-5 w-5" />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Service Details Table */}
             <div className="mb-8">

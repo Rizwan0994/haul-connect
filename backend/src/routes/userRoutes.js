@@ -40,7 +40,7 @@ router.get('/:id', requireRole(['Admin', 'Super Admin', 'Manager']), async (req,
 // Create new user (HR/Admin only)
 router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
   try {
-    const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
+    const { email, password, role, category, basic_salary, first_name, last_name, phone,role_id } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -57,6 +57,7 @@ router.post('/', requireRole(['Admin', 'Super Admin']), async (req, res) => {
       basic_salary: basic_salary || 500.0,
       first_name,
       last_name,
+      role_id,
       phone
     });
     

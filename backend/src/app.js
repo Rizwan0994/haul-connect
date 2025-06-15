@@ -37,6 +37,7 @@ const invoiceRoutes = require('./routes/invoiceRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
 const notificationRoutes = require('./routes/notification.routes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 const profileRoutes = require('./routes/profile');
 const followupSheetRoutes = require('./routes/followupSheetRoutes');
 const smtpRoutes = require('./routes/smtpRoutes');
@@ -55,6 +56,7 @@ app.use('/api/followup-sheets', authenticateToken, followupSheetRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/attendance', authenticateToken, attendanceRoutes);
 app.use('/api/smtp-settings', smtpRoutes);
 app.use('/api', profileRoutes); // Profile routes
 module.exports = app;

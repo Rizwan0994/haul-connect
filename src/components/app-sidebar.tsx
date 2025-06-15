@@ -16,6 +16,7 @@ import {
   Bell,
   User,
   DollarSign,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -117,6 +118,17 @@ const menuItems = [
         title: "Commissions",
         path: "/commission-management",
         requiresPermission: "route.commission-management",
+      },    ],
+  },
+  {
+    title: "Employee Attendance",
+    isSection: true,
+    icon: Clock,
+    children: [
+      {
+        title: "Attendance Records",
+        path: "/employee-attendance",
+        requiresPermission: "route.attendance-records",
       },
     ],
   },{

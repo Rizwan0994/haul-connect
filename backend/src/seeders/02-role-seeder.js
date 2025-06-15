@@ -52,19 +52,19 @@ const systemRoles = [
 const rolePermissions = {
   // Admin has all permissions (will be assigned separately)
     // Manager permissions
-  'manager': [    // Feature permissions
-    'users.view', 'users.create', 'users.edit', 'users.status',
+  'manager': [    // Feature permissions    'users.view', 'users.create', 'users.edit', 'users.status',
     'carriers.view', 'carriers.create', 'carriers.edit',
     'carrier.approve.manager', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.create', 'dispatch.edit',
     'dispatch.approve.manager', 'dispatch.reject', 'dispatch.view.pending',
     'invoices.view', 'invoices.create', 'invoices.edit',
+    'attendance.view', 'attendance.create', 'attendance.edit', 'attendance.delete',
     'role.view',
       // Route permissions
     'route.dashboard', 'route.messages', 'route.calendar',
     'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
     'route.active-dispatches', 'route.create-dispatch',
-    'route.invoices', 'route.user-management', 'route.commission-management',
+    'route.invoices', 'route.user-management', 'route.commission-management', 'route.attendance-records',
     'settings.smtp'
   ],
     // Dispatch role permissions
@@ -92,16 +92,15 @@ const rolePermissions = {
     'route.active-dispatches', 'route.create-dispatch'
   ],
     // Account role permissions
-  'account': [    // Feature permissions
-    'invoices.view', 'invoices.create', 'invoices.edit',
+  'account': [    // Feature permissions    'invoices.view', 'invoices.create', 'invoices.edit',
     'carriers.view',
     'carrier.approve.accounts', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.approve.accounts', 'dispatch.reject', 'dispatch.view.pending',
+    'attendance.view', 'attendance.create', 'attendance.edit', 'attendance.delete',
     
     // Route permissions    'route.dashboard',
-    'route.carrier-profiles',
-    'route.active-dispatches',
-    'route.invoices', 'route.commission-management'
+    'route.carrier-profiles',    'route.active-dispatches',
+    'route.invoices', 'route.commission-management', 'route.attendance-records'
   ],
   
   // Carrier role permissions (very limited)

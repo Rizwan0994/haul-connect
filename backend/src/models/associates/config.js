@@ -20,6 +20,10 @@ exports.userModel = (db) => {
   // Commission tracking associations
   db.user.hasMany(db.carrier_profile, { foreignKey: 'sales_agent_id', as: 'salesCarriers' });
   db.user.hasMany(db.carrier_profile, { foreignKey: 'commission_paid_by', as: 'commissionPayments' });
+
+  // Employee Attendance association
+  db.user.hasMany(db.employee_attendance, { foreignKey: 'employee_id', as: 'attendanceRecords' });
+  db.user.hasMany(db.employee_attendance, { foreignKey: 'marked_by', as: 'markedAttendance' });
 };
 
 exports.carrierModel = (db) => {
@@ -85,4 +89,10 @@ exports['carrier-user-assignmentModel'] = (db) => {
   db.carrier_user_assignment.belongsTo(db.carrier_profile, { foreignKey: 'carrier_id', as: 'carrier' });
   db.carrier_user_assignment.belongsTo(db.user, { foreignKey: 'user_id', as: 'user' });
   db.carrier_user_assignment.belongsTo(db.user, { foreignKey: 'assigned_by', as: 'assignedBy' });
+};
+
+// Employee Attendance associations
+exports['employee-attendanceModel'] = (db) => {
+  db.employee_attendance.belongsTo(db.user, { foreignKey: 'employee_id', as: 'employee' });
+  db.employee_attendance.belongsTo(db.user, { foreignKey: 'marked_by', as: 'markedBy' });
 };

@@ -113,7 +113,7 @@ export default function BrokerForm({ isEdit = false }: { isEdit?: boolean }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full">
       <div className="flex items-center gap-4">
         <Button
           variant="outline"

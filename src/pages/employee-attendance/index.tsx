@@ -217,36 +217,31 @@ export default function EmployeeAttendance() {
           <p className="text-sm text-muted-foreground">Loading attendance data...</p>
         </div>
       </div>
-    );
-  }  return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="flex-none space-y-4 px-6 pt-6">
-        <div className="flex items-center justify-between">
-          <div>
+    );  }
+
+  return (
+    <div className="flex flex-col h-full max-h-screen overflow-hidden">
+      <div className="flex-none space-y-4 px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="min-w-0 flex-1">
             <h1 className="text-3xl font-bold tracking-tight">Employee Attendance</h1>
             <p className="text-muted-foreground">
               Track and manage employee attendance records
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <Button variant="outline" onClick={() => window.location.href = '/employee-attendance/bulk'}>
               <ClipboardList className="mr-2 h-4 w-4" />
               Mark Attendance
             </Button>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
+              {/* <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Individual Record
                 </Button>
-              </DialogTrigger>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Mark Attendance
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+              </DialogTrigger> */}
+              <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Mark Attendance</DialogTitle>
               </DialogHeader>
@@ -339,7 +334,18 @@ export default function EmployeeAttendance() {
           </Dialog>
         </div>
 
-        {/* Summary Cards */}
+              
+        
+
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-4">
+              <p className="text-red-600">{error}</p>
+            </CardContent>
+          </Card>
+        )}
+      </div> 
+      {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -393,44 +399,45 @@ export default function EmployeeAttendance() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Filters */}
+          {/* Filters */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Filter className="h-5 w-5" />
               Filters
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
                 <Input
                   id="startDate"
                   type="date"
                   value={filters.startDate}
                   onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full"
                 />
               </div>
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
+              <div className="space-y-2">
+                <Label htmlFor="endDate" className="text-sm font-medium">End Date</Label>
                 <Input
                   id="endDate"
                   type="date"
                   value={filters.endDate}
                   onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="w-full"
                 />
-              </div>
-              <div>
-                <Label htmlFor="employeeFilter">Employee</Label>
+              </div>              <div className="space-y-2">
+                <Label htmlFor="employeeFilter" className="text-sm font-medium">Employee</Label>
                 <Select
                   value={filters.employeeId}
                   onValueChange={(value) => setFilters(prev => ({ ...prev, employeeId: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="All employees" />
-                  </SelectTrigger>                  <SelectContent>
+                  </SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="all">All employees</SelectItem>
                     {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id.toString()}>
@@ -440,15 +447,16 @@ export default function EmployeeAttendance() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="statusFilter">Status</Label>
+              <div className="space-y-2">
+                <Label htmlFor="statusFilter" className="text-sm font-medium">Status</Label>
                 <Select
                   value={filters.status}
                   onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>                  <SelectContent>
+                  </SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="present">Present</SelectItem>
                     <SelectItem value="absent">Absent</SelectItem>
@@ -460,23 +468,16 @@ export default function EmployeeAttendance() {
             </div>
           </CardContent>
         </Card>
-
-        {error && (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="p-4">
-              <p className="text-red-600">{error}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Data Table */}
-      <div className="flex-1 px-6 pb-6">
-        <Card className="h-full">          <CardContent className="p-6 h-full">
-            <DataTable
-              columns={columns}
-              data={attendance}
-            />
+           {/* Data Table */}
+      <div className="flex-1 px-6 pb-6 min-h-0 overflow-hidden">
+        <Card className="h-full flex flex-col">
+          <CardContent className="p-6 flex-1 min-h-0 overflow-hidden">
+            <div className="h-full overflow-auto">
+              <DataTable
+                columns={columns}
+                data={attendance}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

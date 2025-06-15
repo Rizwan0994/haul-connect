@@ -14,4 +14,9 @@ router.get('/:id/users', carrierController.getCarrierUsers);
 router.post('/:id/users', carrierController.assignUsersToCarrier);
 router.delete('/:id/users/:userId', carrierController.removeUserFromCarrier);
 
+// Commission management routes
+router.put('/:id/commission', carrierController.updateCarrierCommissionStatus);
+router.post('/:id/load-completed', carrierController.markLoadCompleted);
+router.get('/commission/summary', carrierController.getCommissionSummary);
+
 module.exports = router;

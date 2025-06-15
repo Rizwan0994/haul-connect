@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { DataTable } from '@/components/ui/data-table'
-import { columns } from '@/components/carrier-management/columns'
+import { createColumns } from '@/components/carrier-management/columns'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2 } from 'lucide-react'
 import { carrierApiService, CarrierProfile } from '@/services/carrierApi'
@@ -14,6 +14,7 @@ export default function CarrierManagement() {
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
   // Fetch carriers from API
   const fetchCarriers = async () => {
     try {
@@ -39,7 +40,13 @@ export default function CarrierManagement() {
         approved_by_manager: c.approved_by_manager || '',
         approved_by_accounts: c.approved_by_accounts || '',
         manager_approved_at: c.manager_approved_at || '',
-        accounts_approved_at: c.accounts_approved_at || ''
+        accounts_approved_at: c.accounts_approved_at || '',
+        // Commission tracking fields
+        commission_status: c.commission_status,
+        commission_amount: c.commission_amount,
+        commission_paid_at: c.commission_paid_at,
+        loads_completed: c.loads_completed,
+        first_load_completed_at: c.first_load_completed_at
       }))
       setCarriers(formattedCarriers)
     } catch (err: any) {
@@ -49,11 +56,14 @@ export default function CarrierManagement() {
         title: 'Error',
         description: `Failed to load carriers: ${err.message}`,
         variant: 'destructive',
-      })
-    } finally {
+      })    } finally {
       setLoading(false)
     }
   }
+
+  // Create columns with refresh function
+  const columns = useMemo(() => createColumns(fetchCarriers), [])
+
   // Load carriers on component mount
   useEffect(() => {
     fetchCarriers()

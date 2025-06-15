@@ -24,6 +24,7 @@ import {
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import UserAssignmentButton from "./user-assignment-button";
+import CommissionStatusManager from "./commission-status-manager";
 
 export type Carrier = {
   id: string;
@@ -43,9 +44,14 @@ export type Carrier = {
   approved_by_accounts?: string;
   manager_approved_at?: string;
   accounts_approved_at?: string;
+  commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";
+  commission_paid_at?: string;
+  commission_amount?: number;
+  loads_completed?: number;
+  first_load_completed_at?: string;
 };
 
-export const columns: ColumnDef<Carrier>[] = [
+export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
   {
     accessorKey: "mc_number",
     header: "MC Number",
@@ -163,8 +169,51 @@ export const columns: ColumnDef<Carrier>[] = [
            approvalStatus === "manager_approved" ? "Manager Approved" :
            approvalStatus === "pending" ? "Pending" :
            approvalStatus === "rejected" ? "Rejected" :
-           approvalStatus === "disabled" ? "Disabled" : approvalStatus}
-        </Badge>
+           approvalStatus === "disabled" ? "Disabled" : approvalStatus}        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "commission_status",
+    header: "Commission Status",    cell: ({ row }) => {
+      const commissionStatus = row.getValue("commission_status") as string;
+      console.log("Commission status for carrier:", row.original.company_name, "->", commissionStatus);
+      const loadsCompleted = row.original.loads_completed || 0;
+      const firstLoadDate = row.original.first_load_completed_at;
+      
+      // Default to "not_eligible" if no status is provided
+      const status = commissionStatus || "not_eligible";
+
+      return (
+        <div className="flex flex-col gap-1">
+          <Badge
+            variant="outline"
+            className={
+              status === "paid"
+                ? "bg-green-100 text-green-800 border-green-200"
+                : status === "confirmed_sale"
+                ? "bg-blue-100 text-blue-800 border-blue-200"
+                : status === "pending"
+                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                : "bg-gray-100 text-gray-800 border-gray-200"
+            }
+          >
+            {status === "paid" ? "Commission Paid" : 
+             status === "confirmed_sale" ? "Confirmed Sale" :
+             status === "pending" ? "Pending Payment" :
+             "Not Eligible"}
+          </Badge>
+          {loadsCompleted > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {loadsCompleted} load{loadsCompleted > 1 ? 's' : ''} completed
+            </span>
+          )}
+          {firstLoadDate && (
+            <span className="text-xs text-muted-foreground">
+              First load: {format(new Date(firstLoadDate), "MMM dd, yyyy")}
+            </span>
+          )}
+        </div>
       );
     },
   },
@@ -205,8 +254,17 @@ export const columns: ColumnDef<Carrier>[] = [
       const { openCarrierModal } = useCarrierModal();
       const { toast } = useToast();
 
-      return (
-        <div className="flex items-center justify-end gap-1">
+      return (        <div className="flex items-center justify-end gap-1">
+          <CommissionStatusManager 
+            carrier={carrier}
+            onUpdate={(carrierId, newStatus) => {
+              console.log(`Commission status updated for carrier ${carrierId}: ${newStatus}`);
+              // Call the refresh function if provided
+              if (onRefresh) {
+                onRefresh();
+              }
+            }}
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -300,9 +358,11 @@ export const columns: ColumnDef<Carrier>[] = [
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+          </DropdownMenu>        </div>
       );
     },
   },
 ];
+
+// Default columns export for backward compatibility
+export const columns = createColumns();

@@ -57,6 +57,7 @@ exports.getAllCarriers = async (req, res) => {
     const carriers = await CarrierProfile.findAll();
     res.json({ status: "success", data: carriers });
   } catch (error) {
+    console.log("error",error)
     res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -448,9 +449,7 @@ exports.removeUserFromCarrier = async (req, res) => {
       );
     } catch (notifError) {
       console.error("Failed to create removal notifications:", notifError);
-    }
-
-    res.json({ 
+    }    res.json({ 
       status: "success", 
       message: "User removed from carrier successfully" 
     });
@@ -459,6 +458,229 @@ exports.removeUserFromCarrier = async (req, res) => {
     res.status(500).json({ 
       status: "error", 
       message: error.message 
+    });
+  }
+};
+
+// Commission Management Endpoints
+
+/**
+ * Update commission status for a carrier
+ */
+exports.updateCarrierCommissionStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { commission_status, commission_amount, loads_completed, first_load_completed_at, sales_agent_id } = req.body;
+
+    const carrier = await CarrierProfile.findByPk(id);
+    if (!carrier) {
+      return res.status(404).json({
+        status: "error",
+        message: "Carrier not found"
+      });
+    }
+
+    const updateData = {};
+    
+    if (commission_status) updateData.commission_status = commission_status;
+    if (commission_amount !== undefined) updateData.commission_amount = commission_amount;
+    if (loads_completed !== undefined) updateData.loads_completed = loads_completed;
+    if (first_load_completed_at) updateData.first_load_completed_at = first_load_completed_at;
+    if (sales_agent_id !== undefined) updateData.sales_agent_id = sales_agent_id;
+
+    // If marking as paid, record the payment details
+    if (commission_status === 'paid') {
+      updateData.commission_paid_at = new Date();
+      updateData.commission_paid_by = req.user.id;
+    }
+
+    // If first load is completed and status is not set, mark as confirmed sale
+    if (loads_completed > 0 && !carrier.first_load_completed_at && first_load_completed_at) {
+      updateData.commission_status = 'confirmed_sale';
+    }
+
+    await carrier.update(updateData);
+
+    // Create notification for commission status change
+    try {
+      const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;
+      
+      if (commission_status === 'confirmed_sale') {
+        // Notify accounts team about confirmed sale
+        await NotificationService.createForRole(
+          'accounts',
+          `Confirmed sale: ${carrierName} - Commission payment required`,
+          'commission',
+          `/carrier-management/${carrier.id}`
+        );
+        
+        // Notify sales agent if available
+        if (carrier.sales_agent_id) {
+          await NotificationService.createForUser(
+            carrier.sales_agent_id,
+            `Confirmed sale: ${carrierName} - Your commission is pending payment`,
+            'success',
+            `/carrier-management/${carrier.id}`
+          );
+        }
+      } else if (commission_status === 'paid') {
+        // Notify sales agent about commission payment
+        if (carrier.sales_agent_id) {
+          await NotificationService.createForUser(
+            carrier.sales_agent_id,
+            `Commission paid for ${carrierName} - $${commission_amount || 'N/A'}`,
+            'success',
+            `/carrier-management/${carrier.id}`
+          );
+        }
+      }
+    } catch (notifError) {
+      console.error("Failed to create commission notification:", notifError);
+    }
+
+    const updatedCarrier = await CarrierProfile.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'salesAgent',
+          attributes: ['id', 'first_name', 'last_name', 'email']
+        },
+        {
+          model: User,
+          as: 'commissionPaidBy',
+          attributes: ['id', 'first_name', 'last_name', 'email']
+        }
+      ]
+    });
+
+    res.json({
+      status: "success",
+      message: "Commission status updated successfully",
+      data: updatedCarrier
+    });
+  } catch (error) {
+    console.error("Error updating commission status:", error);
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+};
+
+/**
+ * Mark load as completed for commission tracking
+ */
+exports.markLoadCompleted = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { load_number, completed_at } = req.body;
+
+    const carrier = await CarrierProfile.findByPk(id);
+    if (!carrier) {
+      return res.status(404).json({
+        status: "error",
+        message: "Carrier not found"
+      });
+    }
+
+    const updateData = {
+      loads_completed: (carrier.loads_completed || 0) + 1
+    };
+
+    // If this is the first load, mark it and set status to confirmed sale
+    if (!carrier.first_load_completed_at) {
+      updateData.first_load_completed_at = completed_at || new Date();
+      updateData.commission_status = 'confirmed_sale';
+    }
+
+    await carrier.update(updateData);
+
+    // Create notification for first load completion
+    if (!carrier.first_load_completed_at) {
+      try {
+        const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;
+        
+        // Notify accounts team
+        await NotificationService.createForRole(
+          'accounts',
+          `First load completed: ${carrierName} - Commission payment now due`,
+          'commission',
+          `/carrier-management/${carrier.id}`
+        );
+        
+        // Notify sales agent
+        if (carrier.sales_agent_id) {
+          await NotificationService.createForUser(
+            carrier.sales_agent_id,
+            `Confirmed sale! ${carrierName} completed their first load - Commission pending`,
+            'success',
+            `/carrier-management/${carrier.id}`
+          );
+        }
+      } catch (notifError) {
+        console.error("Failed to create load completion notification:", notifError);
+      }
+    }
+
+    res.json({
+      status: "success",
+      message: "Load marked as completed",
+      data: {
+        carrier_id: carrier.id,
+        loads_completed: updateData.loads_completed,
+        first_load_completed: !carrier.first_load_completed_at,
+        commission_status: updateData.commission_status || carrier.commission_status
+      }
+    });
+  } catch (error) {
+    console.error("Error marking load as completed:", error);
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+};
+
+/**
+ * Get commission summary/stats across all carriers
+ */
+exports.getCommissionSummary = async (req, res) => {
+  try {
+    const summary = await CarrierProfile.findAll({
+      attributes: [
+        'commission_status',
+        [require('sequelize').fn('COUNT', require('sequelize').col('id')), 'count'],
+        [require('sequelize').fn('SUM', require('sequelize').col('commission_amount')), 'total_amount']
+      ],
+      group: ['commission_status']
+    });
+
+    const stats = {
+      not_eligible: { count: 0, amount: 0 },
+      pending: { count: 0, amount: 0 },
+      confirmed_sale: { count: 0, amount: 0 },
+      paid: { count: 0, amount: 0 }
+    };
+
+    summary.forEach(item => {
+      const status = item.getDataValue('commission_status');
+      const count = parseInt(item.getDataValue('count'));
+      const amount = parseFloat(item.getDataValue('total_amount')) || 0;
+      
+      if (stats[status]) {
+        stats[status] = { count, amount };
+      }
+    });
+
+    res.json({
+      status: "success",
+      data: stats
+    });
+  } catch (error) {
+    console.error("Error getting commission summary:", error);
+    res.status(500).json({
+      status: "error",
+      message: error.message
     });
   }
 };

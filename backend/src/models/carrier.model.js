@@ -173,10 +173,56 @@ module.exports = (sequelize) => {
           model: 'users',
           key: 'id',
         },
-      },
-      disabled_at: {
+      },      disabled_at: {
         type: DataTypes.DATE,
         allowNull: true,
+      },
+
+      // Commission tracking fields
+      commission_status: {
+        type: DataTypes.ENUM('not_eligible', 'pending', 'confirmed_sale', 'paid'),
+        defaultValue: 'not_eligible',
+        allowNull: false,
+        comment: 'Commission payment status for sales agents'
+      },
+      commission_amount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        comment: 'Commission amount to be paid to sales agent'
+      },
+      commission_paid_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        comment: 'When commission was paid to sales agent'
+      },
+      commission_paid_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        comment: 'User who marked commission as paid'
+      },
+      loads_completed: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+        comment: 'Number of loads completed by this carrier'
+      },
+      first_load_completed_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        comment: 'When the first load was completed (triggers confirmed sale)'
+      },
+      sales_agent_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        comment: 'Sales agent who brought this carrier (for commission tracking)'
       },
 
       created_at: {

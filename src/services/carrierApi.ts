@@ -49,8 +49,13 @@ export interface CarrierProfile {
   approval_status?: "pending" | "manager_approved" | "accounts_approved" | "rejected" | "disabled";
   approved_by_manager?: string;
   approved_by_accounts?: string;
-  manager_approved_at?: string;
-  accounts_approved_at?: string;
+  manager_approved_at?: string;  accounts_approved_at?: string;
+  // Commission tracking fields
+  commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";
+  commission_amount?: number;
+  commission_paid_at?: string;
+  loads_completed?: number;
+  first_load_completed_at?: string;
 }
 
 export interface ApiResponse<T> {

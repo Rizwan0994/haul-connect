@@ -5,20 +5,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, BarChart3, Users, Truck, Package, CalendarDays, TrendingUp } from 'lucide-react';
+import { Loader2, BarChart3, Users, Truck, Package, CalendarDays, TrendingUp, DollarSign } from 'lucide-react';
 import { dispatchAPI, Dispatch } from '@/lib/dispatch-api';
 import { carrierApiService } from '@/services/carrierApi';
+import { commissionApi, CommissionSummary } from '@/lib/commission-api';
 import { format, startOfMonth, endOfMonth, subMonths, eachMonthOfInterval } from 'date-fns';
 
 interface DashboardData {
   dispatches: Dispatch[];
   carriers: any[];
+  commissionSummary: CommissionSummary | null;
   monthlyStats: {
     month: string;
     carriers: number;
     drivers: number;
     loads: number;
     revenue: number;
+    commissions: number;
   }[];
 }
 
@@ -38,6 +41,10 @@ const chartConfig = {
   revenue: {
     label: "Revenue",
     color: "#ef4444"
+  },
+  commissions: {
+    label: "Commissions",
+    color: "#8b5cf6"
   }
 };
 
@@ -94,15 +101,20 @@ export default function Dashboard() {
           const monthDispatches = dispatches.filter(dispatch => {
             const dispatchDate = new Date(dispatch.created_at);
             return dispatchDate >= monthStart && dispatchDate <= monthEnd;
+          });          // Filter carriers for this month (assuming they have a created_at field)
+          const monthCarriers = carriers.filter(carrier => {
+            const carrierDate = new Date(carrier.created_at || month);
+            return carrierDate >= monthStart && carrierDate <= monthEnd;
           });
 
-          // Filter carriers for this month (assuming they have a created_at field)
-          const monthCarriers = carriers.filter(carrier => {
-            const carrierDate = new Date(carrier.created_at || carrier.createdAt || month);
-            return carrierDate >= monthStart && carrierDate <= monthEnd;
-          });          // Calculate revenue from dispatches
+          // Calculate revenue from dispatches
           const revenue = monthDispatches.reduce((sum, dispatch) => {
             return sum + parseLoadAmount(dispatch.load_amount);
+          }, 0);
+
+          // Calculate commission amounts for this month
+          const commissions = monthCarriers.reduce((sum, carrier) => {
+            return sum + (parseFloat(String(carrier.commission_amount || 0)) || 0);
           }, 0);
 
           return {
@@ -110,13 +122,18 @@ export default function Dashboard() {
             carriers: monthCarriers.length,
             drivers: monthCarriers.length, // Assuming 1 driver per carrier for now
             loads: monthDispatches.length,
-            revenue: revenue
+            revenue: revenue,
+            commissions: commissions
           };
         });
+
+        // Fetch commission summary
+        const commissionSummary = await commissionApi.getCommissionSummary().catch(() => null);
 
         setData({
           dispatches,
           carriers,
+          commissionSummary,
           monthlyStats
         });
 
@@ -143,7 +160,6 @@ export default function Dashboard() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
   // Generate dispatch sheet chart data
   const getDispatchSheetData = () => {
     if (!data) return [];
@@ -159,6 +175,39 @@ export default function Dashboard() {
       count,
       fill: COLORS[index % COLORS.length]
     }));
+  };
+
+  // Generate sales/commission analysis data
+  const getSalesAnalysisData = () => {
+    if (!data || !data.commissionSummary) return [];
+    
+    const summary = data.commissionSummary;
+    return [
+      {
+        status: 'Not Eligible',
+        count: summary.not_eligible.count,
+        amount: summary.not_eligible.amount,
+        fill: '#94a3b8' // gray-400
+      },
+      {
+        status: 'Pending',
+        count: summary.pending.count,
+        amount: summary.pending.amount,
+        fill: '#f59e0b' // amber-500
+      },
+      {
+        status: 'Confirmed Sale',
+        count: summary.confirmed_sale.count,
+        amount: summary.confirmed_sale.amount,
+        fill: '#3b82f6' // blue-500
+      },
+      {
+        status: 'Paid',
+        count: summary.paid.count,
+        amount: summary.paid.amount,
+        fill: '#10b981' // emerald-500
+      }
+    ];
   };
 
   if (loading) {
@@ -188,6 +237,7 @@ export default function Dashboard() {
   }
 
   const dispatchSheetData = getDispatchSheetData();
+  const salesAnalysisData = getSalesAnalysisData();
 
   return (
     <div className="space-y-6">
@@ -214,20 +264,27 @@ export default function Dashboard() {
               Active carrier profiles
             </p>
           </CardContent>
-        </Card>
-
-        {/* <Card>
+        </Card>        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Drivers</CardTitle>
-            <Truck className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Commissions</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.carriers.length}</div>
+            <div className="text-2xl font-bold">
+              {data.commissionSummary ? formatCurrency(
+                (data.commissionSummary.paid.amount || 0) + 
+                (data.commissionSummary.pending.amount || 0) + 
+                (data.commissionSummary.confirmed_sale.amount || 0)
+              ) : formatCurrency(0)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Available drivers
+              {data.commissionSummary ? 
+                `${data.commissionSummary.paid.count} paid, ${data.commissionSummary.pending.count} pending` : 
+                'Commission tracking'
+              }
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -258,10 +315,10 @@ export default function Dashboard() {
       </div>
 
       {/* Charts */}
-      <Tabs defaultValue="monthly" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="monthly" className="space-y-4">        <TabsList>
           <TabsTrigger value="monthly">Monthly Trends</TabsTrigger>
           <TabsTrigger value="dispatch">Dispatch Analysis</TabsTrigger>
+          <TabsTrigger value="sales">Sales Analysis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="monthly" className="space-y-4">
@@ -405,6 +462,123 @@ export default function Dashboard() {
                     <ChartLegend content={<ChartLegendContent />} />
                     <Bar dataKey="carriers" fill={chartConfig.carriers.color} />
                     <Bar dataKey="loads" fill={chartConfig.loads.color} />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>          </div>
+        </TabsContent>
+
+        <TabsContent value="sales" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Commission Status Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Commission Status Distribution</CardTitle>
+                <CardDescription>Current commission status across all carriers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <PieChart>
+                    <Pie
+                      dataKey="count"
+                      data={salesAnalysisData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={({ status, count }) => `${status}: ${count}`}
+                    >
+                      {salesAnalysisData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip 
+                      content={<ChartTooltipContent 
+                        formatter={(value, name) => [
+                          name === 'count' ? value : formatCurrency(Number(value)), 
+                          name === 'count' ? 'Count' : 'Amount'
+                        ]} 
+                      />} 
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            {/* Commission Amount Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Commission Amount Distribution</CardTitle>
+                <CardDescription>Total commission amounts by status</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <BarChart data={salesAnalysisData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="status" />
+                    <YAxis />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent 
+                        formatter={(value) => [formatCurrency(Number(value)), "Amount"]} 
+                      />} 
+                    />
+                    <Bar dataKey="amount" fill={chartConfig.commissions.color} />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Commission Trends */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Commission Trends</CardTitle>
+                <CardDescription>Commission amounts over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <LineChart data={data.monthlyStats}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent 
+                        formatter={(value) => [formatCurrency(Number(value)), "Commissions"]} 
+                      />} 
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="commissions" 
+                      stroke={chartConfig.commissions.color}
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            {/* Revenue vs Commission Comparison */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Revenue vs Commission</CardTitle>
+                <CardDescription>Monthly comparison of revenue and commissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <BarChart data={data.monthlyStats}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent 
+                        formatter={(value, name) => [
+                          formatCurrency(Number(value)), 
+                          name === 'revenue' ? 'Revenue' : 'Commissions'
+                        ]} 
+                      />} 
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="revenue" fill={chartConfig.revenue.color} />
+                    <Bar dataKey="commissions" fill={chartConfig.commissions.color} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>

@@ -14,6 +14,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -131,36 +137,46 @@ export function BrokerMultiSelect({
             </CommandList>
           </Command>
         </PopoverContent>
-      </Popover>
-
-      {/* Selected Brokers Display */}
+      </Popover>      {/* Selected Brokers Display - Chip Style */}
       {value.length > 0 && (
         <div className="space-y-2">
-          {value.map((broker) => (
-            <Card key={broker.id} className="p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Broker</Badge>
-                    <span className="font-medium">{broker.brokerage_company}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    <div>Agent: {broker.agent_name}</div>
-                    {broker.agent_email && <div>Email: {broker.agent_email}</div>}
-                    {broker.agent_phone && <div>Phone: {broker.agent_phone}</div>}
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(broker.id)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+          <div className="text-sm font-medium text-muted-foreground">
+            Selected Brokers ({value.length})
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+            {value.map((broker) => (
+              <TooltipProvider key={broker.id}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-sm max-w-[200px]">
+                      <Badge variant="outline" className="text-xs px-1 py-0">B</Badge>
+                      <span className="truncate flex-1">{broker.brokerage_company}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemove(broker.id)}
+                        className="h-4 w-4 p-0 text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-sm">
+                    <div className="space-y-1">
+                      <div className="font-medium">{broker.brokerage_company}</div>
+                      <div className="text-xs">Agent: {broker.agent_name}</div>
+                      {broker.agent_phone && (
+                        <div className="text-xs">Phone: {broker.agent_phone}</div>
+                      )}
+                      {broker.agent_email && (
+                        <div className="text-xs">Email: {broker.agent_email}</div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
         </div>
       )}
     </div>

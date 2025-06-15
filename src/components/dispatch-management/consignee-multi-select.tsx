@@ -14,6 +14,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -148,38 +154,51 @@ export function ConsigneeMultiSelect({
             </CommandList>
           </Command>
         </PopoverContent>
-      </Popover>
-
-      {/* Selected Consignees Display */}
+      </Popover>      {/* Selected Consignees Display - Chip Style */}
       {value.length > 0 && (
         <div className="space-y-2">
-          {value.map((consignee) => (
-            <Card key={consignee.id} className="p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Consignee</Badge>
-                    <span className="font-medium">{consignee.consignee_name}</span>
-                    <span className="text-sm text-muted-foreground">({consignee.consignee_id})</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {consignee.contact && <div>Contact: {consignee.contact}</div>}
-                    {consignee.email && <div>Email: {consignee.email}</div>}
-                    {consignee.telephone && <div>Phone: {consignee.telephone}</div>}
-                    {consignee.address && <div>Address: {consignee.address}</div>}
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(consignee.id!)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+          <div className="text-sm font-medium text-muted-foreground">
+            Selected Consignees ({value.length})
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+            {value.map((consignee) => (
+              <TooltipProvider key={consignee.id}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-sm max-w-[200px]">
+                      <Badge variant="outline" className="text-xs px-1 py-0">C</Badge>
+                      <span className="truncate flex-1">{consignee.consignee_name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemove(consignee.id!)}
+                        className="h-4 w-4 p-0 text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-sm">
+                    <div className="space-y-1">
+                      <div className="font-medium">{consignee.consignee_name}</div>
+                      {consignee.contact && (
+                        <div className="text-xs">Contact: {consignee.contact}</div>
+                      )}
+                      {consignee.telephone && (
+                        <div className="text-xs">Phone: {consignee.telephone}</div>
+                      )}
+                      {consignee.email && (
+                        <div className="text-xs">Email: {consignee.email}</div>
+                      )}
+                      {consignee.address && (
+                        <div className="text-xs">Address: {consignee.address}</div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
         </div>
       )}
     </div>

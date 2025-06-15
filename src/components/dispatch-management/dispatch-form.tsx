@@ -536,100 +536,106 @@ export function DispatchForm({
                 )}
               />
             </CardContent>
-          </Card>          {/* Pickup & Delivery */}
-          <Card>
+          </Card>          {/* Pickup & Delivery */}          <Card>
             <CardHeader>
               <CardTitle>Pickup & Delivery</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="pickup_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Pickup Date</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                        onChange={(e) => {
-                          const dateValue = e.target.value;
-                          if (dateValue) {
-                            field.onChange(new Date(dateValue));
-                          } else {
-                            field.onChange(undefined);
-                          }
-                        }}
-                        className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />              <FormField
-                control={form.control}
-                name="shippers"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Shippers</FormLabel>
-                    <FormControl>
-                      <ShipperMultiSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Date Fields Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="pickup_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Pickup Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                          onChange={(e) => {
+                            const dateValue = e.target.value;
+                            if (dateValue) {
+                              field.onChange(new Date(dateValue));
+                            } else {
+                              field.onChange(undefined);
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="dropoff_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Dropoff Date</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                        onChange={(e) => {
-                          const dateValue = e.target.value;
-                          if (dateValue) {
-                            field.onChange(new Date(dateValue));
-                          } else {
-                            field.onChange(undefined);
-                          }
-                        }}
-                        className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="dropoff_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Dropoff Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                          onChange={(e) => {
+                            const dateValue = e.target.value;
+                            if (dateValue) {
+                              field.onChange(new Date(dateValue));
+                            } else {
+                              field.onChange(undefined);
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="consignees"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Consignees</FormLabel>
-                    <FormControl>
-                      <ConsigneeMultiSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Shipper and Consignee Selection */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="shippers"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Shippers</FormLabel>
+                      <FormControl>
+                        <ShipperMultiSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="consignees"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Consignees</FormLabel>
+                      <FormControl>
+                        <ConsigneeMultiSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}                />
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">          {/* Broker Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{/* Broker Information */}
           <Card>
             <CardHeader>
               <CardTitle>Broker Information</CardTitle>

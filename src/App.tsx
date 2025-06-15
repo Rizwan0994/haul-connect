@@ -21,6 +21,20 @@ import CarrierDetailPage from '@/pages/carrier-management/carrier-detail'
 import CarrierEditPage from '@/pages/carrier-management/carrier-edit'
 import CarrierCreatePage from '@/pages/carrier-management/carrier-create'
 // import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments'
+
+// Contact Management pages
+import ContactManagementPage from '@/pages/contact-management'
+import BrokerManagementPage from '@/pages/contact-management/brokers'
+import BrokerCreatePage from '@/pages/contact-management/broker-create'
+import BrokerEditPage from '@/pages/contact-management/broker-edit'
+import BrokerDetailPage from '@/pages/contact-management/broker-detail'
+import ShipperManagementPage from '@/pages/contact-management/shippers'
+import ShipperCreatePage from '@/pages/contact-management/shipper-create'
+import ShipperEditPage from '@/pages/contact-management/shipper-edit'
+import ConsigneeManagementPage from '@/pages/contact-management/consignees'
+import ConsigneeCreatePage from '@/pages/contact-management/consignee-create'
+import ConsigneeEditPage from '@/pages/contact-management/consignee-edit'
+
 import DispatchManagementPage from '@/pages/dispatch-management'
 import DispatchDetailPage from '@/pages/dispatch-management/dispatch-detail'
 import DispatchEditPage from '@/pages/dispatch-management/dispatch-edit'
@@ -95,9 +109,72 @@ function App() {
                 <Route path="carrier-management/:id/edit" element={
                   <PrivateRoute requiredPermission="carriers.edit">
                     <CarrierEditPage />
+                  </PrivateRoute>                } />
+                {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
+                
+                {/* Contact Management Routes */}
+                <Route path="contact-management" element={
+                  <PrivateRoute requiredPermission="route.brokers">
+                    <ContactManagementPage />
                   </PrivateRoute>
                 } />
-                {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
+                
+                {/* Broker Routes */}
+                <Route path="contact-management/brokers" element={
+                  <PrivateRoute requiredPermission="route.brokers">
+                    <BrokerManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/brokers/create" element={
+                  <PrivateRoute requiredPermission="route.brokers">
+                    <BrokerCreatePage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/brokers/:id" element={
+                  <PrivateRoute requiredPermission="route.brokers">
+                    <BrokerDetailPage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/brokers/:id/edit" element={
+                  <PrivateRoute requiredPermission="route.brokers">
+                    <BrokerEditPage />
+                  </PrivateRoute>
+                } />
+                
+                {/* Shipper Routes */}
+                <Route path="contact-management/shippers" element={
+                  <PrivateRoute requiredPermission="route.shippers">
+                    <ShipperManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/shippers/create" element={
+                  <PrivateRoute requiredPermission="route.shippers">
+                    <ShipperCreatePage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/shippers/:id/edit" element={
+                  <PrivateRoute requiredPermission="route.shippers">
+                    <ShipperEditPage />
+                  </PrivateRoute>
+                } />
+                
+                {/* Consignee Routes */}
+                <Route path="contact-management/consignees" element={
+                  <PrivateRoute requiredPermission="route.consignees">
+                    <ConsigneeManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/consignees/create" element={
+                  <PrivateRoute requiredPermission="route.consignees">
+                    <ConsigneeCreatePage />
+                  </PrivateRoute>
+                } />
+                <Route path="contact-management/consignees/:id/edit" element={
+                  <PrivateRoute requiredPermission="route.consignees">
+                    <ConsigneeEditPage />
+                  </PrivateRoute>
+                } />
+                
                 <Route path="dispatch-management" element={
                   <PrivateRoute requiredPermission="route.active-dispatches">
                     <DispatchManagementPage />

@@ -41,6 +41,9 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const profileRoutes = require('./routes/profile');
 const followupSheetRoutes = require('./routes/followupSheetRoutes');
 const smtpRoutes = require('./routes/smtpRoutes');
+const brokerRoutes = require('./routes/brokerRoutes');
+const shipperRoutes = require('./routes/shipperRoutes');
+const consigneeRoutes = require('./routes/consigneeRoutes');
 
 // Public routes (no authentication required)
 app.use('/api/auth', authRoutes);
@@ -57,6 +60,9 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/attendance', authenticateToken, attendanceRoutes);
+app.use('/api/brokers', authenticateToken, brokerRoutes);
+app.use('/api/shippers', authenticateToken, shipperRoutes);
+app.use('/api/consignees', authenticateToken, consigneeRoutes);
 app.use('/api/smtp-settings', smtpRoutes);
 app.use('/api', profileRoutes); // Profile routes
 module.exports = app;

@@ -63,8 +63,8 @@ const rolePermissions = {
       // Route permissions
     'route.dashboard', 'route.messages', 'route.calendar',
     'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
-    'route.active-dispatches', 'route.create-dispatch',
-    'route.invoices', 'route.user-management', 'route.commission-management', 'route.attendance-records',
+    'route.active-dispatches', 'route.create-dispatch',    'route.invoices', 'route.user-management', 'route.commission-management', 'route.attendance-records',
+    'route.brokers', 'route.shippers', 'route.consignees',
     'settings.smtp'
   ],
     // Dispatch role permissions
@@ -73,11 +73,10 @@ const rolePermissions = {
     'carriers.view', // Can only view carriers in list, not details
     'dispatch.view', 'dispatch.create', 'dispatch.edit',
     'invoices.view', // Can view invoices but not edit
-    
-    // Route permissions
+      // Route permissions
     'route.dashboard',
     'route.carrier-profiles', // Access to carrier list page only    'route.active-dispatches', 'route.create-dispatch',
-    'route.invoices', 'route.commission-management'
+    'route.invoices', 'route.commission-management', 'route.brokers', 'route.shippers', 'route.consignees'
   ],
   
   // Sales role permissions
@@ -97,10 +96,10 @@ const rolePermissions = {
     'carrier.approve.accounts', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.approve.accounts', 'dispatch.reject', 'dispatch.view.pending',
     'attendance.view', 'attendance.create', 'attendance.edit', 'attendance.delete',
-    
-    // Route permissions    'route.dashboard',
+      // Route permissions    'route.dashboard',
     'route.carrier-profiles',    'route.active-dispatches',
-    'route.invoices', 'route.commission-management', 'route.attendance-records'
+    'route.invoices', 'route.commission-management', 'route.attendance-records',
+    'route.brokers', 'route.shippers', 'route.consignees'
   ],
   
   // Carrier role permissions (very limited)

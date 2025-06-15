@@ -84,9 +84,9 @@ const menuItems = [
         title: "Followup Sheets",
         path: "/carrier-management/followup-sheets",
         requiresPermission: "route.followup-sheets",
-      },
-    ],
+      },    ],
   },
+
   {
     title: "Dispatch Management",
     isSection: true,
@@ -102,13 +102,29 @@ const menuItems = [
         path: "/dispatch-management/approvals",
         requiresPermission: "dispatch.approval.view",
       },
-      // {
-      //   title: "Create Dispatch",
-      //   path: "/dispatch-management/new",
-      //   icon: Plus, // Icon for specific menu item
-      //   requiresPermission: "route.create-dispatch",      // },
+ {
+        title: "All Contacts",
+        path: "/contact-management",
+        requiresPermission: "route.brokers",
+      },
+      {
+        title: "Brokers",
+        path: "/contact-management/brokers",
+        requiresPermission: "route.brokers",
+      },
+      {
+        title: "Shippers",
+        path: "/contact-management/shippers",
+        requiresPermission: "route.shippers",
+      },
+      {
+        title: "Consignees",
+        path: "/contact-management/consignees",
+        requiresPermission: "route.consignees",
+      },
     ],
-  },
+  }, 
+
   {
     title: "Commission Management",
     isSection: true,

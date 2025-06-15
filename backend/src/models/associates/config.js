@@ -20,10 +20,17 @@ exports.userModel = (db) => {
   // Commission tracking associations
   db.user.hasMany(db.carrier_profile, { foreignKey: 'sales_agent_id', as: 'salesCarriers' });
   db.user.hasMany(db.carrier_profile, { foreignKey: 'commission_paid_by', as: 'commissionPayments' });
-
   // Employee Attendance association
   db.user.hasMany(db.employee_attendance, { foreignKey: 'employee_id', as: 'attendanceRecords' });
   db.user.hasMany(db.employee_attendance, { foreignKey: 'marked_by', as: 'markedAttendance' });
+
+  // Contact management associations
+  db.user.hasMany(db.broker, { foreignKey: 'created_by', as: 'createdBrokers' });
+  db.user.hasMany(db.broker, { foreignKey: 'updated_by', as: 'updatedBrokers' });
+  db.user.hasMany(db.shipper, { foreignKey: 'created_by', as: 'createdShippers' });
+  db.user.hasMany(db.shipper, { foreignKey: 'updated_by', as: 'updatedShippers' });
+  db.user.hasMany(db.consignee, { foreignKey: 'created_by', as: 'createdConsignees' });
+  db.user.hasMany(db.consignee, { foreignKey: 'updated_by', as: 'updatedConsignees' });
 };
 
 exports.carrierModel = (db) => {
@@ -95,4 +102,22 @@ exports['carrier-user-assignmentModel'] = (db) => {
 exports['employee-attendanceModel'] = (db) => {
   db.employee_attendance.belongsTo(db.user, { foreignKey: 'employee_id', as: 'employee' });
   db.employee_attendance.belongsTo(db.user, { foreignKey: 'marked_by', as: 'markedBy' });
+};
+
+// Broker associations
+exports.brokerModel = (db) => {
+  db.broker.belongsTo(db.user, { foreignKey: 'created_by', as: 'createdBy' });
+  db.broker.belongsTo(db.user, { foreignKey: 'updated_by', as: 'updatedBy' });
+};
+
+// Shipper associations
+exports.shipperModel = (db) => {
+  db.shipper.belongsTo(db.user, { foreignKey: 'created_by', as: 'createdBy' });
+  db.shipper.belongsTo(db.user, { foreignKey: 'updated_by', as: 'updatedBy' });
+};
+
+// Consignee associations
+exports.consigneeModel = (db) => {
+  db.consignee.belongsTo(db.user, { foreignKey: 'created_by', as: 'createdBy' });
+  db.consignee.belongsTo(db.user, { foreignKey: 'updated_by', as: 'updatedBy' });
 };

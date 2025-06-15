@@ -155,7 +155,7 @@ export function DispatchForm({
 
     fetchCarriers();
   }, []);
-
+ console.log('Fetched carriers:', carriers);
   // Set up form with default values and current user defaults
   const form = useForm<DispatchFormValues>({
     resolver: zodResolver(formSchema),

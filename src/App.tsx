@@ -44,6 +44,7 @@ import CommissionManagementPage from '@/pages/commission-management'
 import EmployeeAttendancePage from '@/pages/employee-attendance'
 import BulkAttendancePage from '@/pages/employee-attendance/bulk-attendance'
 import InvoicesPage from '@/pages/invoices'
+import CreateInvoicePage from '@/pages/invoices/create'
 import SMTPSettingsPage from '@/pages/settings/smtp'
 import PermissionManagementPage from '@/pages/settings/permissions'
 
@@ -213,7 +214,12 @@ function App() {
                   <PrivateRoute requiredPermission="route.invoices">
                     <InvoicesPage />
                   </PrivateRoute>
-                } />                <Route path="commission-management" element={
+                } />
+                <Route path="invoices/create" element={
+                  <PrivateRoute requiredPermission="route.invoices">
+                    <CreateInvoicePage />
+                  </PrivateRoute>
+                } /><Route path="commission-management" element={
                   <PrivateRoute requiredPermission="route.commission-management">
                     <CommissionManagementPage />
                   </PrivateRoute>

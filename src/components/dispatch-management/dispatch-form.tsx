@@ -76,81 +76,81 @@ const formSchema = z.object({
   dropoff_date: z.date({
     required_error: "Dropoff date is required",
   }),
-  carrier: z.string().min(1, "Carrier is required"),  shippers: z.array(z.object({
-    id: z.number().optional(),
-    shipper_id: z.string().optional(),
+  carrier: z.string().min(1, "Carrier is required"),  
+  shippers: z.array(z.object({
+  id: z.number(),
     shipper_name: z.string(),
-    contact: z.string().optional(),
-    telephone: z.string().optional(),
-    address: z.string().optional(),
-    ext: z.string().optional(),
-    email: z.string().optional(),
-    notes: z.string().optional(),
-    attachment: z.any().optional(),
-    attachment_path: z.string().optional(),
-    attachment_filename: z.string().optional(),
-    created_by: z.number().optional(),
-    updated_by: z.number().optional(),
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
-    createdBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
-    updatedBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
+    // contact: z.string().optional(),
+    // telephone: z.string().optional(),
+    // address: z.string().optional(),
+    // ext: z.string().optional(),
+    // email: z.string().optional(),
+    // notes: z.string().optional(),
+    // attachment: z.any().optional(),
+    // attachment_path: z.string().optional(),
+    // attachment_filename: z.string().optional(),
+    // created_by: z.number().optional(),
+    // updated_by: z.number().optional(),
+    // created_at: z.string().optional(),
+    // updated_at: z.string().optional(),
+    // createdBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
+    // updatedBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
   })).min(1, "At least one shipper is required"),
   consignees: z.array(z.object({
-    id: z.number().optional(),
-    consignee_id: z.string().optional(),
+     id: z.number(),
     consignee_name: z.string(),
-    contact: z.string().optional(),
-    telephone: z.string().optional(),
-    address: z.string().optional(),
-    ext: z.string().optional(),
-    email: z.string().optional(),
-    notes: z.string().optional(),
-    attachment: z.any().optional(),
-    attachment_path: z.string().optional(),
-    attachment_filename: z.string().optional(),
-    created_by: z.number().optional(),
-    updated_by: z.number().optional(),
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
-    createdBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
-    updatedBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
-  })).min(1, "At least one consignee is required"),  brokers: z.array(z.object({
+    // contact: z.string().optional(),
+    // telephone: z.string().optional(),
+    // address: z.string().optional(),
+    // ext: z.string().optional(),
+    // email: z.string().optional(),
+    // notes: z.string().optional(),
+    // attachment: z.any().optional(),
+    // attachment_path: z.string().optional(),
+    // attachment_filename: z.string().optional(),
+    // created_by: z.number().optional(),
+    // updated_by: z.number().optional(),
+    // created_at: z.string().optional(),
+    // updated_at: z.string().optional(),
+    // createdBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
+    // updatedBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
+  })).min(1, "At least one consignee is required"),  
+  brokers: z.array(z.object({
     id: z.number(),
     brokerage_company: z.string(),
-    agent_name: z.string(),
-    agent_phone: z.string().optional(),
-    agent_email: z.string().optional(),
-    created_by: z.number().optional(),
-    updated_by: z.number().optional(),
-    created_at: z.string(),
-    updated_at: z.string(),
-    createdBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
-    updatedBy: z.object({
-      id: z.number(),
-      username: z.string(),
-      email: z.string(),
-    }).optional(),
+    // agent_name: z.string(),
+    // agent_phone: z.string().optional(),
+    // agent_email: z.string().optional(),
+    // created_by: z.number().optional(),
+    // updated_by: z.number().optional(),
+    // created_at: z.string(),
+    // updated_at: z.string(),
+    // createdBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
+    // updatedBy: z.object({
+    //   id: z.number(),
+    //   username: z.string(),
+    //   email: z.string(),
+    // }).optional(),
   })).min(1, "At least one broker is required"),
   load_amount: z.coerce.number().min(0, "Amount must be positive"),
   charge_percent: z.coerce
@@ -816,7 +816,7 @@ export function DispatchForm({
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4 bg-slate-50">
+                <div className="border rounded-lg p-4 bg-gray-600">
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     <Badge
                       variant="outline"
@@ -836,7 +836,7 @@ export function DispatchForm({
                   </ol>
                 </div>
 
-                <div className="border rounded-lg p-4 bg-slate-50">
+                <div className="border rounded-lg p-4 bg-gray-600">
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     <Badge
                       variant="outline"

@@ -8,14 +8,14 @@ interface CarrierCommissionDistributionProps {
   loading?: boolean;
 }
 
-export function CarrierCommissionDistribution({ carriers, loading }: CarrierCommissionDistributionProps) {
-  const calculateCommissionBreakdown = () => {
+export function CarrierCommissionDistribution({ carriers, loading }: CarrierCommissionDistributionProps) {  const calculateCommissionBreakdown = () => {
     let paidCommission = 0;
     let pendingCommission = 0;
     let confirmedSaleCommission = 0;
 
     carriers.forEach(carrier => {
-      const commissionAmount = carrier.commission_amount || 0;
+      // Ensure commission_amount is properly parsed as a number
+      const commissionAmount = parseFloat(String(carrier.commission_amount || 0)) || 0;
       
       if (carrier.commission_status === 'paid') {
         paidCommission += commissionAmount;
@@ -25,6 +25,11 @@ export function CarrierCommissionDistribution({ carriers, loading }: CarrierComm
         confirmedSaleCommission += commissionAmount;
       }
     });
+
+    // Ensure all values are properly parsed as numbers
+    paidCommission = parseFloat(String(paidCommission)) || 0;
+    pendingCommission = parseFloat(String(pendingCommission)) || 0;
+    confirmedSaleCommission = parseFloat(String(confirmedSaleCommission)) || 0;
 
     const totalCommission = paidCommission + pendingCommission + confirmedSaleCommission;
     const paidPercentage = totalCommission > 0 ? (paidCommission / totalCommission) * 100 : 0;
@@ -41,7 +46,6 @@ export function CarrierCommissionDistribution({ carriers, loading }: CarrierComm
       confirmedPercentage
     };
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -52,6 +56,18 @@ export function CarrierCommissionDistribution({ carriers, loading }: CarrierComm
   };
 
   const commission = calculateCommissionBreakdown();
+  
+  // Enhanced logging for debugging
+  console.log("Commission calculation debug:", {
+    rawCarrierData: carriers.map(c => ({ 
+      id: c.id, 
+      company_name: c.company_name,
+      commission_amount: c.commission_amount, 
+      commission_status: c.commission_status,
+      commission_amount_type: typeof c.commission_amount
+    })),
+    calculatedCommission: commission
+  });
 
   if (loading) {
     return (
@@ -75,8 +91,7 @@ export function CarrierCommissionDistribution({ carriers, loading }: CarrierComm
             <div className="h-2 bg-gray-200 rounded"></div>
             <div className="h-4 bg-gray-200 rounded w-20"></div>
           </div>
-        </CardContent>
-      </Card>
+        </CardContent>      </Card>
     );
   }
 
@@ -161,8 +176,8 @@ export function CarrierCommissionDistribution({ carriers, loading }: CarrierComm
             {/* Total Summary */}
             <div className="pt-4 border-t">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">Total Commission</span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-sm font-medium text-gray-100">Total Commission</span>
+                <span className="text-lg font-bold text-gray-100">
                   {formatCurrency(commission.totalCommission)}
                 </span>
               </div>

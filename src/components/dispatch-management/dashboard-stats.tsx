@@ -110,7 +110,7 @@ export function DashboardStats({ dispatches, loading }: DashboardStatsProps) {
               <div className="text-2xl font-bold text-white-900">
                 {stat.value}
               </div>
-              <p className="text-xs text-white-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 {stat.description}
               </p>
             </CardContent>

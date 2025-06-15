@@ -68,7 +68,7 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {  const 
     },
     {
       title: 'Commission Paid',
-      value: formatCurrency(stats.totalCommissionPaid),
+      value: formatCurrency( parseFloat(String(stats.totalCommissionPaid)) || 0),
       icon: DollarSign,
       description: 'Total commission paid',
       color: 'text-emerald-600',
@@ -102,7 +102,7 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {  const 
         return (
           <Card key={index} className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-gray-100">
                 {stat.title}
               </CardTitle>
               <div className={`${stat.bgColor} p-2 rounded-lg`}>
@@ -110,7 +110,7 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {  const 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-100">
                 {stat.value}
               </div>
               <p className="text-xs text-gray-500 mt-1">

@@ -286,7 +286,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Drivers by Month */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Drivers by Month</CardTitle>
                 <CardDescription>Driver availability trends</CardDescription>
@@ -307,7 +307,7 @@ export default function Dashboard() {
                   </LineChart>
                 </ChartContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Total Loads by Month */}
             <Card>

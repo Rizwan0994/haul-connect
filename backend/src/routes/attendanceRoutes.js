@@ -16,6 +16,18 @@ router.get('/summary',
   attendanceController.getAttendanceSummary
 );
 
+// Get employees for bulk attendance marking
+router.get('/employees-for-date',  
+  requirePermission('attendance.view'), 
+  attendanceController.getEmployeesForBulkAttendance
+);
+
+// Generate attendance report
+router.get('/report',  
+  requirePermission('attendance.view'), 
+  attendanceController.generateAttendanceReport
+);
+
 // Get attendance by ID
 router.get('/:id', 
   requirePermission('attendance.view'), 

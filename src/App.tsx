@@ -28,6 +28,7 @@ import DispatchInvoicePage from '@/pages/dispatch-management/dispatch-invoice'
 import NewDispatchPage from '@/pages/dispatch-management/new'
 import CommissionManagementPage from '@/pages/commission-management'
 import EmployeeAttendancePage from '@/pages/employee-attendance'
+import BulkAttendancePage from '@/pages/employee-attendance/bulk-attendance'
 import InvoicesPage from '@/pages/invoices'
 import SMTPSettingsPage from '@/pages/settings/smtp'
 import PermissionManagementPage from '@/pages/settings/permissions'
@@ -139,10 +140,14 @@ function App() {
                   <PrivateRoute requiredPermission="route.commission-management">
                     <CommissionManagementPage />
                   </PrivateRoute>
-                } />
-                <Route path="employee-attendance" element={
+                } />                <Route path="employee-attendance" element={
                   <PrivateRoute requiredPermission="route.attendance-records">
                     <EmployeeAttendancePage />
+                  </PrivateRoute>
+                } />
+                <Route path="employee-attendance/bulk" element={
+                  <PrivateRoute requiredPermission="route.attendance-records">
+                    <BulkAttendancePage />
                   </PrivateRoute>
                 } />
                 <Route path="settings/smtp" element={

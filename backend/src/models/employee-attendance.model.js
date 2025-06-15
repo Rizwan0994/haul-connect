@@ -35,11 +35,10 @@ module.exports = (sequelize) => {  class EmployeeAttendance extends Model {
       check_out_time: {
         type: DataTypes.TIME,
         allowNull: true,
-      },
-      status: {
-        type: DataTypes.ENUM('present', 'absent', 'late', 'half_day'),
+      },      status: {
+        type: DataTypes.ENUM('present', 'absent', 'late', 'half_day', 'late_present', 'not_marked', 'late_without_notice', 'leave_without_notice'),
         allowNull: false,
-        defaultValue: 'absent'
+        defaultValue: 'not_marked'
       },
       notes: {
         type: DataTypes.TEXT,

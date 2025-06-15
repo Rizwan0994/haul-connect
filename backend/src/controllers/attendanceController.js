@@ -396,11 +396,110 @@ exports.bulkMarkAttendance = async (req, res) => {
         errorCount: errors.length
       }
     });
-  } catch (error) {
-    console.error('Error in bulk attendance marking:', error);
+  } catch (error) {    console.error('Error in bulk attendance marking:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to process bulk attendance marking',
+      error: error.message
+    });
+  }
+};
+
+// Get employees for bulk attendance (with current attendance status)
+exports.getEmployeesForBulkAttendance = async (req, res) => {
+  try {
+    const { date } = req.query;
+    
+    if (!date) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Date parameter is required'
+      });
+    }
+
+    // Get all users (employees) except super admin
+    const employees = await User.findAll({
+      where: {
+        role: { [Op.not]: 'Super Admin' }
+      },
+      attributes: ['id', 'username', 'email', 'role'],
+      order: [['username', 'ASC']]
+    });
+
+    // Get existing attendance records for the date
+    const attendanceRecords = await EmployeeAttendance.findAll({
+      where: { date },
+      attributes: ['employee_id', 'status', 'check_in_time', 'check_out_time', 'notes', 'id'],
+      raw: true
+    });
+
+    // Create a map for quick lookup
+    const attendanceMap = {};
+    attendanceRecords.forEach(record => {
+      attendanceMap[record.employee_id] = record;
+    });
+
+    // Combine employee data with attendance status
+    const employeesWithAttendance = employees.map(employee => ({
+      ...employee.toJSON(),
+      department: employee.role, // Use role as department for now
+      currentAttendance: attendanceMap[employee.id] || null
+    }));
+
+    res.json({
+      status: 'success',
+      data: employeesWithAttendance
+    });
+  } catch (error) {
+    console.error('Error fetching employees for bulk attendance:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch employees for bulk attendance',
+      error: error.message
+    });
+  }
+};
+
+// Generate attendance report
+exports.generateAttendanceReport = async (req, res) => {
+  try {
+    const { startDate, endDate, format = 'pdf' } = req.query;
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Start date and end date are required'
+      });
+    }
+
+    // Get attendance data for the date range
+    const attendanceData = await EmployeeAttendance.findAll({
+      where: {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      },
+      include: [
+        {
+          model: User,
+          as: 'employee',
+          attributes: ['id', 'username', 'email', 'role']
+        }
+      ],
+      order: [['date', 'DESC'], ['employee_id', 'ASC']]
+    });
+
+    // For now, return JSON data - PDF/Excel generation can be implemented later
+    res.json({
+      status: 'success',
+      data: attendanceData,
+      message: `${format} report data retrieved successfully`
+    });
+  } catch (error) {
+    console.error('Error generating attendance report:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to generate attendance report',
       error: error.message
     });
   }

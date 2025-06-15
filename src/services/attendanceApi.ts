@@ -6,13 +6,14 @@ export interface AttendanceRecord {
   date: string;
   check_in_time?: string;
   check_out_time?: string;
-  status: 'present' | 'absent' | 'late' | 'half_day';
+  status: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
   notes?: string;
   employee: {
     id: string;
     username: string;
     email: string;
     role: string;
+    department?: string;
   };
   created_at: string;
   updated_at: string;
@@ -23,14 +24,14 @@ export interface AttendanceCreateRequest {
   date: string;
   check_in_time?: string;
   check_out_time?: string;
-  status: 'present' | 'absent' | 'late' | 'half_day';
+  status: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
   notes?: string;
 }
 
 export interface AttendanceUpdateRequest {
   check_in_time?: string;
   check_out_time?: string;
-  status?: 'present' | 'absent' | 'late' | 'half_day';
+  status?: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
   notes?: string;
 }
 
@@ -116,16 +117,26 @@ export const attendanceApi = {
       throw new Error(error.response?.data?.message || 'Failed to fetch attendance summary');
     }
   },
-
   // Get employees list for dropdown
   getEmployees: async (): Promise<any[]> => {
     try {
       const response = await apiClient.get<AttendanceApiResponse<any[]>>('/users');
       console.log('Fetched employees:', response);
-      return response.data || [];
+      return response.data.data || [];
     } catch (error: any) {
       console.error('Error fetching employees:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch employees');
+    }
+  },
+
+  // Get employees for bulk attendance marking (with their current attendance status for a date)
+  getEmployeesForBulkAttendance: async (date: string): Promise<any[]> => {
+    try {
+      const response = await apiClient.get<AttendanceApiResponse<any[]>>(`/attendance/employees-for-date?date=${date}`);
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching employees for bulk attendance:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch employees for bulk attendance');
     }
   },
 
@@ -140,6 +151,19 @@ export const attendanceApi = {
     } catch (error: any) {
       console.error('Error in bulk attendance marking:', error);
       throw new Error(error.response?.data?.message || 'Failed to process bulk attendance marking');
+    }
+  },
+
+  // Generate attendance report
+  generateAttendanceReport: async (startDate: string, endDate: string, format: 'pdf' | 'excel' = 'pdf'): Promise<Blob> => {
+    try {
+      const response = await apiClient.get(`/attendance/report?startDate=${startDate}&endDate=${endDate}&format=${format}`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error generating attendance report:', error);
+      throw new Error(error.response?.data?.message || 'Failed to generate attendance report');
     }
   }
 };

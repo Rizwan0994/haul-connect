@@ -20,10 +20,10 @@ import {
 } from '@/components/ui/dialog';
 import { DataTable } from '@/components/ui/data-table';
 import { useToast } from '@/components/ui/use-toast';
-import { Clock, Users, UserCheck, UserX, Plus, Calendar, Filter } from 'lucide-react';
+import { Clock, Users, UserCheck, UserX, Plus, Calendar, Filter, ClipboardList } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { createAttendanceColumns, AttendanceRecord } from './attendance-columns';
-import { attendanceApi } from '@/services/attendanceApi';
+import { attendanceApi } from '../../services/attendanceApi';
 
 export default function EmployeeAttendance() {
   const { toast } = useToast();
@@ -43,14 +43,13 @@ export default function EmployeeAttendance() {
     employeeId: 'all',
     status: 'all',
   });
-
   // Form states
   const [formData, setFormData] = useState({
     employee_id: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     check_in_time: '',
     check_out_time: '',
-    status: 'present' as 'present' | 'absent' | 'late' | 'half_day',
+    status: 'present' as 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice',
     notes: '',
   });
 
@@ -219,9 +218,7 @@ export default function EmployeeAttendance() {
         </div>
       </div>
     );
-  }
-
-  return (
+  }  return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <div className="flex-none space-y-4 px-6 pt-6">
         <div className="flex items-center justify-between">
@@ -231,7 +228,18 @@ export default function EmployeeAttendance() {
               Track and manage employee attendance records
             </p>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => window.location.href = '/employee-attendance/bulk'}>
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Mark Attendance
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Individual Record
+                </Button>
+              </DialogTrigger>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -464,8 +472,7 @@ export default function EmployeeAttendance() {
 
       {/* Data Table */}
       <div className="flex-1 px-6 pb-6">
-        <Card className="h-full">
-          <CardContent className="p-6 h-full">
+        <Card className="h-full">          <CardContent className="p-6 h-full">
             <DataTable
               columns={columns}
               data={attendance}
@@ -534,11 +541,10 @@ export default function EmployeeAttendance() {
               Cancel
             </Button>
             <Button onClick={handleUpdateAttendance}>
-              Update
-            </Button>
-          </div>
-        </DialogContent>
+              Update            </Button>
+          </div>        </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

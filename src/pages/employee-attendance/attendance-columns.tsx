@@ -20,13 +20,14 @@ export interface AttendanceRecord {
   date: string;
   check_in_time?: string;
   check_out_time?: string;
-  status: 'present' | 'absent' | 'late' | 'half_day';
+  status: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
   notes?: string;
   employee: {
     id: string;
     username: string;
     email: string;
     role: string;
+    department?: string;
   };
   created_at: string;
   updated_at: string;
@@ -134,27 +135,64 @@ export function createAttendanceColumns(
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
-      },
-      cell: ({ row }) => {
+      },      cell: ({ row }) => {
         const status = row.original.status;
+        
+        // Define status styling and labels
+        const getStatusConfig = (status: string) => {
+          switch (status) {
+            case 'present':
+              return { 
+                className: 'bg-green-100 text-green-800 border-green-200', 
+                label: 'Present' 
+              };
+            case 'absent':
+              return { 
+                className: 'bg-red-100 text-red-800 border-red-200', 
+                label: 'Absent' 
+              };
+            case 'late':
+              return { 
+                className: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                label: 'Late' 
+              };
+            case 'late_present':
+              return { 
+                className: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                label: 'Late Present' 
+              };
+            case 'half_day':
+              return { 
+                className: 'bg-blue-100 text-blue-800 border-blue-200', 
+                label: 'Half Day' 
+              };
+            case 'late_without_notice':
+              return { 
+                className: 'bg-orange-100 text-orange-800 border-orange-200', 
+                label: 'Late Without Notice' 
+              };
+            case 'leave_without_notice':
+              return { 
+                className: 'bg-purple-100 text-purple-800 border-purple-200', 
+                label: 'Leave Without Notice' 
+              };
+            case 'not_marked':
+            default:
+              return { 
+                className: 'bg-gray-100 text-gray-800 border-gray-200', 
+                label: 'Not Marked' 
+              };
+          }
+        };
+        
+        const config = getStatusConfig(status);
         
         return (
           <Badge
             variant="outline"
-            className={
-              status === "present"
-                ? "bg-green-100 text-green-800 border-green-200"
-                : status === "late"
-                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                : status === "half_day"
-                ? "bg-blue-100 text-blue-800 border-blue-200"
-                : "bg-red-100 text-red-800 border-red-200"
-            }
+            className={config.className}
           >
-            {status === "present" ? "Present" : 
-             status === "late" ? "Late" :
-             status === "half_day" ? "Half Day" :
-             "Absent"}
+            {config.label}
           </Badge>
         );
       },

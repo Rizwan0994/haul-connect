@@ -55,6 +55,12 @@ import { Badge } from "@/components/ui/badge";
 import { getAllCarriers } from "@/lib/carriers-data";
 import { carrierApiService } from "@/services/carrierApi";
 import { useAuth } from "@/components/auth/auth-context";
+import { BrokerMultiSelect } from "./broker-multi-select";
+import { ShipperMultiSelect } from "./shipper-multi-select";
+import { ConsigneeMultiSelect } from "./consignee-multi-select";
+import { Broker } from "@/services/brokerApi";
+import { Shipper } from "@/services/shipperApi";
+import { Consignee } from "@/services/consigneeApi";
 
 // Define the form schema with validation
 const formSchema = z.object({
@@ -70,13 +76,82 @@ const formSchema = z.object({
   dropoff_date: z.date({
     required_error: "Dropoff date is required",
   }),
-  carrier: z.string().min(1, "Carrier is required"),
-  origin: z.string().min(1, "Origin is required"),
-  destination: z.string().min(1, "Destination is required"),
-  brokerage_company: z.string().min(1, "Brokerage company is required"),
-  brokerage_agent: z.string().min(1, "Brokerage agent is required"),
-  agent_ph: z.string().min(1, "Agent phone is required"),
-  agent_email: z.string().email("Invalid email format"),
+  carrier: z.string().min(1, "Carrier is required"),  shippers: z.array(z.object({
+    id: z.number().optional(),
+    shipper_id: z.string().optional(),
+    shipper_name: z.string(),
+    contact: z.string().optional(),
+    telephone: z.string().optional(),
+    address: z.string().optional(),
+    ext: z.string().optional(),
+    email: z.string().optional(),
+    notes: z.string().optional(),
+    attachment: z.any().optional(),
+    attachment_path: z.string().optional(),
+    attachment_filename: z.string().optional(),
+    created_by: z.number().optional(),
+    updated_by: z.number().optional(),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+    createdBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+    updatedBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+  })).min(1, "At least one shipper is required"),
+  consignees: z.array(z.object({
+    id: z.number().optional(),
+    consignee_id: z.string().optional(),
+    consignee_name: z.string(),
+    contact: z.string().optional(),
+    telephone: z.string().optional(),
+    address: z.string().optional(),
+    ext: z.string().optional(),
+    email: z.string().optional(),
+    notes: z.string().optional(),
+    attachment: z.any().optional(),
+    attachment_path: z.string().optional(),
+    attachment_filename: z.string().optional(),
+    created_by: z.number().optional(),
+    updated_by: z.number().optional(),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+    createdBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+    updatedBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+  })).min(1, "At least one consignee is required"),  brokers: z.array(z.object({
+    id: z.number(),
+    brokerage_company: z.string(),
+    agent_name: z.string(),
+    agent_phone: z.string().optional(),
+    agent_email: z.string().optional(),
+    created_by: z.number().optional(),
+    updated_by: z.number().optional(),
+    created_at: z.string(),
+    updated_at: z.string(),
+    createdBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+    updatedBy: z.object({
+      id: z.number(),
+      username: z.string(),
+      email: z.string(),
+    }).optional(),
+  })).min(1, "At least one broker is required"),
   load_amount: z.coerce.number().min(0, "Amount must be positive"),
   charge_percent: z.coerce
     .number()
@@ -101,6 +176,9 @@ interface DispatchFormProps {
     carrier_id?: number;
     carrier?: string | { id: number; company_name: string; mc_number: string; owner_name: string; phone_number: string; email_address: string; truck_type: string; status: "active" | "inactive" | "pending" | "suspended"; };
     user?: string | { first_name: string; last_name: string; id: number; email: string; };
+    brokers?: Broker[];
+    shippers?: Shipper[];
+    consignees?: Consignee[];
   };
   onSubmit: (data: DispatchFormValues) => void;
   isSubmitting?: boolean;
@@ -155,8 +233,7 @@ export function DispatchForm({
 
     fetchCarriers();
   }, []);
- console.log('Fetched carriers:', carriers);
-  // Set up form with default values and current user defaults
+ console.log('Fetched carriers:', carriers);  // Set up form with default values and current user defaults
   const form = useForm<DispatchFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -177,12 +254,9 @@ export function DispatchForm({
         ? new Date(initialData.dropoff_date)
         : new Date(),
       carrier: initialData?.carrier_id ? initialData.carrier_id.toString() : "",
-      origin: initialData?.origin || "",
-      destination: initialData?.destination || "",
-      brokerage_company: initialData?.brokerage_company || "",
-      brokerage_agent: initialData?.brokerage_agent || "",
-      agent_ph: initialData?.agent_ph || "",
-      agent_email: initialData?.agent_email || "",
+      shippers: initialData?.shippers || [],
+      consignees: initialData?.consignees || [],
+      brokers: initialData?.brokers || [],
       load_amount: initialData?.load_amount || 0,
       // Charge percentage should be taken from carrier profile but can be modified by admin
       charge_percent: initialData?.charge_percent || 0,
@@ -194,7 +268,6 @@ export function DispatchForm({
       payment_method: initialData?.payment_method || "ACH",
     },
   });
-
   // Watch the carrier field to update charge_percent
   const watchedCarrier = form.watch("carrier");
 
@@ -212,14 +285,26 @@ export function DispatchForm({
     }
   }, [watchedCarrier, carriers, form, selectedCarrier]);
 
+  // Handle form submission with data transformation
+  const handleSubmit = (values: DispatchFormValues) => {
+    // Transform the data to match backend expectations
+    const transformedData = {
+      ...values,
+      // For backward compatibility, extract primary broker info if needed
+      brokerage_company: values.brokers[0]?.brokerage_company || "",
+      brokerage_agent: values.brokers[0]?.agent_name || "",
+      agent_ph: values.brokers[0]?.agent_phone || "",
+      agent_email: values.brokers[0]?.agent_email || "",
+      // For backward compatibility, extract primary shipper/consignee if needed
+      origin: values.shippers[0]?.shipper_name || "",
+      destination: values.consignees[0]?.consignee_name || "",
+    };
+    
+    onSubmit(transformedData);
+  };
   // Determine if user is admin
   // TODO: Replace with actual role checking
   const isAdmin = currentUser?.category === "admin_manager" || currentUser?.category === "admin_user" || currentUser?.category === "super_admin";
-
-  // Form submission handler
-  const handleSubmit = (values: DispatchFormValues) => {
-    onSubmit(values);
-  };
 
   return (
     <Form {...form}>
@@ -470,9 +555,7 @@ export function DispatchForm({
                 )}
               />
             </CardContent>
-          </Card>
-
-          {/* Pickup & Delivery */}
+          </Card>          {/* Pickup & Delivery */}
           <Card>
             <CardHeader>
               <CardTitle>Pickup & Delivery</CardTitle>
@@ -502,16 +585,17 @@ export function DispatchForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              <FormField
+              />              <FormField
                 control={form.control}
-                name="origin"
+                name="shippers"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Origin</FormLabel>
+                    <FormLabel>Shippers</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter origin location" {...field} />
+                      <ShipperMultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -546,14 +630,14 @@ export function DispatchForm({
 
               <FormField
                 control={form.control}
-                name="destination"
+                name="consignees"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Destination</FormLabel>
+                    <FormLabel>Consignees</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter destination location"
-                        {...field}
+                      <ConsigneeMultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -564,8 +648,7 @@ export function DispatchForm({
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Broker Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">          {/* Broker Information */}
           <Card>
             <CardHeader>
               <CardTitle>Broker Information</CardTitle>
@@ -573,63 +656,14 @@ export function DispatchForm({
             <CardContent className="space-y-6">
               <FormField
                 control={form.control}
-                name="brokerage_company"
+                name="brokers"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brokerage Company</FormLabel>
+                    <FormLabel>Brokers</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter brokerage company" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="brokerage_agent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Brokerage Agent</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter brokerage agent name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="agent_ph"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Agent Phone</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter agent phone number"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="agent_email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Agent Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Enter agent email"
-                        {...field}
+                      <BrokerMultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />

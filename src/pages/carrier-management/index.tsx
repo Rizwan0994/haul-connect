@@ -8,6 +8,9 @@ import { carrierApiService, CarrierProfile } from '@/services/carrierApi'
 import { useToast } from '@/components/ui/use-toast'
 import { Carrier } from '@/components/carrier-management/columns'
 import { UserAssignmentProvider } from '@/components/carrier-management/user-assignment-provider'
+import { CarrierStats } from '@/components/carrier-management/carrier-stats'
+import { CarrierCommissionDistribution } from '@/components/carrier-management/carrier-commission-distribution'
+import { TopCarriers } from '@/components/carrier-management/top-carriers'
 
 export default function CarrierManagement() {
   const { toast } = useToast()
@@ -68,18 +71,19 @@ export default function CarrierManagement() {
   useEffect(() => {
     fetchCarriers()
   }, []);
-
   return (
     <UserAssignmentProvider>
-      <div className="flex flex-col h-[calc(100vh-4rem)]">
-        <div className="flex-none space-y-4 px-6 pt-6">
+      <div className="flex flex-col h-full">
+        {/* Header section - always visible */}
+        <div className="flex-none space-y-4 px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Carrier Management</h1>
               <p className="text-muted-foreground">
-                Manage your carrier profiles and assignments
+                Manage your carrier profiles and commission tracking
               </p>
-            </div><Link to="/carrier-management/create">
+            </div>
+            <Link to="/carrier-management/create">
               <Button disabled={loading}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Carrier
@@ -111,23 +115,38 @@ export default function CarrierManagement() {
                 </div>
               </div>
             </div>
-          )}        {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading carriers...</span>
-            </div>
-          ) : (
-            <div className="flex-grow overflow-hidden px-6 pb-6">
-              <div className="h-full overflow-auto rounded-md border">
-                <DataTable 
-                  columns={columns} 
-                  data={carriers} 
-                  searchPlaceholder="Search carriers..."
-                />
-              </div>
-            </div>
           )}
         </div>
+
+        {/* Content area - scrollable */}
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center pb-6">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+              <span className="mt-2 block">Loading carriers...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 px-6 pb-6 overflow-auto space-y-6">
+            {/* Carrier Statistics */}
+            <CarrierStats carriers={carriers} loading={loading} />
+            
+            {/* Commission Distribution and Top Carriers Row */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <CarrierCommissionDistribution carriers={carriers} loading={loading} />
+              <TopCarriers carriers={carriers} loading={loading} />
+            </div>
+            
+            {/* Data Table */}
+            <div className="border rounded-md">
+              <DataTable 
+                columns={columns} 
+                data={carriers} 
+                searchPlaceholder="Search carriers..."
+              />
+            </div>
+          </div>
+        )}
       </div>
     </UserAssignmentProvider>
   )

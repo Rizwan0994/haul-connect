@@ -498,12 +498,12 @@ export function InvoiceView({ dispatch }: InvoiceViewProps) {
                     </div>
                     <div className="text-sm">info@haulconnectlogistics.com</div>
                   </div>
-                  <div className="flex">
+                  {/* <div className="flex">
                     <div className="w-24 text-sm font-medium text-slate-500">
                       Email:
                     </div>
                     <div className="text-sm">haulconnect@gmail.com</div>
-                  </div>
+                  </div> */}
                   <Separator className="my-2" />
                   <div className="text-xs text-slate-500">
                     Please include invoice number {invoiceNumber} as reference

@@ -15,6 +15,7 @@ import {
   Search,
   Bell,
   User,
+  DollarSign,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -104,10 +105,21 @@ const menuItems = [
       //   title: "Create Dispatch",
       //   path: "/dispatch-management/new",
       //   icon: Plus, // Icon for specific menu item
-      //   requiresPermission: "route.create-dispatch",
-      // },
+      //   requiresPermission: "route.create-dispatch",      // },
     ],
-  },  {
+  },
+  {
+    title: "Commission Management",
+    isSection: true,
+    icon: DollarSign,
+    children: [
+      {
+        title: "Commissions",
+        path: "/commission-management",
+        requiresPermission: "route.commission-management",
+      },
+    ],
+  },{
     title: "Invoices",
     path: "/invoices",
     icon: FileText,

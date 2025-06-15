@@ -26,6 +26,7 @@ import DispatchDetailPage from '@/pages/dispatch-management/dispatch-detail'
 import DispatchEditPage from '@/pages/dispatch-management/dispatch-edit'
 import DispatchInvoicePage from '@/pages/dispatch-management/dispatch-invoice'
 import NewDispatchPage from '@/pages/dispatch-management/new'
+import CommissionManagementPage from '@/pages/commission-management'
 import InvoicesPage from '@/pages/invoices'
 import SMTPSettingsPage from '@/pages/settings/smtp'
 import PermissionManagementPage from '@/pages/settings/permissions'
@@ -129,10 +130,14 @@ function App() {
                   <PrivateRoute requiredPermission="route.user-management">
                     <UserManagementPage />
                   </PrivateRoute>
-                } />
-                <Route path="invoices" element={
+                } />                <Route path="invoices" element={
                   <PrivateRoute requiredPermission="route.invoices">
                     <InvoicesPage />
+                  </PrivateRoute>
+                } />
+                <Route path="commission-management" element={
+                  <PrivateRoute requiredPermission="route.commission-management">
+                    <CommissionManagementPage />
                   </PrivateRoute>
                 } />
                 <Route path="settings/smtp" element={

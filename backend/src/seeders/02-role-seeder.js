@@ -64,7 +64,7 @@ const rolePermissions = {
     'route.dashboard', 'route.messages', 'route.calendar',
     'route.carrier-profiles', 'route.add-carrier', 'route.followup-sheets',
     'route.active-dispatches', 'route.create-dispatch',
-    'route.invoices', 'route.user-management',
+    'route.invoices', 'route.user-management', 'route.commission-management',
     'settings.smtp'
   ],
     // Dispatch role permissions
@@ -76,9 +76,8 @@ const rolePermissions = {
     
     // Route permissions
     'route.dashboard',
-    'route.carrier-profiles', // Access to carrier list page only
-    'route.active-dispatches', 'route.create-dispatch',
-    'route.invoices'
+    'route.carrier-profiles', // Access to carrier list page only    'route.active-dispatches', 'route.create-dispatch',
+    'route.invoices', 'route.commission-management'
   ],
   
   // Sales role permissions
@@ -99,11 +98,10 @@ const rolePermissions = {
     'carrier.approve.accounts', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.approve.accounts', 'dispatch.reject', 'dispatch.view.pending',
     
-    // Route permissions
-    'route.dashboard',
+    // Route permissions    'route.dashboard',
     'route.carrier-profiles',
     'route.active-dispatches',
-    'route.invoices'
+    'route.invoices', 'route.commission-management'
   ],
   
   // Carrier role permissions (very limited)

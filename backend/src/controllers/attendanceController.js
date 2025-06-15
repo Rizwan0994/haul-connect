@@ -1,6 +1,7 @@
 const { employee_attendance:EmployeeAttendance, user:User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const moment = require('moment');
+const ReportGenerator = require('../utils/reportGenerator');
 
 // Get all attendance records with filtering and pagination
 exports.getAllAttendance = async (req, res) => {
@@ -472,6 +473,14 @@ exports.generateAttendanceReport = async (req, res) => {
       });
     }
 
+    // Validate format
+    if (!['pdf', 'excel'].includes(format)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Format must be either "pdf" or "excel"'
+      });
+    }
+
     // Get attendance data for the date range
     const attendanceData = await EmployeeAttendance.findAll({
       where: {
@@ -489,12 +498,30 @@ exports.generateAttendanceReport = async (req, res) => {
       order: [['date', 'DESC'], ['employee_id', 'ASC']]
     });
 
-    // For now, return JSON data - PDF/Excel generation can be implemented later
-    res.json({
-      status: 'success',
-      data: attendanceData,
-      message: `${format} report data retrieved successfully`
-    });
+    let buffer;
+    let mimeType;
+    let filename;
+
+    if (format === 'excel') {
+      // Generate Excel report
+      buffer = ReportGenerator.generateExcelReport(attendanceData);
+      mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      filename = `attendance-report-${startDate}-to-${endDate}.xlsx`;
+    } else {
+      // Generate PDF report
+      buffer = ReportGenerator.generatePDFReport(attendanceData, startDate, endDate);
+      mimeType = 'application/pdf';
+      filename = `attendance-report-${startDate}-to-${endDate}.pdf`;
+    }
+
+    // Set headers for file download
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    
+    // Send the file
+    res.send(buffer);
+
   } catch (error) {
     console.error('Error generating attendance report:', error);
     res.status(500).json({

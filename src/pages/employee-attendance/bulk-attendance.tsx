@@ -12,6 +12,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
-import { Calendar, Check, X, Clock, Users, FileDown, Printer } from 'lucide-react';
+import { Calendar, Check, X, Clock, Users, FileDown, Printer, CalendarRange } from 'lucide-react';
 import { format } from 'date-fns';
 import { attendanceApi } from '../../services/attendanceApi';
 
@@ -66,6 +73,11 @@ export default function BulkAttendance() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [attendanceData, setAttendanceData] = useState<Record<string, string>>({});
+  
+  // Report dialog states
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [reportStartDate, setReportStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [reportEndDate, setReportEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Fetch employees for the selected date
   const fetchEmployeesForDate = async () => {
@@ -163,9 +175,7 @@ export default function BulkAttendance() {
     } finally {
       setSaving(false);
     }
-  };
-
-  // Generate report
+  };  // Generate report for current date
   const generateReport = async (format: 'pdf' | 'excel') => {
     try {
       const blob = await attendanceApi.generateAttendanceReport(selectedDate, selectedDate, format);
@@ -189,6 +199,36 @@ export default function BulkAttendance() {
       toast({
         title: 'Error',
         description: 'Failed to generate report',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Generate report for custom date range
+  const generateCustomReport = async (format: 'pdf' | 'excel') => {
+    try {
+      const blob = await attendanceApi.generateAttendanceReport(reportStartDate, reportEndDate, format);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `attendance-report-${reportStartDate}-to-${reportEndDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      setIsReportDialogOpen(false);
+      toast({
+        title: 'Success',
+        description: `Custom report downloaded successfully`,
+      });
+    } catch (error: any) {
+      console.error('Error generating custom report:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate custom report',
         variant: 'destructive',
       });
     }
@@ -218,16 +258,15 @@ export default function BulkAttendance() {
           <p className="text-gray-600 mt-1">
             Select date and mark attendance for all employees
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
+        </div>        <div className="flex gap-2">
+          {/* <Button
             onClick={() => generateReport('pdf')}
             variant="outline"
             size="sm"
           >
             <FileDown className="w-4 h-4 mr-2" />
             PDF Report
-          </Button>
+          </Button> */}
           <Button
             onClick={() => generateReport('excel')}
             variant="outline"
@@ -236,6 +275,59 @@ export default function BulkAttendance() {
             <FileDown className="w-4 h-4 mr-2" />
             Excel Report
           </Button>
+          <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+              >
+                <CalendarRange className="w-4 h-4 mr-2" />
+                Custom Report
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Generate Custom Date Range Report</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="startDate">Start Date</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={reportStartDate}
+                      onChange={(e) => setReportStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="endDate">End Date</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={reportEndDate}
+                      onChange={(e) => setReportEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    onClick={() => generateCustomReport('pdf')}
+                    variant="outline"
+                  >
+                    <FileDown className="w-4 h-4 mr-2" />
+                    PDF Report
+                  </Button>
+                  <Button
+                    onClick={() => generateCustomReport('excel')}
+                  >
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Excel Report
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

@@ -121,13 +121,17 @@ const menuItems = [
       },    ],
   },
   {
-    title: "Employee Attendance",
-    isSection: true,
+    title: "Employee Attendance",    isSection: true,
     icon: Clock,
     children: [
       {
         title: "Attendance Records",
         path: "/employee-attendance",
+        requiresPermission: "route.attendance-records",
+      },
+      {
+        title: "Mark Attendance",
+        path: "/employee-attendance/bulk",
         requiresPermission: "route.attendance-records",
       },
     ],

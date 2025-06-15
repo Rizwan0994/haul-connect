@@ -197,7 +197,6 @@ export function DispatchForm({
     return user && typeof user === 'object' && 'first_name' in user && 'last_name' in user;
   };
 
-
   // State to store carriers data
   const [carriers, setCarriers] = useState<
     {
@@ -207,9 +206,8 @@ export function DispatchForm({
     }[]
   >([]);
   const [isLoadingCarriers, setIsLoadingCarriers] = useState(false);
-
   // Selected carrier data
-  const [selectedCarrier, setSelectedCarrier] = useState<string | null>(null);
+  const [selectedCarrier, setSelectedCarrier] = useState<any>(null);
 
   // Fetch carriers on component mount
   useEffect(() => {
@@ -270,20 +268,18 @@ export function DispatchForm({
   });
   // Watch the carrier field to update charge_percent
   const watchedCarrier = form.watch("carrier");
-
   // Update charge percentage when carrier changes
   useEffect(() => {
-    if (watchedCarrier && watchedCarrier !== selectedCarrier) {
-      setSelectedCarrier(watchedCarrier);
-
+    if (watchedCarrier && carriers.length > 0) {
       // Find the selected carrier and get its percentage
       const carrier = carriers.find((c) => c.value === watchedCarrier);
       if (carrier) {
+        setSelectedCarrier(carrier);
         // Update charge percentage field with the carrier's agreed percentage
-        form.setValue("charge_percent", parseFloat(carrier.percentage));
+        form.setValue("charge_percent", parseFloat(carrier.percentage) || 0);
       }
     }
-  }, [watchedCarrier, carriers, form, selectedCarrier]);
+  }, [watchedCarrier, carriers, form]);
 
   // Handle form submission with data transformation
   const handleSubmit = (values: DispatchFormValues) => {
@@ -466,63 +462,48 @@ export function DispatchForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />              <FormField
+              />                <FormField
                 control={form.control}
                 name="carrier"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem>
                     <FormLabel>Carrier</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value && "text-muted-foreground"
-                            )}
-                            disabled={isLoadingCarriers}
-                          >
-                            {field.value
-                              ? carriers.find(
-                                  (carrier) => carrier.value === field.value
-                                )?.label
-                              : "Select a carrier"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                          <CommandInput placeholder="Search carriers..." />
-                          <CommandList>
-                            <CommandEmpty>No carrier found.</CommandEmpty>
-                            <CommandGroup>
-                              {carriers.map((carrier) => (
-                                <CommandItem
-                                  value={carrier.label}
-                                  key={carrier.value}
-                                  onSelect={() => {
-                                    form.setValue("carrier", carrier.value);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      carrier.value === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {carrier.label}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const carrier = carriers.find(c => c.value === value);
+                        setSelectedCarrier(carrier || null);
+                      }} 
+                      defaultValue={field.value}
+                      disabled={isLoadingCarriers}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a carrier" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {carriers.map((carrier) => (
+                          <SelectItem key={carrier.value} value={carrier.value}>
+                            <div className="flex flex-col">
+                              <span>{carrier.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Display selected carrier information */}
+                    {selectedCarrier && (
+                      <div className="mt-2 p-3 border rounded-lg bg-gray-800">
+                        <h4 className="font-medium text-sm mb-2">Selected Carrier:</h4>
+                        <div className="space-y-1 text-sm">
+                          <div><strong>Company:</strong> {selectedCarrier.label}</div>
+                          <div><strong>Agreed Percentage:</strong> {selectedCarrier.percentage}%</div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <FormMessage />
                   </FormItem>
                 )}

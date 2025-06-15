@@ -238,12 +238,12 @@ export const columns: ColumnDef<Carrier>[] = [
                 Open in popup window
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link to={`/carrier-management/assignments/${carrier.id}`}>
                   <CalendarCheck2 className="h-4 w-4 mr-2" />
                   Manage Assignments
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -6,7 +6,7 @@ const { requireRole } = require('../middleware/auth');
 const NotificationService = require('../services/notificationService');
 
 // Get all users (HR/Admin only)
-router.get('/', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, res) => {
+router.get('/',  async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
@@ -20,7 +20,7 @@ router.get('/', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, re
 });
 
 // Get user by ID (HR/Admin only)
-router.get('/:id', requireRole(['Admin', 'Super Admin', 'Manager']), async (req, res) => {
+router.get('/:id',  async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] }

@@ -25,6 +25,7 @@ import {
 import { Carrier } from "@/lib/carriers-data";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/components/auth/auth-context";
 
 // Define form schema with Zod
 const carrierFormSchema = z.object({
@@ -122,6 +123,16 @@ export function CarrierForm({
   isLoading = false,
 }: CarrierFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
+  const { hasPermission } = useAuth();
+    // Check if user is admin
+  const isAdmin = hasPermission(['admin', 'super admin']);
+  
+  // Reset tab to basic if trying to access admin tab without permissions
+  React.useEffect(() => {
+    if (activeTab === "admin" && !isAdmin) {
+      setActiveTab("basic");
+    }
+  }, [activeTab, isAdmin]);
   
   // Initialize the form with default values
   const form = useForm<CarrierFormValues>({
@@ -204,15 +215,14 @@ export function CarrierForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">          <TabsList className="grid grid-cols-7 mb-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">          <TabsList className={`grid ${isAdmin ? 'grid-cols-7' : 'grid-cols-6'} mb-8`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="driver">Driver Details</TabsTrigger>
             <TabsTrigger value="vehicle">Vehicle Details</TabsTrigger>
             <TabsTrigger value="insurance">Insurance</TabsTrigger>
             <TabsTrigger value="factoring">Factoring</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
-            <TabsTrigger value="admin">Admin Only</TabsTrigger>
+            {isAdmin && <TabsTrigger value="admin">Admin Only</TabsTrigger>}
           </TabsList>
 
           {/* Basic Information Tab */}
@@ -856,27 +866,26 @@ export function CarrierForm({
                   </FormItem>
                 )}              />
             </div>
-          </TabsContent>
-
-          {/* Admin Only Tab */}
-          <TabsContent value="admin" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="text-amber-600 mt-0.5">
-                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-amber-800">Restricted Access</h4>
-                      <p className="text-sm text-amber-700 mt-1">
-                        This information is restricted to administrators only. Please do not share these credentials.
-                      </p>
+          </TabsContent>          {/* Admin Only Tab */}
+          {isAdmin && (
+            <TabsContent value="admin" className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <div className="text-amber-600 mt-0.5">
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-amber-800">Restricted Access</h4>
+                        <p className="text-sm text-amber-700 mt-1">
+                          This information is restricted to administrators only. Please do not share these credentials.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 <div className="space-y-6">
                   {/* DAT Information */}
@@ -1067,11 +1076,11 @@ export function CarrierForm({
                         )}
                       />
                     </div>
-                  </div>
-                </div>
+                  </div>                </div>
               </CardContent>
             </Card>
           </TabsContent>
+          )}
         </Tabs>
 
         <div className="flex justify-end gap-4 pt-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   Truck,
   Package,
@@ -17,6 +18,8 @@ import {
   User,
   DollarSign,
   Clock,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -205,7 +208,38 @@ export function AppSidebar({ className }: AppSidebarProps) {
   const { state } = useSidebar();
   const { hasSpecificPermission } = useAuth();
   const { unreadCount } = useNotifications();
+  
+  // State for managing collapsible sections
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
+  const toggleSection = (sectionTitle: string) => {
+    const newCollapsed = new Set(collapsedSections);
+    if (newCollapsed.has(sectionTitle)) {
+      newCollapsed.delete(sectionTitle);
+    } else {
+      newCollapsed.add(sectionTitle);
+    }
+    setCollapsedSections(newCollapsed);
+  };
+
+  // Check if any children of a section have permission
+  const hasVisibleChildren = (item: any): boolean => {
+    if (!item.children) return false;
+    
+    return item.children.some((child: any) => {
+      // Check role-based permission (legacy)
+      if (child.requiresRole && currentUser && !child.requiresRole.includes(currentUser.category)) {
+        return false;
+      }
+      
+      // Check specific permission (new permission system)
+      if (child.requiresPermission && !hasSpecificPermission(child.requiresPermission)) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
   const renderMenuItem = (item: any) => {
     // Check role-based permission (legacy)
     if (item.requiresRole && currentUser && !item.requiresRole.includes(currentUser.category)) {
@@ -218,15 +252,32 @@ export function AppSidebar({ className }: AppSidebarProps) {
     }
 
     if (item.children) {
+      // Don't render section if no children have permission
+      if (!hasVisibleChildren(item)) {
+        return null;
+      }
+
+      const isCollapsed = collapsedSections.has(item.title);
+      const ChevronIcon = isCollapsed ? ChevronRight : ChevronDown;
+
       return (
-        <div key={item.title} className="mb-4">
-          <div className="flex items-center gap-3 px-3 py-2 text-xs uppercase tracking-wider font-bold text-gray-400 border-b border-gray-700 pb-2 mb-2">
-            {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
-            <span>{item.title}</span>
-          </div>
-          <SidebarMenu className="space-y-1">
-            {item.children.map((child: any) => renderMenuItem(child))}
-          </SidebarMenu>
+        <div key={item.title} className="mb-2">
+          <button
+            onClick={() => toggleSection(item.title)}
+            className="flex items-center justify-between w-full gap-3 px-3 py-2 text-xs uppercase tracking-wider font-bold text-gray-400 hover:text-gray-300 border-b border-gray-700 pb-2 mb-2 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
+              <span>{item.title}</span>
+            </div>
+            <ChevronIcon className="h-4 w-4 flex-shrink-0" />
+          </button>
+          
+          {!isCollapsed && (
+            <SidebarMenu className="space-y-1 ml-2">
+              {item.children.map((child: any) => renderMenuItem(child))}
+            </SidebarMenu>
+          )}
         </div>
       );
     }    const isActive = location.pathname === item.path;
@@ -238,12 +289,11 @@ export function AppSidebar({ className }: AppSidebarProps) {
           onClick={() => navigate(item.path)}
           isActive={isActive}
           className={cn(
-            "w-full justify-start gap-3 px-3 py-2.5 rounded-md", // Added rounded-md
-            "hover:bg-gray-700 hover:text-white", // Adjusted hover for dark theme
-            "data-[active=true]:bg-[#f29600] data-[active=true]:text-white", // Stronger active state
-            "transition-colors duration-150 relative", // Added relative for potential absolute elements
-           isActive && "before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-white before:rounded-l-sm"
-
+            "w-full justify-start gap-3 px-3 py-2.5 rounded-md",
+            "hover:bg-gray-700 hover:text-white",
+            "data-[active=true]:bg-[#f29600] data-[active=true]:text-white",
+            "transition-colors duration-150 relative",
+            isActive && "before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-white before:rounded-l-sm"
           )}
           tooltip={item.title}
         >

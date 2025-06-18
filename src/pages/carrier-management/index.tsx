@@ -49,10 +49,10 @@ export default function CarrierManagement() {
         commission_amount: c.commission_amount,
         commission_paid_at: c.commission_paid_at,
         loads_completed: c.loads_completed,
-        first_load_completed_at: c.first_load_completed_at,
-        sales_agent_id: c.sales_agent_id,
+        first_load_completed_at: c.first_load_completed_at,        sales_agent_id: c.sales_agent_id,
         created_by: c.created_by,
-        commission_paid: c.commission_paid
+        commission_paid: c.commission_paid,
+        creator: c.creator // Add creator information from API
       }))
       setCarriers(formattedCarriers)
     } catch (err: any) {

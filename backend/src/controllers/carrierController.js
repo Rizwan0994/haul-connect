@@ -10,6 +10,7 @@ exports.createCarrier = async (req, res) => {
       approval_status: 'pending',
       status: 'pending', // Also set the main status to pending
       sales_agent_id: req.user?.role === 'sales' ? req.user.id : req.body.sales_agent_id, // Set sales agent ID for sales users
+      created_by: req.user?.id, // Set created_by to current user
     };
     
     const carrier = await CarrierProfile.create(carrierData);
@@ -55,7 +56,17 @@ exports.createCarrier = async (req, res) => {
 
 exports.getAllCarriers = async (req, res) => {
   try {
-    const carriers = await CarrierProfile.findAll();
+    const carriers = await CarrierProfile.findAll({
+      include: [
+        {
+          model: User,
+          as: 'creator',
+          attributes: ['id', 'username', 'email', 'first_name', 'last_name'],
+          required: false // LEFT JOIN to include carriers without creators
+        }
+      ],
+      order: [['created_at', 'DESC']]
+    });
     res.json({ status: "success", data: carriers });
   } catch (error) {
     console.log("error",error)

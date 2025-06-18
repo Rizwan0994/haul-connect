@@ -58,10 +58,16 @@ export interface CarrierProfile {
   commission_paid_at?: string;
   
   // Commission tracking fields
-  commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";
-  commission_amount?: number;
+  commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";  commission_amount?: number;
   loads_completed?: number;
   first_load_completed_at?: string;
+  creator?: {
+    id: number;
+    username: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+  };
 }
 
 export interface ApiResponse<T> {

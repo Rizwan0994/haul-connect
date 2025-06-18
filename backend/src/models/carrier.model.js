@@ -219,8 +219,7 @@ module.exports = (sequelize) => {
         type: DataTypes.DATE,
         allowNull: true,
         comment: 'When the first load was completed (triggers confirmed sale)'
-      },
-      sales_agent_id: {
+      },      sales_agent_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
@@ -228,6 +227,15 @@ module.exports = (sequelize) => {
           key: 'id',
         },
         comment: 'Sales agent who brought this carrier (for commission tracking)'
+      },
+      created_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        comment: 'User who created this carrier profile'
       },
 
       created_at: {

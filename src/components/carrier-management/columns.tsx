@@ -47,10 +47,16 @@ export type Carrier = {
   commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";
   commission_paid_at?: string;  commission_amount?: number;
   loads_completed?: number;
-  first_load_completed_at?: string;
-  sales_agent_id?: number;
+  first_load_completed_at?: string;  sales_agent_id?: number;
   created_by?: number;
   commission_paid?: boolean;
+  creator?: {
+    id: number;
+    username: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+  };
 };
 
 export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
@@ -230,6 +236,28 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
           carrierName={`${carrier.company_name} (${carrier.mc_number})`}
           status={carrier.status}
         />
+      );
+    },  },
+  {
+    accessorKey: "creator",
+    header: "Created By",
+    cell: ({ row }) => {
+      const carrier = row.original;
+      const creator = carrier.creator;
+      
+      if (!creator) {
+        return <span className="text-muted-foreground">Unknown</span>;
+      }
+      
+      const displayName = creator.first_name && creator.last_name 
+        ? `${creator.first_name} ${creator.last_name}`
+        : creator.username;
+      
+      return (
+        <div className="flex flex-col">
+          <span className="font-medium">{displayName}</span>
+          <span className="text-xs text-muted-foreground">{creator.email}</span>
+        </div>
       );
     },
   },

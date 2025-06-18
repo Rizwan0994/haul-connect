@@ -189,11 +189,16 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
         comment: 'Commission amount to be paid to sales agent'
-      },
-      commission_paid_at: {
+      },      commission_paid_at: {
         type: DataTypes.DATE,
         allowNull: true,
         comment: 'When commission was paid to sales agent'
+      },
+      commission_paid: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        comment: 'Whether commission has been paid to sales agent'
       },
       commission_paid_by: {
         type: DataTypes.INTEGER,

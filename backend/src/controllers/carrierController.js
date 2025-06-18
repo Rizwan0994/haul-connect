@@ -8,7 +8,8 @@ exports.createCarrier = async (req, res) => {
     const carrierData = {
       ...req.body,
       approval_status: 'pending',
-      status: 'pending' // Also set the main status to pending
+      status: 'pending', // Also set the main status to pending
+      sales_agent_id: req.user?.role === 'sales' ? req.user.id : req.body.sales_agent_id, // Set sales agent ID for sales users
     };
     
     const carrier = await CarrierProfile.create(carrierData);

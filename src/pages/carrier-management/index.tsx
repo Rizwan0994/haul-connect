@@ -23,9 +23,10 @@ export default function CarrierManagement() {
     try {
       setLoading(true)
       setError(null)
+        // Using the carriers data service for fetching
+      const carrierData = await carrierApiService.getAllCarriers()
       
-      // Using the carriers data service for fetching
-      const carrierData = await carrierApiService.getAllCarriers()      // Convert CarrierProfile[] to Carrier[]
+      console.log('Raw carrier data from API:', carrierData);// Convert CarrierProfile[] to Carrier[]
       const formattedCarriers = carrierData.map(c => ({
         id: c.id?.toString() || '',
         mc_number: c.mc_number || '',
@@ -43,13 +44,15 @@ export default function CarrierManagement() {
         approved_by_manager: c.approved_by_manager || '',
         approved_by_accounts: c.approved_by_accounts || '',
         manager_approved_at: c.manager_approved_at || '',
-        accounts_approved_at: c.accounts_approved_at || '',
-        // Commission tracking fields
+        accounts_approved_at: c.accounts_approved_at || '',        // Commission tracking fields
         commission_status: c.commission_status,
         commission_amount: c.commission_amount,
         commission_paid_at: c.commission_paid_at,
         loads_completed: c.loads_completed,
-        first_load_completed_at: c.first_load_completed_at
+        first_load_completed_at: c.first_load_completed_at,
+        sales_agent_id: c.sales_agent_id,
+        created_by: c.created_by,
+        commission_paid: c.commission_paid
       }))
       setCarriers(formattedCarriers)
     } catch (err: any) {

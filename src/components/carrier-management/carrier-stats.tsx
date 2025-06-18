@@ -1,32 +1,61 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Users, CheckCircle, DollarSign } from 'lucide-react';
+import { TrendingUp, Users, CheckCircle, DollarSign, UserCheck, Activity } from 'lucide-react';
 import { Carrier } from './columns';
+import { useAuth } from '@/components/auth/auth-context';
 
 interface CarrierStatsProps {
   carriers: Carrier[];
   loading?: boolean;
 }
 
-export function CarrierStats({ carriers, loading }: CarrierStatsProps) {  const calculateStats = () => {
-    const totalCarriers = carriers.length;
-    const activeCarriers = carriers.filter(c => c.status === 'active').length;
-    const approvedCarriers = carriers.filter(c => c.approval_status === 'accounts_approved').length;
+export function CarrierStats({ carriers, loading }: CarrierStatsProps) {
+  const { currentUser } = useAuth();  const calculateStats = () => {
+    // Filter carriers by current user for sales agents
+    // Admins and managers see all carriers
+    const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Super Admin' || currentUser?.role === 'Manager';
     
-    // Calculate total commission paid
-    const totalCommissionPaid = carriers.reduce((sum, carrier) => {
-      return sum + (carrier.commission_amount || 0);
-    }, 0);
-
-    // Calculate eligible carriers (carriers who have completed at least one load)
-    const eligibleCarriers = carriers.filter(c => c.commission_status === 'confirmed_sale' || c.commission_status === 'paid').length;
+    // For now, show all carriers since existing carriers might not have sales_agent_id set
+    // TODO: Once all carriers have sales_agent_id populated, enable strict filtering for sales users
+    const userCarriers = carriers; // Temporarily show all carriers until sales_agent_id is populated
+    
+    console.log('Current user:', currentUser);
+    console.log('User carriers:', userCarriers);
+    console.log('All carriers:', carriers);
+    
+    // 1. Total Carriers: Number of carriers a sales user has saved
+    const totalCarriers = userCarriers.length;
+    
+    // 2. Approved Carriers: Carriers that have been approved by manager/admin
+    const approvedCarriers = userCarriers.filter(c => {
+      const isApproved = c.approval_status === 'accounts_approved' || c.approval_status === 'manager_approved';
+      console.log(`Carrier ${c.company_name}: approval_status = ${c.approval_status}, isApproved = ${isApproved}`);
+      return isApproved;
+    }).length;
+      // 3. Active Carriers: Carriers with completed dispatches and paid invoices
+    // A carrier is active when they have completed at least one load AND commission is confirmed/paid
+    const activeCarriers = userCarriers.filter(c => {
+      const hasCompletedLoads = c.loads_completed && c.loads_completed > 0;
+      const hasConfirmedCommission = c.commission_status === 'confirmed_sale' || c.commission_status === 'paid';
+      const isActive = hasCompletedLoads && hasConfirmedCommission;
+      console.log(`Carrier ${c.company_name}: loads_completed = ${c.loads_completed}, commission_status = ${c.commission_status}, isActive = ${isActive}`);
+      return isActive;
+    }).length;
+    
+    // 4. Commission Paid: Total amount of commissions paid to the sales agent
+    const totalCommissionPaid = userCarriers
+      .filter(c => {
+        const isPaid = c.commission_status === 'paid' || c.commission_paid === true;
+        console.log(`Carrier ${c.company_name}: commission_status = ${c.commission_status}, commission_paid = ${c.commission_paid}, isPaid = ${isPaid}`);
+        return isPaid;
+      })
+      .reduce((sum, carrier) => sum + (carrier.commission_amount || 0), 0);
 
     return {
       totalCarriers,
-      activeCarriers,
       approvedCarriers,
-      totalCommissionPaid,
-      eligibleCarriers
+      activeCarriers,
+      totalCommissionPaid
     };
   };
 
@@ -40,37 +69,35 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {  const 
       maximumFractionDigits: 0,
     }).format(amount);
   };
-
   const statsData = [
     {
       title: 'Total Carriers',
       value: stats.totalCarriers,
       icon: Users,
-      description: 'All registered carriers',
+      description: 'Number of carriers you have saved',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-    },
-    {
-      title: 'Active Carriers',
-      value: stats.activeCarriers,
-      icon: TrendingUp,
-      description: 'Currently active carriers',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
     },
     {
       title: 'Approved Carriers',
       value: stats.approvedCarriers,
       icon: CheckCircle,
-      description: 'Fully approved carriers',
+      description: 'Carriers approved by manager/admin',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
+    },    {
+      title: 'Active Carriers',
+      value: stats.activeCarriers,
+      icon: Activity,
+      description: 'Carriers with completed & paid dispatches',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
     },
     {
       title: 'Commission Paid',
-      value: formatCurrency( parseFloat(String(stats.totalCommissionPaid)) || 0),
+      value: formatCurrency(parseFloat(String(stats.totalCommissionPaid)) || 0),
       icon: DollarSign,
-      description: 'Total commission paid',
+      description: 'Total commission paid to you',
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
     },

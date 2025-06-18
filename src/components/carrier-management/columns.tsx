@@ -45,10 +45,12 @@ export type Carrier = {
   manager_approved_at?: string;
   accounts_approved_at?: string;
   commission_status?: "not_eligible" | "pending" | "paid" | "confirmed_sale";
-  commission_paid_at?: string;
-  commission_amount?: number;
+  commission_paid_at?: string;  commission_amount?: number;
   loads_completed?: number;
   first_load_completed_at?: string;
+  sales_agent_id?: number;
+  created_by?: number;
+  commission_paid?: boolean;
 };
 
 export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [

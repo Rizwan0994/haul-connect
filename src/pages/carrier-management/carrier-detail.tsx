@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Edit, ArrowLeft, CalendarCheck2 } from 'lucide-react'
 import { getCarrierById, type Carrier } from '@/lib/carriers-data'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function CarrierDetail() {
   const { id } = useParams()
@@ -66,14 +67,15 @@ export default function CarrierDetail() {
         <div className="flex-1">
           <h1 className="text-3xl font-bold tracking-tight">{carrier.company_name}</h1>
           <p className="text-muted-foreground">Carrier Profile Details</p>
-        </div>
-        <div className="flex gap-2">
-          <Link to={`/carrier-management/assignments/${id}`}>
-            <Button variant="outline">
-              <CalendarCheck2 className="mr-2 h-4 w-4" />
-              Manage Assignments
-            </Button>
-          </Link>
+        </div>        <div className="flex gap-2">
+          <PermissionGate requiredPermission="carriers.manage_assignments">
+            <Link to={`/carrier-management/assignments/${id}`}>
+              <Button variant="outline">
+                <CalendarCheck2 className="mr-2 h-4 w-4" />
+                Manage Assignments
+              </Button>
+            </Link>
+          </PermissionGate>
           <Link to={`/carrier-management/${id}/edit`}>
             <Button>
               <Edit className="mr-2 h-4 w-4" />

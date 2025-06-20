@@ -110,9 +110,8 @@ function App() {
                 <Route path="carrier-management/:id/edit" element={
                   <PrivateRoute requiredPermission="carriers.edit">
                     <CarrierEditPage />
-                  </PrivateRoute>                } />
-                <Route path="carrier-management/assignments/:id" element={
-                  <PrivateRoute requiredPermission="carriers.view">
+                  </PrivateRoute>                } />                <Route path="carrier-management/assignments/:id" element={
+                  <PrivateRoute requiredPermission="carriers.manage_assignments">
                     <CarrierAssignmentsPage />
                   </PrivateRoute>
                 } />

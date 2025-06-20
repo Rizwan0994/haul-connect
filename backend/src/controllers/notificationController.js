@@ -166,7 +166,8 @@ const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    const count = await Notification.count({
+    // Get regular notifications count
+    const notificationCount = await Notification.count({
       where: { 
         [Op.or]: [
           { user_id: userId },
@@ -176,7 +177,61 @@ const getUnreadCount = async (req, res) => {
       }
     });
     
-    res.json(successResponse("Unread notification count retrieved", { count }));
+    let approvalCount = 0;
+    
+    // Check if user has permission to approve carriers or dispatches
+    const userPermissions = req.user.permissions || [];
+    const userRole = req.user.role_name || req.user.category || '';
+    
+    // Check if user is admin or has approval permissions
+    const isAdmin = userRole.toLowerCase().includes('admin');
+    const canApproveCarriers = isAdmin || userPermissions.some(p => 
+      p.name === 'carrier.approve.manager' || p.name === 'carrier.approve.accounts'
+    );
+    const canApproveDispatches = isAdmin || userPermissions.some(p => 
+      p.name === 'dispatch.approve.manager' || p.name === 'dispatch.approve.accounts'
+    );
+    
+    if (canApproveCarriers || canApproveDispatches) {
+      // Import models
+      const { carrier_profile, dispatch } = require('../models');
+      
+      // Count pending carrier approvals
+      if (canApproveCarriers) {
+        const pendingCarriers = await carrier_profile.count({
+          where: {
+            [Op.or]: [
+              { approval_status: 'pending' },
+              { approval_status: 'manager_approved' } // For accounts team
+            ]
+          }
+        });
+        approvalCount += pendingCarriers;
+      }
+      
+      // Count pending dispatch approvals
+      if (canApproveDispatches) {
+        const pendingDispatches = await dispatch.count({
+          where: {
+            [Op.or]: [
+              { approval_status: 'pending' },
+              { approval_status: 'manager_approved' } // For accounts team
+            ]
+          }
+        });
+        approvalCount += pendingDispatches;
+      }
+    }
+    
+    const totalCount = notificationCount + approvalCount;
+    
+    res.json(successResponse("Unread notification count retrieved", { 
+      count: totalCount,
+      breakdown: {
+        notifications: notificationCount,
+        approvals: approvalCount
+      }
+    }));
   } catch (error) {
     console.error("Error getting unread count:", error);
     res.status(500).json(errorResponse("Error retrieving unread count", error.message));

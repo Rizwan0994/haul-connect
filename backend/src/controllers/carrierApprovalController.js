@@ -206,20 +206,60 @@ const carrierApprovalController = {
         rejected_at: new Date(),
         rejection_reason: reason,
         status: 'suspended' // Update main status to suspended
-      });
+      });      // Create notification for the creator/assigned users
+      try {
+        // Try to find users assigned to this carrier
+        const { carrier_user_assignment } = require('../models');
+        const assignedUsers = await carrier_user_assignment.findAll({
+          where: { carrier_id: carrierId },
+          include: [{ model: user, as: 'user' }]
+        });
 
-      // Create notification for the creator
-      await notification.create({
-        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
-        title: 'Carrier Profile Rejected',
-        message: `Your carrier profile for ${carrierProfile.company_name} has been rejected. Reason: ${reason}`,
-        type: 'rejection',
-        metadata: {
-          carrier_id: carrierId,
-          action: 'rejected',
-          reason: reason
-        }
-      });
+        if (assignedUsers.length > 0) {
+          // Notify all assigned users
+          for (const assignment of assignedUsers) {
+            await notification.create({
+              user_id: assignment.user_id,
+              title: 'Carrier Profile Rejected',
+              message: `Carrier profile for ${carrierProfile.company_name} has been rejected. Reason: ${reason}`,
+              type: 'error',
+              link: `/carrier-management/${carrierId}`,
+              metadata: {
+                carrier_id: carrierId,
+                action: 'rejected',
+                reason: reason
+              }
+            });
+          }
+        } else {
+          // Fallback: notify all sales users
+          const salesUsers = await user.findAll({
+            where: {
+              [Op.or]: [
+                { category: 'Sales' },
+                { role: 'Sales' }
+              ],
+              is_active: true
+            }
+          });
+          
+          for (const salesUser of salesUsers) {
+            await notification.create({
+              user_id: salesUser.id,
+              title: 'Carrier Profile Rejected',
+              message: `Carrier profile for ${carrierProfile.company_name} has been rejected. Reason: ${reason}`,
+              type: 'error',
+              link: `/carrier-management/${carrierId}`,
+              metadata: {
+                carrier_id: carrierId,
+                action: 'rejected',
+                reason: reason
+              }
+            });
+          }
+        }      } catch (notifError) {
+        console.error('Error creating rejection notification:', notifError);
+      }
 
       res.json({
         success: true,

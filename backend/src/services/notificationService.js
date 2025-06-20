@@ -191,10 +191,11 @@ class NotificationService {
    * @param {string} options.type Notification type (info, warning, error, success)
    * @param {string} options.link Optional link for the notification
    * @returns {Promise<Object[]>} Array of created notifications
-   */
-  static async createForRoles(options) {
+   */  static async createForRoles(options) {
     try {
       const { roleIds, message, type = 'info', link } = options;
+      
+      console.log('🎭 createForRoles called with:', { roleIds, message, type, link });
       
       if (!roleIds || !Array.isArray(roleIds) || roleIds.length === 0) {
         throw new Error("Role IDs array is required and must not be empty");
@@ -212,9 +213,12 @@ class NotificationService {
         attributes: ['id']
       });
       
+      console.log('👥 Found users with roles:', users.map(u => u.id));
+      
       const userIds = users.map(user => user.id);
       
       if (userIds.length === 0) {
+        console.log('⚠️ No users found with the specified roles');
         return [];
       }
       
@@ -238,32 +242,35 @@ class NotificationService {
    * @param {string} options.type Notification type (info, warning, error, success)
    * @param {string} options.link Optional link for the notification
    * @returns {Promise<Object[]>} Array of created notifications
-   */
-  static async createForAdmins( message, type = 'info', link ) {
+   */  static async createForAdmins( message, type = 'info', link ) {
     try {
       // const { message, type = 'info', link } = options;
+      
+      console.log('👑 createForAdmins called with:', { message, type, link });
       
       if (!message) {
         throw new Error("Message is required");
       }
-      
-      // Find all admin users
+        // Find all admin users
       const adminUsers = await User.findAll({
         include : [
           {
             model: Role,
             as: 'userRole',
             where: {
-              name: 'Super Admin' 
+              name: 'admin' 
             }
           }
         ],
         attributes: ['id']
       });
       
+      console.log('👑 Found admin users:', adminUsers.map(u => u.id));
+      
       const adminIds = adminUsers.map(user => user.id);
       
       if (adminIds.length === 0) {
+        console.log('⚠️ No admin users found');
         return [];
       }
       

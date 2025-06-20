@@ -117,14 +117,21 @@ const systemPermissions = [
     resource: 'carriers',
     action: 'delete',
     description: 'Delete carriers'
-  },
-  {
+  },  {
     name: 'carriers.manage_assignments',
     type: 'feature',
     module: 'Carriers',
     resource: 'carriers',
     action: 'manage_assignments',
     description: 'Manage user assignments for carriers'
+  },
+  {
+    name: 'carriers.manage_status',
+    type: 'feature',
+    module: 'Carriers',
+    resource: 'carriers',
+    action: 'manage_status',
+    description: 'Manage carrier status (Active/Inactive/Suspended)'
   },
   
   // Dispatch module permissions

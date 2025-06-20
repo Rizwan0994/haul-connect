@@ -9,6 +9,7 @@ import CarrierModalsContainer from '@/components/carrier-management/carrier-moda
 import DispatchModalsContainer from '@/components/dispatch-management/dispatch-modals-container'
 import DashboardLayout from '@/components/dashboard-layout'
 import PrivateRoute from '@/components/auth/private-route'
+import { SmartRedirect } from '@/components/auth/smart-redirect'
 
 // Auth pages
 import LoginPage from '@/pages/auth/login'
@@ -72,11 +73,9 @@ function App() {
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/access-denied" element={<AccessDeniedPage />} />
-
-              {/* Protected routes */}
+                <Route path="/access-denied" element={<AccessDeniedPage />} />              {/* Protected routes */}
               <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route index element={<SmartRedirect />} />
                 <Route path="dashboard" element={
                   <PrivateRoute requiredPermission="route.dashboard">
                     <DashboardPage />

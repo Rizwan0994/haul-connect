@@ -20,7 +20,7 @@ import CarrierManagementPage from '@/pages/carrier-management'
 import CarrierDetailPage from '@/pages/carrier-management/carrier-detail'
 import CarrierEditPage from '@/pages/carrier-management/carrier-edit'
 import CarrierCreatePage from '@/pages/carrier-management/carrier-create'
-// import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments'
+import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments-page'
 
 // Contact Management pages
 import ContactManagementPage from '@/pages/contact-management'
@@ -111,7 +111,11 @@ function App() {
                   <PrivateRoute requiredPermission="carriers.edit">
                     <CarrierEditPage />
                   </PrivateRoute>                } />
-                {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
+                <Route path="carrier-management/assignments/:id" element={
+                  <PrivateRoute requiredPermission="carriers.view">
+                    <CarrierAssignmentsPage />
+                  </PrivateRoute>
+                } />
                 
                 {/* Contact Management Routes */}
                 <Route path="contact-management" element={

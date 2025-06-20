@@ -42,11 +42,9 @@ export default function DashboardLayout() {
             <div className="flex items-center gap-2 flex-1 min-w-0 sm:ml-2">
               <h1 className="font-semibold text-lg truncate">Haul Connect</h1>
             </div>
-          </header>
-
-          {/* Main Outlet */}
+          </header>          {/* Main Outlet */}
           <main className="flex-1 overflow-y-auto">
-            <div className="p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12">
+            <div className="p-4 sm:p-6 max-w-[calc(100vw-280px)] mx-auto">
               <Outlet />
             </div>
           </main>

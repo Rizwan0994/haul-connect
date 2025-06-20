@@ -102,10 +102,9 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {
       bgColor: 'bg-emerald-50',
     },
   ];
-
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -123,13 +122,12 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
       {statsData.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <Card key={index} className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-100">
+          <Card key={index} className="hover:shadow-md transition-shadow">            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
               <div className={`${stat.bgColor} p-2 rounded-lg`}>
@@ -137,10 +135,10 @@ export function CarrierStats({ carriers, loading }: CarrierStatsProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-100">
+              <div className="text-2xl font-bold">
                 {stat.value}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {stat.description}
               </p>
             </CardContent>

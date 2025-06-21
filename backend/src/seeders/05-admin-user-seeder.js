@@ -36,7 +36,7 @@ async function createAdminUser() {
       return false;
     }    // Get the Super Admin role ID
     const superAdminRole = await sequelize.query(
-      "SELECT id FROM roles WHERE name = 'Super Admin'",
+      "SELECT id FROM roles WHERE name = 'admin'",
       { type: QueryTypes.SELECT }
     );
 

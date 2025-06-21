@@ -9,6 +9,7 @@ import CarrierModalsContainer from '@/components/carrier-management/carrier-moda
 import DispatchModalsContainer from '@/components/dispatch-management/dispatch-modals-container'
 import DashboardLayout from '@/components/dashboard-layout'
 import PrivateRoute from '@/components/auth/private-route'
+import { SmartRedirect } from '@/components/auth/smart-redirect'
 
 // Auth pages
 import LoginPage from '@/pages/auth/login'
@@ -20,7 +21,7 @@ import CarrierManagementPage from '@/pages/carrier-management'
 import CarrierDetailPage from '@/pages/carrier-management/carrier-detail'
 import CarrierEditPage from '@/pages/carrier-management/carrier-edit'
 import CarrierCreatePage from '@/pages/carrier-management/carrier-create'
-// import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments'
+import CarrierAssignmentsPage from '@/pages/carrier-management/carrier-assignments-page'
 
 // Contact Management pages
 import ContactManagementPage from '@/pages/contact-management'
@@ -72,11 +73,9 @@ function App() {
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/access-denied" element={<AccessDeniedPage />} />
-
-              {/* Protected routes */}
+                <Route path="/access-denied" element={<AccessDeniedPage />} />              {/* Protected routes */}
               <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route index element={<SmartRedirect />} />
                 <Route path="dashboard" element={
                   <PrivateRoute requiredPermission="route.dashboard">
                     <DashboardPage />
@@ -110,8 +109,11 @@ function App() {
                 <Route path="carrier-management/:id/edit" element={
                   <PrivateRoute requiredPermission="carriers.edit">
                     <CarrierEditPage />
-                  </PrivateRoute>                } />
-                {/* <Route path="carrier-management/assignments/:id" element={<CarrierAssignmentsPage />} /> */}
+                  </PrivateRoute>                } />                <Route path="carrier-management/assignments/:id" element={
+                  <PrivateRoute requiredPermission="carriers.manage_assignments">
+                    <CarrierAssignmentsPage />
+                  </PrivateRoute>
+                } />
                 
                 {/* Contact Management Routes */}
                 <Route path="contact-management" element={

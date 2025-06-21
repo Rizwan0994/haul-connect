@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authClient, User } from '@/lib/auth-client';
 import { jwtDecode } from "jwt-decode";
 import { Permission } from '@/lib/permission-api';
+import { findFirstAccessibleRoute, isUserAdmin } from '@/lib/route-utils';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -108,22 +109,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('No permissions found in login response');
       setUserPermissions([]);
     }
-      
-    // Log permissions for debugging
+        // Log permissions for debugging
     console.log('User permissions:', response.data.user.permissions || 'No permissions');
     console.log('User role:', response.data.user.role_name || response.data.user.category);
 
-    // Redirect based on role - use role_name first if available, then fall back to category
-    const userRole = response.data.user.role_name || response.data.user.category;
+    // Use smart redirect to find the first accessible route
+    const userIsAdmin = isUserAdmin(response.data.user);
+    const redirectPath = findFirstAccessibleRoute(response.data.user.permissions || [], userIsAdmin);
     
-    if (['Admin', 'admin', 'Manager', 'manager', 'Super Admin', 'super admin'].some(r => 
-        userRole?.toLowerCase() === r.toLowerCase())) {
-      navigate('/user-management');
-    } else if (userRole?.toLowerCase() === 'dispatch') {
-      navigate('/dispatch-management'); // Dispatch users go directly to dispatch management
-    } else {
-      navigate('/carrier-management');
-    }
+    console.log(`Redirecting user to: ${redirectPath}`);
+    navigate(redirectPath);
   };
 
   const logout = () => {
@@ -151,13 +146,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('User has admin role, granting access to all roles');
       return true;
     }
-    
-    // Check both role_name (new system) and category (legacy)
-    const hasRole = 
+      // Check both role_name (new system) and category (legacy)
+    const hasRole = Boolean(
       (currentUser.role_name && allowedRoles.some(role => 
         role.toLowerCase() === currentUser.role_name?.toLowerCase())) ||
       (currentUser.category && allowedRoles.some(role => 
-        role.toLowerCase() === currentUser.category?.toLowerCase()));
+        role.toLowerCase() === currentUser.category?.toLowerCase()))
+    );
     
     console.log(`Role check result: ${hasRole ? 'GRANTED' : 'DENIED'}`);
     return hasRole;

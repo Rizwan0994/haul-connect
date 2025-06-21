@@ -1,4 +1,4 @@
-const { carrier_profile: CarrierProfile, user: User, carrier_user_assignment: CarrierUserAssignment } = require("../models");
+const { carrier_profile: CarrierProfile, user: User, carrier_user_assignment: CarrierUserAssignment, role: Role } = require("../models");
 const { Op } = require("sequelize");
 const NotificationService = require("../services/notificationService");
 
@@ -14,35 +14,35 @@ exports.createCarrier = async (req, res) => {
     };
     
     const carrier = await CarrierProfile.create(carrierData);
-    
-    // Create comprehensive notifications for carrier creation
+      // Create comprehensive notifications for carrier creation
     try {
       const carrierName = req.body.company_name || `Carrier ID: ${carrier.id}`;
       
-      // Notify the creator
-      if (req.user && req.user.id) {
-        await NotificationService.createForUser(
-          req.user.id,
-          `You created a new carrier: ${carrierName} - Pending approval`,
-          'success',
-          `/carrier-management/${carrier.id}`
-        );
-      }
+      console.log('🔔 Creating notifications for carrier creation:', carrierName);
       
       // Notify managers about new carrier requiring approval
-      await NotificationService.createForRole(
-        'manager',
-        `New carrier requires approval: ${carrierName}`,
-        'approval',
-        `/carrier-management/approvals`
-      );
+      const managerRole = await Role.findOne({ where: { name: 'manager' } });
+      console.log('📋 Manager role found:', managerRole ? managerRole.id : 'NOT FOUND');
+      
+      if (managerRole) {
+        console.log('📤 Sending notification to managers...');
+        await NotificationService.createForRoles({
+          roleIds: [managerRole.id],
+          message: `New carrier requires approval: ${carrierName}`,
+          type: 'approval',
+          link: `/carrier-management/approvals`
+        });
+        console.log('✅ Manager notification sent');
+      }
       
       // Notify all admin users about new carrier
+      console.log('📤 Sending notification to admins...');
       await NotificationService.createForAdmins(
         `New carrier created by ${req.user?.first_name || 'User'}: ${carrierName} - Requires approval`,
         'info',
         `/carrier-management/approvals`
       );
+      console.log('✅ Admin notification sent');
     } catch (notifError) {
       console.error("Failed to create carrier notification:", notifError);
       // Don't fail the request if notification creation fails
@@ -99,24 +99,37 @@ exports.updateCarrier = async (req, res) => {
 
     // Store original values for comparison
     const originalCompanyName = carrier.company_name;
+    const originalStatus = carrier.status;
+    
+    // Check if user is trying to change status
+    if (req.body.status && req.body.status !== originalStatus) {
+      // Check if user has permission to manage status
+      const userPermissions = req.user.permissions || [];
+      const userRole = req.user.role_name || req.user.category || '';
+      const isAdmin = userRole.toLowerCase().includes('admin');
+      const canManageStatus = isAdmin || userPermissions.some(p => p.name === 'carriers.manage_status');
+      
+      if (!canManageStatus) {
+        return res.status(403).json({ 
+          status: "error", 
+          message: "You don't have permission to change carrier status" 
+        });
+      }
+      
+      // If status is being changed to 'active', reset approval status to trigger re-approval
+      if (req.body.status === 'active' && originalStatus !== 'active') {
+        req.body.approval_status = 'pending';
+        req.body.approved_by_manager = null;
+        req.body.approved_by_accounts = null;
+        req.body.manager_approved_at = null;
+        req.body.accounts_approved_at = null;
+      }
+    }
     
     await carrier.update(req.body);
 
     // Create notifications for carrier updates
-    try {
-      const carrierName = req.body.company_name || originalCompanyName || `Carrier ID: ${carrier.id}`;
-      
-      // Notify the updater
-      if (req.user && req.user.id) {
-        const userId = req.user.id || req.user.dataValues.id;
-
-        await NotificationService.createForUser(
-          userId,
-          `You updated carrier: ${carrierName}`,
-          'info',
-          `/carrier-management/${carrier.id}`
-        );
-      }
+    try {      const carrierName = req.body.company_name || originalCompanyName || `Carrier ID: ${carrier.id}`;
       
       // Notify admin users about carrier updates
       await NotificationService.createForAdmins(
@@ -170,16 +183,6 @@ exports.deleteCarrier = async (req, res) => {
 
     // Create notifications for carrier deletion
     try {
-      // Notify the deleter
-      if (req.user && req.user.id) {
-        await NotificationService.createForUser(
-          req.user.id,
-          `You deleted carrier: ${carrierName}`,
-          'warning',
-          `/carrier-management`
-        );
-      }
-      
       // Notify admin users about carrier deletion
       await NotificationService.createForAdmins(
         `Carrier ${carrierName} was deleted by ${req.user?.first_name || 'User'}`,
@@ -440,18 +443,7 @@ exports.removeUserFromCarrier = async (req, res) => {
         userId,
         `You have been removed from carrier: ${carrierName}`,
         'warning',
-        `/carrier-management`
-      );
-
-      // Notify the remover
-      if (req.user && req.user.id) {
-        await NotificationService.createForUser(
-          req.user.id,
-          `You removed ${userName} from carrier: ${carrierName}`,
-          'info',
-          `/carrier-management/${id}`
-        );
-      }
+        `/carrier-management`      );
 
       // Notify admins
       await NotificationService.createForAdmins(
@@ -515,16 +507,17 @@ exports.updateCarrierCommissionStatus = async (req, res) => {
 
     // Create notification for commission status change
     try {
-      const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;
-      
-      if (commission_status === 'confirmed_sale') {
+      const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;      if (commission_status === 'confirmed_sale') {
         // Notify accounts team about confirmed sale
-        await NotificationService.createForRole(
-          'accounts',
-          `Confirmed sale: ${carrierName} - Commission payment required`,
-          'commission',
-          `/carrier-management/${carrier.id}`
-        );
+        const accountRole = await Role.findOne({ where: { name: 'account' } });
+        if (accountRole) {
+          await NotificationService.createForRoles({
+            roleIds: [accountRole.id],
+            message: `Confirmed sale: ${carrierName} - Commission payment required`,
+            type: 'commission',
+            link: `/carrier-management/${carrier.id}`
+          });
+        }
         
         // Notify sales agent if available
         if (carrier.sales_agent_id) {
@@ -610,15 +603,16 @@ exports.markLoadCompleted = async (req, res) => {
     // Create notification for first load completion
     if (!carrier.first_load_completed_at) {
       try {
-        const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;
-        
-        // Notify accounts team
-        await NotificationService.createForRole(
-          'accounts',
-          `First load completed: ${carrierName} - Commission payment now due`,
-          'commission',
-          `/carrier-management/${carrier.id}`
-        );
+        const carrierName = carrier.company_name || `Carrier ID: ${carrier.id}`;        // Notify accounts team
+        const accountRole = await Role.findOne({ where: { name: 'account' } });
+        if (accountRole) {
+          await NotificationService.createForRoles({
+            roleIds: [accountRole.id],
+            message: `First load completed: ${carrierName} - Commission payment now due`,
+            type: 'commission',
+            link: `/carrier-management/${carrier.id}`
+          });
+        }
         
         // Notify sales agent
         if (carrier.sales_agent_id) {

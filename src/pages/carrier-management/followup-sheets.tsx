@@ -70,7 +70,7 @@ import followupSheetApi, { FollowupSheet, FollowupSheetFormData } from '@/servic
 
 const initialFormData: FollowupSheetFormData = {
   agent_name: '',
-  date: new Date().toISOString().split('T')[0],
+  date: new Date().toISOString().slice(0, 16), // Include time in ISO format
   name: '',
   mc_no: '',
   contact: '',
@@ -80,7 +80,10 @@ const initialFormData: FollowupSheetFormData = {
   equipment: '',
   zip_code: '',
   percentage: 0,
-  comments: ''
+  comments: '',
+  followup_status: 'required',
+  followup_scheduled_date: null,
+  followup_scheduled_time: null
 };
 
 // Move FormDialog component outside to prevent re-creation on every render
@@ -125,16 +128,30 @@ const FormDialog = React.memo(({
               required
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => onInputChange('date', e.target.value)}
-              required
-            />
+            <div className="space-y-2">
+            <Label htmlFor="date">Date Created</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Input
+                id="date"
+                type="date"
+                value={formData.date.split('T')[0]}
+                onChange={(e) => {
+                  const currentTime = formData.date.includes('T') ? formData.date.split('T')[1] : '00:00';
+                  onInputChange('date', `${e.target.value}T${currentTime}`);
+                }}
+                required
+              />
+              <Input
+                id="time"
+                type="time"
+                value={formData.date.includes('T') ? formData.date.split('T')[1].substring(0, 5) : '00:00'}
+                onChange={(e) => {
+                  const currentDate = formData.date.split('T')[0];
+                  onInputChange('date', `${currentDate}T${e.target.value}`);
+                }}
+                required
+              />
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -230,7 +247,81 @@ const FormDialog = React.memo(({
               onChange={(e) => onInputChange('percentage', parseFloat(e.target.value) || 0)}
               required
             />
+          </div>        </div>
+        
+        {/* Follow-up Status Section */}
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="text-lg font-semibold">Follow-up Management</h3>
+          
+          <div className="space-y-3">
+            <Label>Follow-up Status</Label>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                type="button"
+                variant={formData.followup_status === 'required' ? 'default' : 'outline'}
+                size="sm"
+                className={`${
+                  formData.followup_status === 'required'
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'text-red-500 border-red-500 hover:bg-red-50'
+                }`}
+                onClick={() => onInputChange('followup_status', 'required')}
+              >
+                Followup Required
+              </Button>
+              <Button
+                type="button"
+                variant={formData.followup_status === 'rescheduled' ? 'default' : 'outline'}
+                size="sm"
+                className={`${
+                  formData.followup_status === 'rescheduled'
+                    ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                    : 'text-yellow-600 border-yellow-500 hover:bg-yellow-50'
+                }`}
+                onClick={() => onInputChange('followup_status', 'rescheduled')}
+              >
+                Follow-up Re-scheduled
+              </Button>
+              <Button
+                type="button"
+                variant={formData.followup_status === 'complete' ? 'default' : 'outline'}
+                size="sm"
+                className={`${
+                  formData.followup_status === 'complete'
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'text-green-600 border-green-500 hover:bg-green-50'
+                }`}
+                onClick={() => onInputChange('followup_status', 'complete')}
+              >
+                Follow-up Complete
+              </Button>
+            </div>
           </div>
+          
+          {/* Follow-up Scheduling */}
+          {(formData.followup_status === 'required' || formData.followup_status === 'rescheduled') && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="followup_scheduled_date">Follow-up Date</Label>
+                <Input
+                  id="followup_scheduled_date"
+                  type="date"
+                  value={formData.followup_scheduled_date || ''}
+                  onChange={(e) => onInputChange('followup_scheduled_date', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="followup_scheduled_time">Follow-up Time</Label>
+                <Input
+                  id="followup_scheduled_time"
+                  type="time"
+                  value={formData.followup_scheduled_time || ''}
+                  onChange={(e) => onInputChange('followup_scheduled_time', e.target.value)}
+                />
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -347,7 +438,6 @@ export default function FollowupSheets() {
       setSubmitting(false);
     }
   };
-
   const handleEdit = (sheet: FollowupSheet) => {
     setEditingSheet(sheet);
     setFormData({
@@ -362,10 +452,13 @@ export default function FollowupSheets() {
       equipment: sheet.equipment,
       zip_code: sheet.zip_code,
       percentage: sheet.percentage,
-      comments: sheet.comments
+      comments: sheet.comments,
+      followup_status: sheet.followup_status || 'required',
+      followup_scheduled_date: sheet.followup_scheduled_date || null,
+      followup_scheduled_time: sheet.followup_scheduled_time || null
     });
     setIsEditDialogOpen(true);
-  };  const handleDelete = async (id: number) => {
+  };const handleDelete = async (id: number) => {
     try {
       await followupSheetApi.delete(id);
       setFollowupSheets(prev => prev.filter(sheet => sheet.id !== id));
@@ -475,8 +568,7 @@ export default function FollowupSheets() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
+              <Table>                <TableHeader>
                   <TableRow>
                     <TableHead>Agent</TableHead>
                     <TableHead>Date</TableHead>
@@ -485,9 +577,10 @@ export default function FollowupSheets() {
                     <TableHead>Contact</TableHead>
                     <TableHead>Equipment</TableHead>
                     <TableHead>Percentage</TableHead>
+                    <TableHead>Follow-up Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
-                </TableHeader>                <TableBody>
+                </TableHeader><TableBody>
                   {filteredSheets.map((sheet) => (
                     <TableRow key={sheet.id}>
                       <TableCell className="min-w-[120px]">
@@ -495,11 +588,17 @@ export default function FollowupSheets() {
                           <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <span className="font-medium text-sm">{sheet.agent_name}</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px]">
+                      </TableCell>                      <TableCell className="min-w-[140px]">
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm">{format(new Date(sheet.date), 'MMM dd, yyyy')}</span>
+                          <div className="space-y-1">
+                            <span className="text-sm">{format(new Date(sheet.date), 'MMM dd, yyyy')}</span>
+                            {sheet.date.includes('T') && (
+                              <div className="text-xs text-muted-foreground">
+                                {format(new Date(sheet.date), 'h:mm a')}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="min-w-[150px]">
@@ -539,6 +638,32 @@ export default function FollowupSheets() {
                         <div className="flex items-center gap-1">
                           <Percent className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                           <span className="font-medium text-sm">{sheet.percentage}%</span>
+                        </div>                      </TableCell>
+                      <TableCell className="min-w-[150px]">
+                        <div className="space-y-2">
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${
+                              (sheet.followup_status || 'required') === 'required'
+                                ? 'border-red-500 text-red-600 bg-red-50'
+                                : (sheet.followup_status || 'required') === 'rescheduled'
+                                ? 'border-yellow-500 text-yellow-600 bg-yellow-50'
+                                : 'border-green-500 text-green-600 bg-green-50'
+                            }`}
+                          >
+                            {(sheet.followup_status || 'required') === 'required' && 'Followup Required'}
+                            {(sheet.followup_status || 'required') === 'rescheduled' && 'Re-scheduled'}
+                            {(sheet.followup_status || 'required') === 'complete' && 'Complete'}
+                          </Badge>
+                          {sheet.followup_scheduled_date && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3 flex-shrink-0" />
+                              <span>
+                                {format(new Date(sheet.followup_scheduled_date), 'MMM dd')}
+                                {sheet.followup_scheduled_time && ` at ${sheet.followup_scheduled_time}`}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="w-[50px]">

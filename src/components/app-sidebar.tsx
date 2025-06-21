@@ -260,47 +260,43 @@ export function AppSidebar({ className }: AppSidebarProps) {
       const isCollapsed = collapsedSections.has(item.title);
       const ChevronIcon = isCollapsed ? ChevronRight : ChevronDown;
 
-      return (
-        <div key={item.title} className="mb-2">
+      return (        <div key={item.title} className="mb-1">
           <button
             onClick={() => toggleSection(item.title)}
-            className="flex items-center justify-between w-full gap-3 px-3 py-2 text-xs uppercase tracking-wider font-bold text-gray-400 hover:text-gray-300 border-b border-gray-700 pb-2 mb-2 transition-colors"
+            className="flex items-center justify-between w-full gap-2 px-2 py-1.5 text-xs uppercase tracking-wide font-medium text-gray-400 hover:text-gray-300 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
-              <span>{item.title}</span>
+            <div className="flex items-center gap-2">
+              {item.icon && <item.icon className="h-3 w-3 flex-shrink-0" />}
+              <span className="text-xs">{item.title}</span>
             </div>
-            <ChevronIcon className="h-4 w-4 flex-shrink-0" />
+            <ChevronIcon className="h-3 w-3 flex-shrink-0" />
           </button>
-          
-          {!isCollapsed && (
-            <SidebarMenu className="space-y-1 ml-2">
+            {!isCollapsed && (
+            <div className="mt-1 space-y-0.5 ml-1 list-none">
               {item.children.map((child: any) => renderMenuItem(child))}
-            </SidebarMenu>
+            </div>
           )}
         </div>
       );
     }    const isActive = location.pathname === item.path;
-    const isNotificationsItem = item.path === "/notifications";
-
-    return (
+    const isNotificationsItem = item.path === "/notifications";    return (
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
           onClick={() => navigate(item.path)}
           isActive={isActive}
           className={cn(
-            "w-full justify-start gap-3 px-3 py-2.5 rounded-md",
+            "w-full justify-start gap-2 px-2 py-1.5 rounded-sm text-sm",
             "hover:bg-gray-700 hover:text-white",
             "data-[active=true]:bg-[#f29600] data-[active=true]:text-white",
-            "transition-colors duration-150 relative",
-            isActive && "before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-white before:rounded-l-sm"
+            "transition-colors duration-150",
+            "text-gray-300"
           )}
           tooltip={item.title}
         >
-          {item.icon && <item.icon className="h-5 w-5 flex-shrink-0" />}
-          <span className="font-medium">{item.title}</span>
+          {item.icon && <item.icon className="h-3.5 w-3.5 flex-shrink-0" />}
+          <span className="text-sm font-normal truncate">{item.title}</span>
           {isNotificationsItem && unreadCount > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center min-w-[16px] text-[10px]">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
@@ -319,15 +315,14 @@ export function AppSidebar({ className }: AppSidebarProps) {
       )}
       collapsible="none"
       variant="sidebar"
-    >
-      <SidebarHeader className="border-b border-gray-700 px-4 py-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f29600] text-white flex-shrink-0">
-            <span className="text-lg font-bold">HC</span>
+    >      <SidebarHeader className="border-b border-gray-700 px-3 py-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f29600] text-white flex-shrink-0">
+            <span className="text-sm font-bold">HC</span>
           </div>
 
           <div className="flex flex-col min-w-0 flex-1">
-            <h2 className="text-lg font-semibold tracking-tight text-white truncate">
+            <h2 className="text-sm font-semibold tracking-tight text-white truncate">
               Haul Connect
             </h2>
             {currentUser && (
@@ -337,22 +332,20 @@ export function AppSidebar({ className }: AppSidebarProps) {
             )}
           </div>
         </div>
-      </SidebarHeader>
-
-      <SidebarContent className="p-2 overflow-y-auto">
-        <SidebarMenu className="space-y-1.5">
+      </SidebarHeader>      <SidebarContent className="p-1 overflow-y-auto">
+        <div className="space-y-1 list-none">
           {menuItems.map(renderMenuItem)}
-        </SidebarMenu>
-      </SidebarContent>      <SidebarFooter className="border-t border-gray-700 p-3">
-        <SidebarMenu className="space-y-1.5">
+        </div>
+      </SidebarContent>      <SidebarFooter className="border-t border-gray-700 p-2">
+        <div className="space-y-1 list-none">
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => navigate("/profile")}
-              className="w-full justify-start gap-3 px-3 py-2 rounded-md text-white hover:bg-gray-700 transition-colors duration-150"
+              className="w-full justify-start gap-2 px-2 py-1.5 rounded-sm text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 list-none"
               tooltip="My Profile"
             >
-              <User className="h-4 w-4 flex-shrink-0" />
-              <span className="group-data-[collapsible=icon]:hidden truncate">
+              <User className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden truncate text-sm font-normal">
                 My Profile
               </span>
             </SidebarMenuButton>
@@ -360,16 +353,16 @@ export function AppSidebar({ className }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={logout}
-              className="w-full justify-start gap-3 px-3 py-2 rounded-md text-red-400 hover:text-red-300 hover:bg-gray-700 transition-colors duration-150" // Adjusted logout styling
+              className="w-full justify-start gap-2 px-2 py-1.5 rounded-sm text-sm text-red-400 hover:text-red-300 hover:bg-gray-700 transition-colors duration-150 list-none"
               tooltip="Logout"
             >
-              <LogOut className="h-4 w-4 flex-shrink-0" />
-              <span className="group-data-[collapsible=icon]:hidden truncate">
+              <LogOut className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden truncate text-sm font-normal">
                 Logout
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

@@ -14,6 +14,10 @@ export interface FollowupSheet {
   zip_code: string;
   percentage: number;
   comments: string;
+  // New follow-up fields
+  followup_status: 'required' | 'rescheduled' | 'complete';
+  followup_scheduled_date: string | null;
+  followup_scheduled_time: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,6 +35,10 @@ export interface FollowupSheetFormData {
   zip_code: string;
   percentage: number;
   comments: string;
+  // New follow-up fields
+  followup_status: 'required' | 'rescheduled' | 'complete';
+  followup_scheduled_date: string | null;
+  followup_scheduled_time: string | null;
 }
 
 export interface FollowupSheetsResponse {

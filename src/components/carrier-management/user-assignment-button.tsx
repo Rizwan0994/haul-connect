@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useUserAssignment } from "./user-assignment-provider";
+import { PermissionGate } from "@/components/auth/permission-gate";
 
 interface UserAssignmentButtonProps {
   carrierId: string;
@@ -65,49 +66,53 @@ const UserAssignmentButton: React.FC<UserAssignmentButtonProps> = ({
       </TooltipProvider>
     );
   }
-
   return (
-    <div className="flex items-center">
-      <DropdownMenu>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 relative"
-                >
-                  <Users className="h-4 w-4" />
-                  {assignedUserCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-primary">
-                      {assignedUserCount}
-                    </Badge>
-                  )}
-                  <span className="sr-only">User management</span>
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {assignedUserCount === 0
-                  ? "Manage users"
-                  : `${assignedUserCount} assigned users`}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleAssignUsers}>
-            Assign Users
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleViewAssignedUsers}>
-            View Assigned Users{" "}
-            {assignedUserCount > 0 && `(${assignedUserCount})`}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <PermissionGate 
+      requiredPermission="carriers.manage_assignments"
+      fallback={null}
+    >
+      <div className="flex items-center">
+        <DropdownMenu>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 relative"
+                  >
+                    <Users className="h-4 w-4" />
+                    {assignedUserCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-primary">
+                        {assignedUserCount}
+                      </Badge>
+                    )}
+                    <span className="sr-only">User management</span>
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {assignedUserCount === 0
+                    ? "Manage users"
+                    : `${assignedUserCount} assigned users`}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleAssignUsers}>
+              Assign Users
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleViewAssignedUsers}>
+              View Assigned Users{" "}
+              {assignedUserCount > 0 && `(${assignedUserCount})`}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </PermissionGate>
   );
 };
 

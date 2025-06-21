@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCarrierModal } from "@/hooks/use-carrier-modal";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { PermissionGate } from "@/components/auth/permission-gate";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -379,14 +380,15 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in popup window
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {/* <DropdownMenuItem asChild>
-                <Link to={`/carrier-management/assignments/${carrier.id}`}>
-                  <CalendarCheck2 className="h-4 w-4 mr-2" />
-                  Manage Assignments
-                </Link>
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>              <DropdownMenuSeparator />
+              <PermissionGate requiredPermission="carriers.manage_assignments">
+                <DropdownMenuItem asChild>
+                  <Link to={`/carrier-management/assignments/${carrier.id}`}>
+                    <CalendarCheck2 className="h-4 w-4 mr-2" />
+                    Manage Assignments
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
             </DropdownMenuContent>
           </DropdownMenu>        </div>
       );

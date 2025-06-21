@@ -18,9 +18,8 @@ module.exports = (sequelize) => {
       agent_name: {
         type: DataTypes.STRING,
         allowNull: false,
-      },
-      date: {
-        type: DataTypes.DATEONLY,
+      },      date: {
+        type: DataTypes.DATE, // Changed from DATEONLY to include time
         allowNull: false,
       },
       name: {
@@ -62,9 +61,21 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: false,
         defaultValue: 0.0,
-      },
-      comments: {
+      },      comments: {
         type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      followup_status: {
+        type: DataTypes.ENUM('required', 'rescheduled', 'complete'),
+        allowNull: false,
+        defaultValue: 'required',
+      },
+      followup_scheduled_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+      followup_scheduled_time: {
+        type: DataTypes.TIME,
         allowNull: true,
       },
       created_at: {

@@ -6,6 +6,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import { brokerApi, Broker } from '@/services/brokerApi'
 import { useToast } from '@/components/ui/use-toast'
 import { brokerColumns } from '@/components/contact-management/broker-columns'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function BrokerManagement() {
   const { toast } = useToast()
@@ -88,16 +89,15 @@ export default function BrokerManagement() {
           <p className="text-muted-foreground">
             Manage your broker contacts and information
           </p>
-        </div>
-        <Link to="/contact-management/brokers/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Broker
-          </Button>
-        </Link>
-      </div>
-
-      <DataTable
+        </div>        <PermissionGate requiredPermission="brokers.create">
+          <Link to="/contact-management/brokers/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Broker
+            </Button>
+          </Link>
+        </PermissionGate>
+      </div>      <DataTable
         columns={columns}
         data={brokers}
       />

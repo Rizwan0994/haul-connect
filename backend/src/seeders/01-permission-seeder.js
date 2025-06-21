@@ -350,6 +350,106 @@ const systemPermissions = [
     resource: 'followup_sheets',
     action: 'delete',
     description: 'Delete followup sheets'
+  },
+  
+  // Contact Management module permissions
+  {
+    name: 'brokers.view',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'brokers',
+    action: 'view',
+    description: 'View broker information'
+  },
+  {
+    name: 'brokers.create',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'brokers',
+    action: 'create',
+    description: 'Create new brokers'
+  },
+  {
+    name: 'brokers.edit',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'brokers',
+    action: 'edit',
+    description: 'Edit broker information'
+  },
+  {
+    name: 'brokers.delete',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'brokers',
+    action: 'delete',
+    description: 'Delete brokers'
+  },
+  
+  {
+    name: 'shippers.view',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'shippers',
+    action: 'view',
+    description: 'View shipper information'
+  },
+  {
+    name: 'shippers.create',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'shippers',
+    action: 'create',
+    description: 'Create new shippers'
+  },
+  {
+    name: 'shippers.edit',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'shippers',
+    action: 'edit',
+    description: 'Edit shipper information'
+  },
+  {
+    name: 'shippers.delete',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'shippers',
+    action: 'delete',
+    description: 'Delete shippers'
+  },
+  
+  {
+    name: 'consignees.view',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'consignees',
+    action: 'view',
+    description: 'View consignee information'
+  },
+  {
+    name: 'consignees.create',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'consignees',
+    action: 'create',
+    description: 'Create new consignees'
+  },
+  {
+    name: 'consignees.edit',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'consignees',
+    action: 'edit',
+    description: 'Edit consignee information'
+  },
+  {
+    name: 'consignees.delete',
+    type: 'feature',
+    module: 'Contacts',
+    resource: 'consignees',
+    action: 'delete',
+    description: 'Delete consignees'
   }
 ];
 

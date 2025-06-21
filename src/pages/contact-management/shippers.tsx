@@ -6,6 +6,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import { shipperApi, Shipper } from '@/services/shipperApi'
 import { useToast } from '@/components/ui/use-toast'
 import { shipperColumns } from '@/components/contact-management/shipper-columns'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function ShipperManagement() {
   const { toast } = useToast()
@@ -93,14 +94,15 @@ export default function ShipperManagement() {
           <h1 className="text-2xl font-bold tracking-tight">Shipper Management</h1>
           <p className="text-muted-foreground">
             Manage your shipper contacts and information
-          </p>
-        </div>
-        <Link to="/contact-management/shippers/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Shipper
-          </Button>
-        </Link>
+          </p>        </div>
+        <PermissionGate requiredPermission="shippers.create">
+          <Link to="/contact-management/shippers/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Shipper
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       <DataTable

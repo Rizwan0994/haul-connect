@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { user: User  } = require('../models');
+const { user: User, role: Role } = require('../models');
 const bcrypt = require('bcrypt');
 const { requireRole } = require('../middleware/auth');
 const NotificationService = require('../services/notificationService');
@@ -10,9 +10,26 @@ router.get('/',  async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ],
       order: [['created_at', 'DESC']]
     });
-    res.json(users);
+    
+    // Format the response to include role_name for frontend compatibility
+    const formattedUsers = users.map(user => {
+      const userData = user.toJSON();
+      return {
+        ...userData,
+        role_name: userData.userRole?.name || null
+      };
+    });
+    
+    res.json(formattedUsers);
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -23,14 +40,28 @@ router.get('/',  async (req, res) => {
 router.get('/:id',  async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ]
     });
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    res.json(user);
+    // Format the response to include role_name for frontend compatibility
+    const userData = user.toJSON();
+    const formattedUser = {
+      ...userData,
+      role_name: userData.userRole?.name || null
+    };
+    
+    res.json(formattedUser);
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
@@ -40,7 +71,7 @@ router.get('/:id',  async (req, res) => {
 // Create new user (HR/Admin only)
 router.post('/',    async (req, res) => {
   try {
-    const { email, password, role, category, basic_salary, first_name, last_name, phone,role_id } = req.body;
+    const { email, password, basic_salary, first_name, last_name, phone, role_id } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -90,11 +121,25 @@ router.post('/',    async (req, res) => {
     } catch (notifError) {
       console.error("Failed to create user notification:", notifError);
       // Don't fail the request if notification creation fails
-    }
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user.toJSON();
-    res.status(201).json(userWithoutPassword);
+    }    // Return user without password but with role information
+    const userWithRole = await User.findByPk(user.id, {
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+    
+    const userData = userWithRole.toJSON();
+    const responseData = {
+      ...userData,
+      role_name: userData.userRole?.name || null
+    };
+    
+    res.status(201).json(responseData);
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Failed to create user' });
@@ -104,17 +149,26 @@ router.post('/',    async (req, res) => {
 // Update user (HR/Admin only)
 router.put('/:id',    async (req, res) => {
   try {
-    const { email, password, role, category, basic_salary, first_name, last_name, phone } = req.body;
+    const { email, password, role_id, basic_salary, first_name, last_name, phone } = req.body;
     
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id, {
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+    
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Store original values for comparison
     const originalEmail = user.email;
-    const originalRole = user.role;
-    const originalCategory = user.category;
+    const originalRoleId = user.role_id;
+    const originalRoleName = user.userRole?.name;
     const originalName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
 
     // Update fields
@@ -123,7 +177,8 @@ router.put('/:id',    async (req, res) => {
       basic_salary,
       first_name,
       last_name,
-      phone
+      phone,
+      role_id
     };
 
     // Hash new password if provided
@@ -134,14 +189,28 @@ router.put('/:id',    async (req, res) => {
 
     await user.update(updateData);
 
+    // Get the updated user with role information
+    const updatedUser = await User.findByPk(user.id, {
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
     // Create notifications for significant changes
     try {
       const newName = `${first_name || ''} ${last_name || ''}`.trim();
+      const newRoleName = updatedUser.userRole?.name;
       const changes = [];
       
       if (originalEmail !== email) changes.push(`email changed from ${originalEmail} to ${email}`);
-      if (originalRole !== role) changes.push(`role changed from ${originalRole} to ${role}`);
-      if (originalCategory !== category) changes.push(`category changed from ${originalCategory} to ${category}`);
+      if (originalRoleId !== role_id && originalRoleName !== newRoleName) {
+        changes.push(`role changed from ${originalRoleName || 'No role'} to ${newRoleName || 'No role'}`);
+      }
       if (originalName !== newName) changes.push(`name changed from ${originalName} to ${newName}`);
       if (password) changes.push('password updated');
 
@@ -177,9 +246,14 @@ router.put('/:id',    async (req, res) => {
       console.error("Failed to create user update notification:", notifError);
     }
 
-    // Return updated user without password
-    const { password: _, ...userWithoutPassword } = user.toJSON();
-    res.json(userWithoutPassword);
+    // Format the response to include role_name for frontend compatibility
+    const userData = updatedUser.toJSON();
+    const responseData = {
+      ...userData,
+      role_name: userData.userRole?.name || null
+    };
+    
+    res.json(responseData);
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Failed to update user' });
@@ -189,14 +263,26 @@ router.put('/:id',    async (req, res) => {
 // Delete user (HR Manager/Admin only)
 router.delete('/:id',    async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id, {
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+    
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Prevent deletion of super admin by non-super admin
-    if (user.category === 'super_admin' && req.user.category !== 'super_admin') {
-      return res.status(403).json({ error: 'Only super admin can delete super admin users' });
+    const currentUserRole = req.user?.role_name;
+    const targetUserRole = user.userRole?.name;
+    
+    if (targetUserRole === 'Super Admin' && currentUserRole !== 'Super Admin') {
+      return res.status(403).json({ error: 'Only Super Admin can delete Super Admin users' });
     }
 
     const deletedUserName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;

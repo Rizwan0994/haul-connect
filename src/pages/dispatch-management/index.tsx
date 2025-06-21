@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { DashboardStats } from '@/components/dispatch-management/dashboard-stats'
 import { CommissionDistribution } from '@/components/dispatch-management/commission-distribution'
 import { TopDispatchers } from '@/components/dispatch-management/top-dispatchers'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function DispatchManagement() {
   const { toast } = useToast();
@@ -50,14 +51,15 @@ export default function DispatchManagement() {
             <h1 className="text-3xl font-bold tracking-tight">Dispatch Management</h1>
             <p className="text-muted-foreground">
               Manage your dispatches and load assignments
-            </p>
-          </div>
-          <Link to="/dispatch-management/new">
-            <Button disabled={loading}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Dispatch
-            </Button>
-          </Link>
+            </p>          </div>
+          <PermissionGate requiredPermission="dispatch.create">
+            <Link to="/dispatch-management/new">
+              <Button disabled={loading}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Dispatch
+              </Button>
+            </Link>
+          </PermissionGate>
         </div>
 
         {error && (

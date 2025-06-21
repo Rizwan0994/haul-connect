@@ -1,15 +1,7 @@
 "use strict";
 const { Model, DataTypes } = require("sequelize");
 
-module.exports = (sequelize) => {
-  class User extends Model {
-    static associate(models) {
-      // Add association to the Role model
-      User.belongsTo(models.role, {
-        foreignKey: "role_id"
-      });
-    }
-
+module.exports = (sequelize) => {  class User extends Model {
     // Instance method to compare passwords
     async comparePassword(candidatePassword) {
       const bcrypt = require('bcrypt');

@@ -5,11 +5,8 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  username?: string;
-  role: string;           // Legacy role field
-  category: string;       // Legacy category field
-  role_id?: number;       // New role ID for permission system
-  role_name?: string;     // New role name for permission system
+  role_id: number;        // Role ID for permission system
+  role_name: string;      // Role name for permission system
   permissions?: any[];    // User permissions
   fatherName?: string;
   address?: string;
@@ -33,9 +30,11 @@ export interface LoginResponse {
 }
 
 export interface RegisterData {
-  username: string;
-  password: string;
   email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role_id: number;
 }
 
 export const authClient = {

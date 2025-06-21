@@ -143,8 +143,6 @@ export const isUserAdmin = (user: any): boolean => {
   const adminRoles = ['admin', 'super admin'];
   
   return adminRoles.some(role => 
-    user.role_name?.toLowerCase() === role ||
-    user.category?.toLowerCase() === role ||
-    user.role?.toLowerCase() === role
+    user.role_name?.toLowerCase() === role
   );
 };

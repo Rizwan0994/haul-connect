@@ -105,8 +105,7 @@ const routePermissions = [
     action: 'view',
     description: 'Access to User Management page'
   },
-  
-  // Settings routes
+    // Settings routes
   {
     name: 'route.email-settings',
     type: 'route',
@@ -122,6 +121,70 @@ const routePermissions = [
     resource: 'settings',
     action: 'view-permissions',
     description: 'Access to Permissions Management page'
+  },
+  
+  // Contact Management routes - MISSING PERMISSIONS
+  {
+    name: 'route.brokers',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'contact-management',
+    action: 'view-brokers',
+    description: 'Access to Broker Management page'
+  },
+  {
+    name: 'route.shippers',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'contact-management',
+    action: 'view-shippers', 
+    description: 'Access to Shipper Management page'
+  },
+  {
+    name: 'route.consignees',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'contact-management',
+    action: 'view-consignees',
+    description: 'Access to Consignee Management page'
+  },
+  
+  // Commission Management route - MISSING PERMISSION
+  {
+    name: 'route.commission-management',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'commission-management',
+    action: 'view',
+    description: 'Access to Commission Management page'
+  },
+  
+  // Employee Attendance route - MISSING PERMISSION  
+  {
+    name: 'route.attendance-records',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'employee-attendance',
+    action: 'view',
+    description: 'Access to Employee Attendance page'
+  },
+  
+  // Approval routes - MISSING PERMISSIONS
+  {
+    name: 'carrier.approval.view',
+    type: 'route',
+    module: 'Navigation', 
+    resource: 'carrier-approvals',
+    action: 'view',
+    description: 'Access to Carrier Approvals page'
+  },
+  {
+    name: 'dispatch.approval.view',
+    type: 'route',
+    module: 'Navigation',
+    resource: 'dispatch-approvals', 
+    action: 'view',
+    description: 'Access to Dispatch Approvals page'
   }
 ];
 

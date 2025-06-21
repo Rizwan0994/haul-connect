@@ -27,6 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/components/ui/use-toast'
+import { PermissionGate } from "@/components/auth/permission-gate"
 
 interface ConsigneeColumnsProps {
   onDelete: (id: number) => void
@@ -204,58 +205,63 @@ export const consigneeColumns = ({ onDelete }: ConsigneeColumnsProps): ColumnDef
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            </DropdownMenuTrigger>            <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={`/contact-management/consignees/${consignee.id}`}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={`/contact-management/consignees/${consignee.id}/edit`}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
+              <PermissionGate requiredPermission="consignees.view">
+                <DropdownMenuItem asChild>
+                  <Link to={`/contact-management/consignees/${consignee.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Details
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
+              <PermissionGate requiredPermission="consignees.edit">
+                <DropdownMenuItem asChild>
+                  <Link to={`/contact-management/consignees/${consignee.id}/edit`}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
               {consignee.attachment_filename && (
-                <>
+                <PermissionGate requiredPermission="consignees.view">
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleDownloadAttachment(consignee)}>
                     <Download className="mr-2 h-4 w-4" />
                     Download Attachment
                   </DropdownMenuItem>
-                </>
+                </PermissionGate>
               )}
-              <DropdownMenuSeparator />
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the consignee
-                      "{consignee.consignee_name}" and all associated data.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => consignee.id && onDelete(consignee.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
+              <PermissionGate requiredPermission="consignees.delete">
+                <DropdownMenuSeparator />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the consignee
+                        "{consignee.consignee_name}" and all associated data.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => consignee.id && onDelete(consignee.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </PermissionGate>
             </DropdownMenuContent>
           </DropdownMenu>
         )

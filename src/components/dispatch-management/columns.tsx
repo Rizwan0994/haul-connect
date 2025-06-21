@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDispatchModal } from "@/hooks/use-dispatch-modal";
+import { PermissionGate } from "@/components/auth/permission-gate";
 
 export const columns: ColumnDef<Dispatch>[] = [
   // Hidden column specifically for searching carrier company names
@@ -315,8 +316,7 @@ export const columns: ColumnDef<Dispatch>[] = [
       const dispatch = row.original;
       const { openDispatchModal } = useDispatchModal();
 
-      return (
-        <div className="flex items-center justify-end gap-1">
+      return (        <div className="flex items-center justify-end gap-1">
           <Button
             variant="ghost"
             size="icon"
@@ -332,53 +332,59 @@ export const columns: ColumnDef<Dispatch>[] = [
             <ExternalLink className="h-4 w-4" />
           </Button>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link to={`/dispatch-management/${dispatch.id}`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">View dispatch</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>View Details</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <PermissionGate requiredPermission="dispatch.view">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}`}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View dispatch</span>
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View Details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </PermissionGate>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link to={`/dispatch-management/${dispatch.id}/edit`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Pencil className="h-4 w-4" />
-                    <span className="sr-only">Edit dispatch</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Edit Dispatch</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <PermissionGate requiredPermission="dispatch.edit">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}/edit`}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Edit dispatch</span>
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit Dispatch</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </PermissionGate>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link to={`/dispatch-management/${dispatch.id}/invoice`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <FileText className="h-4 w-4" />
-                    <span className="sr-only">View invoice</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>View Invoice</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <PermissionGate requiredPermission="dispatch.view">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}/invoice`}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <FileText className="h-4 w-4" />
+                      <span className="sr-only">View invoice</span>
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View Invoice</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </PermissionGate>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -386,51 +392,56 @@ export const columns: ColumnDef<Dispatch>[] = [
                 <MoreHorizontal className="h-4 w-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            </DropdownMenuTrigger>            <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>              <DropdownMenuItem
                 onClick={() => navigator.clipboard.writeText(dispatch.id.toString())}
               >
                 Copy dispatch ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() =>
-                  openDispatchModal(
-                    dispatch.id.toString(),
-                    `Dispatch #${dispatch.load_no}`
-                  )
-                }
-              >
-                View dispatch profile
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={`/dispatch-management/${dispatch.id}`}>
-                  View dispatch details
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={`/dispatch-management/${dispatch.id}/edit`}>
-                  Edit dispatch
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  openDispatchModal(
-                    dispatch.id.toString(),
-                    `Dispatch #${dispatch.load_no}`
-                  )
-                }
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in popup window
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={`/dispatch-management/${dispatch.id}/invoice`}>
-                  View invoice
-                </Link>
-              </DropdownMenuItem>
+              <PermissionGate requiredPermission="dispatch.view">
+                <DropdownMenuItem
+                  onClick={() =>
+                    openDispatchModal(
+                      dispatch.id.toString(),
+                      `Dispatch #${dispatch.load_no}`
+                    )
+                  }
+                >
+                  View dispatch profile
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}`}>
+                    View dispatch details
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
+              <PermissionGate requiredPermission="dispatch.edit">
+                <DropdownMenuItem asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}/edit`}>
+                    Edit dispatch
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
+              <PermissionGate requiredPermission="dispatch.view">
+                <DropdownMenuItem
+                  onClick={() =>
+                    openDispatchModal(
+                      dispatch.id.toString(),
+                      `Dispatch #${dispatch.load_no}`
+                    )
+                  }
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in popup window
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to={`/dispatch-management/${dispatch.id}/invoice`}>
+                    View invoice
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

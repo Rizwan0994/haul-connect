@@ -5,20 +5,37 @@ const { successResponse, errorResponse } = require("../utils/responseUtils");
 
 const register = async (req, res) => {
   try {
-    const { username, password, email, category } = req.body;
+    const { password, email, role_id, first_name, last_name } = req.body;
 
-    const existingUser = await User.findOne({ where: { username } });
+    const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json(errorResponse("Username already exists"));
+      return res.status(400).json(errorResponse("Email already exists"));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      username,
       password: hashedPassword,
       email,
-      category: category || "Dispatch",
-      role: "Dispatch",
+      first_name,
+      last_name,
+      role_id,
+    });
+
+    // Fetch the user with role and permissions
+    const userWithRole = await User.findByPk(user.id, {
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          include: [
+            {
+              model: Permission,
+              as: 'permissions',
+              through: { attributes: [] }
+            }
+          ]
+        }
+      ]
     });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
@@ -27,7 +44,15 @@ const register = async (req, res) => {
 
     res.status(201).json(
       successResponse("User registered successfully", {
-        user: { id: user.id, username: user.username, role: user.role },
+        user: { 
+          id: user.id, 
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role_id: user.role_id,
+          role_name: userWithRole.userRole?.name,
+          permissions: userWithRole.userRole?.permissions || []
+        },
         token,
       }),
     );
@@ -70,13 +95,10 @@ const login = async (req, res) => {
     // Check if user account is active
     if (!user.is_active) {
       return res.status(403).json(errorResponse("Account is inactive. Please contact HR."));
-    }
-
-    const token = jwt.sign(
+    }    const token = jwt.sign(
       { 
         id: user.id,
-        role: user.role,
-        category: user.category
+        role_id: user.role_id
       }, 
       process.env.JWT_SECRET, 
       {
@@ -91,7 +113,6 @@ const login = async (req, res) => {
           email: user.email,
           firstName: user.first_name || '',
           lastName: user.last_name || '',
-          username: user.username || '',
           fatherName: user.fatherName || '',
           address: user.address || '',
           contact: user.contact || '',
@@ -99,8 +120,6 @@ const login = async (req, res) => {
           experience: user.experience || '',
           department: user.department || '',
           photoUrl: user.photoUrl || '',
-          role: user.role,
-          category: user.category,
           role_id: user.role_id,
           role_name: user.userRole?.name,
           permissions: user.userRole?.permissions || []
@@ -115,10 +134,9 @@ const login = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
-  try {
-    // We need to query with the role and permissions
+  try {    // We need to query with the role and permissions
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'email', 'first_name', 'last_name', 'username', 'fatherName', 'address', 'contact', 'cnic', 'experience', 'department', 'photoUrl', 'role', 'category', 'is_active', 'role_id', 'createdAt', 'lastLogin', 'lastLoginIp'],
+      attributes: ['id', 'email', 'first_name', 'last_name', 'fatherName', 'address', 'contact', 'cnic', 'experience', 'department', 'photoUrl', 'is_active', 'role_id', 'createdAt', 'lastLogin', 'lastLoginIp'],
       include: [
         {
           model: Role,
@@ -140,16 +158,13 @@ const getCurrentUser = async (req, res) => {
 
     if (!user.is_active) {
       return res.status(403).json(errorResponse("Account is inactive"));
-    }
-
-    // Include role name and permissions in the response
+    }    // Include role name and permissions in the response
     res.json(
       successResponse("User data retrieved successfully", {
         id: user.id,
         email: user.email,
         firstName: user.first_name || '',
         lastName: user.last_name || '',
-        username: user.username || '',
         fatherName: user.fatherName || '',
         address: user.address || '',
         contact: user.contact || '',
@@ -160,8 +175,6 @@ const getCurrentUser = async (req, res) => {
         onboardDate: user.createdAt,
         lastLogin: user.lastLogin,
         lastLoginIp: user.lastLoginIp,
-        role: user.role,
-        category: user.category,
         role_id: user.role_id,
         role_name: user.userRole?.name,
         permissions: user.userRole?.permissions || []

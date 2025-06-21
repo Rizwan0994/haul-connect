@@ -221,14 +221,13 @@ export function AppSidebar({ className }: AppSidebarProps) {
     }
     setCollapsedSections(newCollapsed);
   };
-
   // Check if any children of a section have permission
   const hasVisibleChildren = (item: any): boolean => {
     if (!item.children) return false;
     
     return item.children.some((child: any) => {
-      // Check role-based permission (legacy)
-      if (child.requiresRole && currentUser && !child.requiresRole.includes(currentUser.category)) {
+      // Check role-based permission (use role_name instead of category)
+      if (child.requiresRole && currentUser && !child.requiresRole.includes(currentUser.role_name)) {
         return false;
       }
       
@@ -241,8 +240,8 @@ export function AppSidebar({ className }: AppSidebarProps) {
     });
   };
   const renderMenuItem = (item: any) => {
-    // Check role-based permission (legacy)
-    if (item.requiresRole && currentUser && !item.requiresRole.includes(currentUser.category)) {
+    // Check role-based permission (use role_name instead of category)
+    if (item.requiresRole && currentUser && !item.requiresRole.includes(currentUser.role_name)) {
       return null;
     }
     

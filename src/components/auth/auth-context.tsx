@@ -20,8 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface DecodedToken {
   id: number;
-  role: string;
-  category: string;
+  role_id: number;
   exp: number;
   permissions?: string[];
 }
@@ -65,12 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.warn('No permissions found in auth init response');
               setUserPermissions([]);
             }
-            
-            // Log the current user state after setting
+              // Log the current user state after setting
             console.log('Current user after auth init:', {
               email: response.data.email,
               role_name: response.data.role_name,
-              category: response.data.category,
               permissions: response.data.permissions?.length || 0
             });
           } catch (err) {
@@ -108,10 +105,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       console.warn('No permissions found in login response');
       setUserPermissions([]);
-    }
-        // Log permissions for debugging
+    }        // Log permissions for debugging
     console.log('User permissions:', response.data.user.permissions || 'No permissions');
-    console.log('User role:', response.data.user.role_name || response.data.user.category);
+    console.log('User role:', response.data.user.role_name);
 
     // Use smart redirect to find the first accessible route
     const userIsAdmin = isUserAdmin(response.data.user);
@@ -126,32 +122,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
     setUserPermissions([]);
   };
-  
-  // Check if user has a specific role
+    // Check if user has a specific role
   const hasPermission = (allowedRoles: string[]): boolean => {
     if (!currentUser) return false;
     
     console.log('Checking user role against allowed roles:', allowedRoles);
-    console.log('Current user role:', currentUser.role_name || currentUser.category);
+    console.log('Current user role:', currentUser.role_name);
     
-    // Admin roles always have all permissions (check both systems)
+    // Admin roles always have all permissions
     if (
       currentUser.role_name?.toLowerCase() === 'admin' || 
-      currentUser.role_name?.toLowerCase() === 'super admin' ||
-      currentUser.category?.toLowerCase() === 'admin' ||
-      currentUser.category?.toLowerCase() === 'super admin' ||
-      currentUser.role?.toLowerCase() === 'admin' ||
-      currentUser.role?.toLowerCase() === 'super admin'
+      currentUser.role_name?.toLowerCase() === 'super admin'
     ) {
       console.log('User has admin role, granting access to all roles');
       return true;
     }
-      // Check both role_name (new system) and category (legacy)
+      // Check role_name (new system)
     const hasRole = Boolean(
-      (currentUser.role_name && allowedRoles.some(role => 
-        role.toLowerCase() === currentUser.role_name?.toLowerCase())) ||
-      (currentUser.category && allowedRoles.some(role => 
-        role.toLowerCase() === currentUser.category?.toLowerCase()))
+      currentUser.role_name && allowedRoles.some(role => 
+        role.toLowerCase() === currentUser.role_name?.toLowerCase())
     );
     
     console.log(`Role check result: ${hasRole ? 'GRANTED' : 'DENIED'}`);
@@ -161,19 +150,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check if user has a specific permission
   const hasSpecificPermission = (permissionName: string): boolean => {
     if (!currentUser) return false;
-    
-    console.log(`Checking permission: ${permissionName}`);
+      console.log(`Checking permission: ${permissionName}`);
     console.log(`User permissions:`, userPermissions);
-    console.log(`Current user role: ${currentUser.role_name || currentUser.category}`);
+    console.log(`Current user role: ${currentUser.role_name}`);
     
-    // Admin roles always have all permissions (check both systems)
+    // Admin roles always have all permissions
     if (
       currentUser.role_name?.toLowerCase() === 'admin' || 
-      currentUser.role_name?.toLowerCase() === 'super admin' ||
-      currentUser.category?.toLowerCase() === 'admin' ||
-      currentUser.category?.toLowerCase() === 'super admin' ||
-      currentUser.role?.toLowerCase() === 'admin' ||
-      currentUser.role?.toLowerCase() === 'super admin'
+      currentUser.role_name?.toLowerCase() === 'super admin'
     ) {
       console.log('User has admin role, granting all permissions');
       return true;

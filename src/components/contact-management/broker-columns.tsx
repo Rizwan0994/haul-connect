@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { PermissionGate } from "@/components/auth/permission-gate"
 
 interface BrokerColumnsProps {
   onDelete: (id: number) => void
@@ -128,8 +129,7 @@ export const brokerColumns = ({ onDelete }: BrokerColumnsProps): ColumnDef<Broke
         </div>
       )
     },
-  },
-  {
+  },  {
     id: "actions",
     cell: ({ row }) => {
       const broker = row.original
@@ -144,46 +144,51 @@ export const brokerColumns = ({ onDelete }: BrokerColumnsProps): ColumnDef<Broke
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to={`/contact-management/brokers/${broker.id}`}>
-                <Eye className="mr-2 h-4 w-4" />
-                View Details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to={`/contact-management/brokers/${broker.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the broker
-                    "{broker.brokerage_company}" and all associated data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onDelete(broker.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
+            <DropdownMenuSeparator />            <PermissionGate requiredPermission="brokers.view">
+              <DropdownMenuItem asChild>
+                <Link to={`/contact-management/brokers/${broker.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </Link>
+              </DropdownMenuItem>
+            </PermissionGate>
+            <PermissionGate requiredPermission="brokers.edit">
+              <DropdownMenuItem asChild>
+                <Link to={`/contact-management/brokers/${broker.id}/edit`}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+            </PermissionGate>
+            <PermissionGate requiredPermission="brokers.delete">
+              <DropdownMenuSeparator />
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the broker
+                      "{broker.brokerage_company}" and all associated data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(broker.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </PermissionGate>
           </DropdownMenuContent>
         </DropdownMenu>
       )

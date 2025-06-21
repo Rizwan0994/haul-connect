@@ -60,8 +60,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { fetchAvailableRoles } from '@/lib/user-management';
 import PermissionGate from '@/components/auth/permission-gate';
 
-// Legacy categories removed - now using permission-based roles only
-
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,13 +69,11 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [availableRoles, setAvailableRoles] = useState<{ value: string, label: string }[]>([]);
-  // Form state
-  const [formData, setFormData] = useState<CreateUserRequest & { id?: number }>({
+  const [availableRoles, setAvailableRoles] = useState<{ value: string, label: string }[]>([]);  // Form state
+  const [formData, setFormData] = useState<Partial<CreateUserRequest> & { id?: number }>({
     email: '',
     password: '',
-    category: 'Dispatch',      // Legacy category - still needed for backend compatibility
-    role_id: undefined,        // New role system
+    role_id: undefined,        // Role system
     basic_salary: 500,
     first_name: '',
     last_name: '',
@@ -108,8 +104,7 @@ export default function UserManagement() {
     } catch (error) {
       console.error('Error loading roles:', error);
     }
-  };
-  const handleCreateUser = async () => {
+  };  const handleCreateUser = async () => {
     try {
       setError('');
       
@@ -121,17 +116,18 @@ export default function UserManagement() {
       
       const { id, ...userData } = formData;
       
-      // Map role_id to category for backward compatibility
-      const selectedRole = availableRoles.find(role => Number(role.value) === formData.role_id);
-      const mappedCategory = selectedRole?.label || 'Dispatch'; // Default fallback
-      
-      // Prepare user data with mapped category
-      const userDataWithCategory = {
-        ...userData,
-        category: mappedCategory as User['category']
+      // Type assertion since we've validated required fields
+      const createRequest: CreateUserRequest = {
+        email: userData.email!,
+        password: userData.password!,
+        role_id: userData.role_id!,
+        basic_salary: userData.basic_salary || 500,
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        phone: userData.phone || '',
       };
       
-      await userAPI.createUser(userDataWithCategory);
+      await userAPI.createUser(createRequest);
       setSuccess('User created successfully');
       setIsCreateDialogOpen(false);
       resetForm();
@@ -139,8 +135,7 @@ export default function UserManagement() {
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to create user');
     }
-  };
-  const handleUpdateUser = async () => {
+  };const handleUpdateUser = async () => {
     if (!editingUser) return;
     
     try {
@@ -159,11 +154,6 @@ export default function UserManagement() {
       if (password) {
         updateData.password = password;
       }
-      
-      // Map role_id to category for backward compatibility
-      const selectedRole = availableRoles.find(role => Number(role.value) === formData.role_id);
-      const mappedCategory = selectedRole?.label || editingUser.category;
-      updateData.category = mappedCategory as User['category'];
       
       await userAPI.updateUser(editingUser.id, updateData);
       setSuccess('User updated successfully');
@@ -201,7 +191,6 @@ export default function UserManagement() {
     setFormData({
       email: user.email,
       password: '', // Don't pre-fill password
-      category: user.category, // Legacy category - still needed for backend compatibility
       role_id: user.role_id,
       basic_salary: user.basic_salary,
       first_name: user.first_name || '',
@@ -213,28 +202,13 @@ export default function UserManagement() {
     setFormData({
       email: '',
       password: '',
-      category: 'Dispatch',    // Legacy category - still needed for backend compatibility
-      role_id: availableRoles.length > 0 ? Number(availableRoles[0].value) : undefined,  // New role system
+      role_id: availableRoles.length > 0 ? Number(availableRoles[0].value) : undefined,  // Role system
       basic_salary: 500,
       first_name: '',
       last_name: '',
       phone: '',
     });
-  };
-  const getCategoryLabel = (category: string) => {
-    // Map legacy categories to display names
-    const categoryMap: { [key: string]: string } = {
-      'Admin': 'Admin',
-      'Super Admin': 'Super Admin', 
-      'Dispatch': 'Dispatch',
-      'Sales': 'Sales',
-      'Account': 'Account',
-      'Manager': 'Manager'
-    };
-    return categoryMap[category] || category;
-  };
-
-  const getStatusBadge = (user: User) => {
+  };  const getStatusBadge = (user: User) => {
     if (!user.is_active) {
       return <Badge variant="destructive">Inactive</Badge>;
     }
@@ -414,8 +388,7 @@ export default function UserManagement() {
                         : '-'
                       }
                     </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell className="capitalize">
+                    <TableCell>{user.email}</TableCell>                    <TableCell className="capitalize">
                       {user.role_name ? (
                         <div className="flex items-center gap-1">
                           <KeyRound className="h-3 w-3 text-primary" />

@@ -11,6 +11,7 @@ import { UserAssignmentProvider } from '@/components/carrier-management/user-ass
 import { CarrierStats } from '@/components/carrier-management/carrier-stats'
 import { CarrierCommissionDistribution } from '@/components/carrier-management/carrier-commission-distribution'
 import { TopCarriers } from '@/components/carrier-management/top-carriers'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function CarrierManagement() {
   const { toast } = useToast()
@@ -84,14 +85,15 @@ export default function CarrierManagement() {
               <h1 className="text-3xl font-bold tracking-tight">Carrier Management</h1>
               <p className="text-muted-foreground">
                 Manage your carrier profiles and commission tracking
-              </p>
-            </div>
-            <Link to="/carrier-management/create">
-              <Button disabled={loading}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Carrier
-              </Button>
-            </Link>
+              </p>            </div>
+            <PermissionGate requiredPermission="carriers.create">
+              <Link to="/carrier-management/create">
+                <Button disabled={loading}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Carrier
+                </Button>
+              </Link>
+            </PermissionGate>
           </div>
 
           {error && (

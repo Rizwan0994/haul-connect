@@ -76,11 +76,10 @@ export default function ProfilePage() {
   // Load profile data on mount
   useEffect(() => {
     // First try to auto-fill from currentUser context
-    if (currentUser) {
-      setPersonalInfo({
+    if (currentUser) {      setPersonalInfo({
         firstName: currentUser.firstName || "",
         lastName: currentUser.lastName || "",
-        sudoName: currentUser.username || "",
+        sudoName: `${currentUser.firstName} ${currentUser.lastName}`.trim() || "",
         fatherName: currentUser.fatherName || "",
         address: currentUser.address || "",
         contact: currentUser.contact || "",

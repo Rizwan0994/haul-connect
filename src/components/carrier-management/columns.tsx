@@ -334,8 +334,7 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
                 <MoreHorizontal className="h-4 w-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            </DropdownMenuTrigger>            <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => {
@@ -351,33 +350,40 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
                 Copy MC Number
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() =>
-                  openCarrierModal(
-                    carrier.id,
-                    `${carrier.company_name} (${carrier.mc_number})`
-                  )
-                }
-              >
-                View carrier profile
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={`/carrier-management/${carrier.id}/edit`}>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit carrier details
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  openCarrierModal(
-                    carrier.id,
-                    `${carrier.company_name} (${carrier.mc_number})`
-                  )
-                }
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in popup window
-              </DropdownMenuItem>              <DropdownMenuSeparator />
+              <PermissionGate requiredPermission="carriers.view">
+                <DropdownMenuItem
+                  onClick={() =>
+                    openCarrierModal(
+                      carrier.id,
+                      `${carrier.company_name} (${carrier.mc_number})`
+                    )
+                  }
+                >
+                  View carrier profile
+                </DropdownMenuItem>
+              </PermissionGate>
+              <PermissionGate requiredPermission="carriers.edit">
+                <DropdownMenuItem asChild>
+                  <Link to={`/carrier-management/${carrier.id}/edit`}>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit carrier details
+                  </Link>
+                </DropdownMenuItem>
+              </PermissionGate>
+              <PermissionGate requiredPermission="carriers.view">
+                <DropdownMenuItem
+                  onClick={() =>
+                    openCarrierModal(
+                      carrier.id,
+                      `${carrier.company_name} (${carrier.mc_number})`
+                    )
+                  }
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in popup window
+                </DropdownMenuItem>
+              </PermissionGate>
+              <DropdownMenuSeparator />
               <PermissionGate requiredPermission="carriers.manage_assignments">
                 <DropdownMenuItem asChild>
                   <Link to={`/carrier-management/assignments/${carrier.id}`}>

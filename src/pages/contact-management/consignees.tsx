@@ -6,6 +6,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import { consigneeApi, Consignee } from '@/services/consigneeApi'
 import { useToast } from '@/components/ui/use-toast'
 import { consigneeColumns } from '@/components/contact-management/consignee-columns'
+import { PermissionGate } from '@/components/auth/permission-gate'
 
 export default function ConsigneeManagement() {
   const { toast } = useToast()
@@ -93,14 +94,15 @@ export default function ConsigneeManagement() {
           <h1 className="text-2xl font-bold tracking-tight">Consignee Management</h1>
           <p className="text-muted-foreground">
             Manage your consignee contacts and information
-          </p>
-        </div>
-        <Link to="/contact-management/consignees/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Consignee
-          </Button>
-        </Link>
+          </p>        </div>
+        <PermissionGate requiredPermission="consignees.create">
+          <Link to="/contact-management/consignees/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Consignee
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       <DataTable

@@ -143,11 +143,9 @@ const carrierApprovalController = {
         approved_by_accounts: userId,
         accounts_approved_at: new Date(),
         status: 'active' // Update the main status to active
-      });
-
-      // Create notification for the creator
+      });      // Create notification for the creator
       await notification.create({
-        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        user_id: carrierProfile.created_by, // Use created_by field
         title: 'Carrier Profile Approved',
         message: `Your carrier profile for ${carrierProfile.company_name} has been fully approved and is now active`,
         type: 'approval',
@@ -206,11 +204,9 @@ const carrierApprovalController = {
         rejected_at: new Date(),
         rejection_reason: reason,
         status: 'suspended' // Update main status to suspended
-      });
-
-      // Create notification for the creator
+      });      // Create notification for the creator
       await notification.create({
-        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        user_id: carrierProfile.created_by, // Use created_by field
         title: 'Carrier Profile Rejected',
         message: `Your carrier profile for ${carrierProfile.company_name} has been rejected. Reason: ${reason}`,
         type: 'rejection',
@@ -254,11 +250,9 @@ const carrierApprovalController = {
         disabled_by: userId,
         disabled_at: new Date(),
         status: 'suspended' // Update main status to suspended
-      });
-
-      // Create notification for the creator
+      });      // Create notification for the creator
       await notification.create({
-        user_id: carrierProfile.agent_name, // Assuming agent_name is user ID
+        user_id: carrierProfile.created_by, // Use created_by field
         title: 'Carrier Profile Disabled',
         message: `Your carrier profile for ${carrierProfile.company_name} has been disabled`,
         type: 'info',

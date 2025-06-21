@@ -1,5 +1,4 @@
 exports.userModel = (db) => {
-  db.user.hasMany(db.carrier_profile, { foreignKey: 'agent_name', as: 'managedCarriers' });
   db.user.hasMany(db.dispatch, { foreignKey: 'user_id', as: 'dispatches' });
   db.user.hasMany(db.notification, { foreignKey: 'user_id', as: 'notifications' });
   // db.user.hasMany(db.FollowupSheet, { foreignKey: 'agent_name', as: 'followups' });
@@ -36,7 +35,6 @@ exports.userModel = (db) => {
 };
 
 exports.carrierModel = (db) => {
-  db.carrier_profile.belongsTo(db.user, { foreignKey: 'agent_name', as: 'agent' });
   db.carrier_profile.hasMany(db.dispatch, { foreignKey: 'carrier_id', as: 'dispatches' });
   // db.carrier_profile.hasMany(db.FollowupSheet, { foreignKey: 'mc_no', as: 'followups' });
   

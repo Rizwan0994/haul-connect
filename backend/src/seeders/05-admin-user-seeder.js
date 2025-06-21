@@ -12,7 +12,7 @@ const bcrypt = require('bcrypt');
 // Default admin user configuration
 const defaultAdminUser = {
   email: 'admin@gmail.com',
-  password: 'admin123', // This should be changed after first login
+  password: '12345678', // This should be changed after first login
   first_name: 'Super',
   last_name: 'Admin',
   basic_salary: 0,

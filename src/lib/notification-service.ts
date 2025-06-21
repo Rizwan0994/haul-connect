@@ -43,7 +43,6 @@ export interface User {
   first_name: string | null;
   last_name: string | null;
   category: string | null;
-  role: string | null;
   userRole?: {
     id: number;
     name: string;

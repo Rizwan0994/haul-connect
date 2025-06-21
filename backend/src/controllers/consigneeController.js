@@ -27,17 +27,16 @@ exports.getAllConsignees = async (req, res) => {
     }
 
     const consignees = await Consignee.findAndCountAll({
-      where: whereConditions,
-      include: [
+      where: whereConditions,      include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ],
       order: [[sortBy, sortOrder]],
@@ -71,18 +70,17 @@ exports.getAllConsignees = async (req, res) => {
 exports.getConsigneeById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const consignee = await Consignee.findByPk(id, {
+      const consignee = await Consignee.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -142,14 +140,12 @@ exports.createConsignee = async (req, res) => {
       attachment_filename,
       created_by: userId,
       updated_by: userId
-    });
-
-    const createdConsignee = await Consignee.findByPk(consignee.id, {
+    });    const createdConsignee = await Consignee.findByPk(consignee.id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -206,19 +202,17 @@ exports.updateConsignee = async (req, res) => {
       updateData.attachment_filename = req.file.originalname;
     }
 
-    await consignee.update(updateData);
-
-    const updatedConsignee = await Consignee.findByPk(id, {
+    await consignee.update(updateData);    const updatedConsignee = await Consignee.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });

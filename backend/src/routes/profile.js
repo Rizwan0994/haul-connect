@@ -57,14 +57,12 @@ router.get('/api/profile', authenticateToken, async (req, res) => {
         success: false,
         message: 'User not found'
       });
-    }
-      // Return user data without sensitive information
+    }    // Return user data without sensitive information
     const userData = {
       id: user.id,
       email: user.email,
       firstName: user.first_name,
       lastName: user.last_name,
-      sudoName: user.username,
       fatherName: user.fatherName,
       address: user.address,
       contact: user.contact,
@@ -94,14 +92,11 @@ router.get('/api/profile', authenticateToken, async (req, res) => {
 
 router.put('/api/profile', authenticateToken, upload.single('photo'), async (req, res) => {
   try {
-    const { firstName, lastName, sudoName, fatherName, address, contact, cnic, experience } = req.body;
-    const userId = req.user.id;
-
-    // Update user profile in database - map camelCase to database fields
+    const { firstName, lastName, fatherName, address, contact, cnic, experience } = req.body;
+    const userId = req.user.id;    // Update user profile in database - map camelCase to database fields
     const updateData = {
       first_name: firstName,
       last_name: lastName,
-      username: sudoName,
       fatherName,
       address,
       contact,
@@ -121,16 +116,13 @@ router.put('/api/profile', authenticateToken, upload.single('photo'), async (req
     );
     
     // Get updated user data
-    const updatedUser = await User.findByPk(userId);
-
-    res.json({
+    const updatedUser = await User.findByPk(userId);    res.json({
       success: true,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
         firstName: updatedUser.first_name,
         lastName: updatedUser.last_name,
-        sudoName: updatedUser.username,
         fatherName: updatedUser.fatherName,
         address: updatedUser.address,
         contact: updatedUser.contact,

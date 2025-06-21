@@ -1,4 +1,4 @@
-const { employee_attendance:EmployeeAttendance, user:User, sequelize } = require('../models');
+const { employee_attendance:EmployeeAttendance, user:User, role:Role, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const moment = require('moment');
 const ReportGenerator = require('../utils/reportGenerator');
@@ -41,22 +41,27 @@ exports.getAllAttendance = async (req, res) => {
     
     if (status) {
       whereConditions.status = status;
-    }
-
-    // Build user where conditions for search
+    }    // Build user where conditions for search
     const userWhere = {};
     if (search) {
       userWhere[Op.or] = [
-        { username: { [Op.iLike]: `%${search}%` } },
+        { first_name: { [Op.iLike]: `%${search}%` } },
+        { last_name: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } }
       ];
     }    const attendanceRecords = await EmployeeAttendance.findAndCountAll({
       where: whereConditions,
-      include: [
-        {
+      include: [        {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email', 'role'],
+          attributes: ['id', 'first_name', 'last_name', 'email'],
+          include: [
+            {
+              model: Role,
+                  as: 'userRole',
+              attributes: ['name']
+            }
+          ],
           where: Object.keys(userWhere).length > 0 ? userWhere : undefined
         }
       ],
@@ -90,14 +95,19 @@ exports.getAllAttendance = async (req, res) => {
 // Get attendance by ID
 exports.getAttendanceById = async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    const attendance = await EmployeeAttendance.findByPk(id, {
+    const { id } = req.params;    const attendance = await EmployeeAttendance.findByPk(id, {
       include: [
         {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email', 'role']
+          attributes: ['id', 'first_name', 'last_name', 'email'],
+          include: [
+            {
+              model: Role,
+                  as: 'userRole',
+              attributes: ['name']
+            }
+          ]
         }
       ]
     });
@@ -152,14 +162,19 @@ exports.createAttendance = async (req, res) => {
       status,
       notes,
       marked_by
-    });
-
-    const attendanceWithEmployee = await EmployeeAttendance.findByPk(attendance.id, {
+    });    const attendanceWithEmployee = await EmployeeAttendance.findByPk(attendance.id, {
       include: [
         {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email', 'role']
+          attributes: ['id', 'first_name', 'last_name', 'email'],
+          include: [
+            {
+              model: Role,
+              as: 'userRole',
+              attributes: ['name']
+            }
+          ]
         }
       ]
     });
@@ -199,14 +214,19 @@ exports.updateAttendance = async (req, res) => {
       check_out_time,
       status,
       notes
-    });
-
-    const updatedAttendance = await EmployeeAttendance.findByPk(id, {
+    });    const updatedAttendance = await EmployeeAttendance.findByPk(id, {
       include: [
         {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email', 'role']
+          attributes: ['id', 'first_name', 'last_name', 'email'],
+          include: [
+            {
+              model: Role,
+                  as: 'userRole',
+              attributes: ['name']
+            }
+          ]
         }
       ]
     });
@@ -294,14 +314,13 @@ exports.getAttendanceSummary = async (req, res) => {
 
     // Get employee attendance stats
     const employeeStats = await EmployeeAttendance.findAll({
-      where: whereConditions,
-      include: [
+      where: whereConditions,      include: [
         {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
-      ],      attributes: [
+      ],attributes: [
         'employee_id',
         [sequelize.fn('COUNT', sequelize.col('employee_attendance.id')), 'total_days'],
         [sequelize.fn('COUNT', sequelize.literal("CASE WHEN status = 'present' THEN 1 END")), 'present_days'],
@@ -310,13 +329,17 @@ exports.getAttendanceSummary = async (req, res) => {
       ],
       group: ['employee_id', 'employee.id'],
       raw: false
-    });
-
-    // Get total employees
+    });    // Get total employees
     const totalEmployees = await User.count({
-      where: {
-        role: { [Op.not]: 'Super Admin' } // Exclude super admin from attendance tracking
-      }
+      include: [
+        {
+          model: Role,
+          as: 'userRole',
+          where: {
+            name: { [Op.not]: 'Super Admin' } // Exclude super admin from attendance tracking
+          }
+        }
+      ]
     });
 
     res.json({
@@ -416,15 +439,19 @@ exports.getEmployeesForBulkAttendance = async (req, res) => {
         status: 'error',
         message: 'Date parameter is required'
       });
-    }
-
-    // Get all users (employees) except super admin
+    }    // Get all users (employees) except super admin
     const employees = await User.findAll({
-      where: {
-        role: { [Op.not]: 'Super Admin' }
-      },
-      attributes: ['id', 'username', 'email', 'role'],
-      order: [['username', 'ASC']]
+      include: [
+        {
+          model: Role,
+              as: 'userRole',
+          where: {
+            name: { [Op.not]: 'Super Admin' }
+          }
+        }
+      ],
+      attributes: ['id', 'first_name', 'last_name', 'email'],
+      order: [['first_name', 'ASC'], ['last_name', 'ASC']]
     });
 
     // Get existing attendance records for the date
@@ -438,12 +465,10 @@ exports.getEmployeesForBulkAttendance = async (req, res) => {
     const attendanceMap = {};
     attendanceRecords.forEach(record => {
       attendanceMap[record.employee_id] = record;
-    });
-
-    // Combine employee data with attendance status
+    });    // Combine employee data with attendance status
     const employeesWithAttendance = employees.map(employee => ({
       ...employee.toJSON(),
-      department: employee.role, // Use role as department for now
+      department: employee.role?.name || 'Unknown', // Use role name as department
       currentAttendance: attendanceMap[employee.id] || null
     }));
 
@@ -487,12 +512,18 @@ exports.generateAttendanceReport = async (req, res) => {
         date: {
           [Op.between]: [startDate, endDate]
         }
-      },
-      include: [
+      },      include: [
         {
           model: User,
           as: 'employee',
-          attributes: ['id', 'username', 'email', 'role']
+          attributes: ['id', 'first_name', 'last_name', 'email'],
+          include: [
+            {
+              model: Role,
+                  as: 'userRole',
+              attributes: ['name']
+            }
+          ]
         }
       ],
       order: [['date', 'DESC'], ['employee_id', 'ASC']]

@@ -7,12 +7,14 @@ export interface AttendanceRecord {
   check_in_time?: string;
   check_out_time?: string;
   status: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
-  notes?: string;
-  employee: {
+  notes?: string;  employee: {
     id: string;
-    username: string;
+    first_name: string;
+    last_name: string;
     email: string;
-    role: string;
+    userRole?: {
+      name: string;
+    };
     department?: string;
   };
   created_at: string;

@@ -9,15 +9,16 @@ export interface Broker {
   created_by?: number;
   updated_by?: number;
   created_at: string;
-  updated_at: string;
-  createdBy?: {
+  updated_at: string;  createdBy?: {
     id: number;
-    username: string;
+    first_name: string;
+    last_name: string;
     email: string;
   };
   updatedBy?: {
     id: number;
-    username: string;
+    first_name: string;
+    last_name: string;
     email: string;
   };
 }

@@ -50,10 +50,8 @@ export type Carrier = {
   loads_completed?: number;
   first_load_completed_at?: string;  sales_agent_id?: number;
   created_by?: number;
-  commission_paid?: boolean;
-  creator?: {
+  commission_paid?: boolean;  creator?: {
     id: number;
-    username: string;
     email: string;
     first_name?: string;
     last_name?: string;
@@ -249,10 +247,9 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
       if (!creator) {
         return <span className="text-muted-foreground">Unknown</span>;
       }
-      
-      const displayName = creator.first_name && creator.last_name 
+        const displayName = creator.first_name && creator.last_name 
         ? `${creator.first_name} ${creator.last_name}`
-        : creator.username;
+        : creator.email || "Unknown User";
       
       return (
         <div className="flex flex-col">

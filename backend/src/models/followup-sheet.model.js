@@ -18,7 +18,8 @@ module.exports = (sequelize) => {
       agent_name: {
         type: DataTypes.STRING,
         allowNull: false,
-      },      date: {
+      },      
+      date: {
         type: DataTypes.DATE, // Changed from DATEONLY to include time
         allowNull: false,
       },

@@ -276,7 +276,7 @@ const getAllUsersForNotification = async (req, res) => {
               as: 'userRole',
       }  ],     
         
-      attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category'],
+      attributes: ['id', 'email', 'first_name', 'last_name'],
       order: [['first_name', 'ASC'], ['last_name', 'ASC']]
     });
     
@@ -417,16 +417,28 @@ const getAllNotifications = async (req, res) => {
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
       offset: parseInt(offset),
-      include: [
-        {
+      include: [        {
           model: User,
           as: 'user',
-          attributes: ['id', 'email', 'first_name', 'last_name', 'role', 'category']
-        },
-        {
+          attributes: ['id', 'email', 'first_name', 'last_name'],
+          include: [
+            {
+              model: Role,
+              as: 'userRole',
+              attributes: ['name']
+            }
+          ]
+        },        {
           model: User,
           as: 'sender',
           attributes: ['id', 'email', 'first_name', 'last_name'],
+          include: [
+            {
+              model: Role,
+              as: 'userRole',
+              attributes: ['name']
+            }
+          ],
           required: false
         }
       ]

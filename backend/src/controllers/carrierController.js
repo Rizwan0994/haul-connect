@@ -57,11 +57,10 @@ exports.createCarrier = async (req, res) => {
 exports.getAllCarriers = async (req, res) => {
   try {
     const carriers = await CarrierProfile.findAll({
-      include: [
-        {
+      include: [        {
           model: User,
           as: 'creator',
-          attributes: ['id', 'username', 'email', 'first_name', 'last_name'],
+          attributes: ['id', 'email', 'first_name', 'last_name'],
           required: false // LEFT JOIN to include carriers without creators
         }
       ],

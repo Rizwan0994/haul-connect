@@ -16,9 +16,7 @@ import { notificationService, User as ServiceUser } from '@/lib/notification-ser
 interface User {
   id: number;
   email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: string | null;
+  first_name: string | null;  last_name: string | null;
   category: string | null;
   userRole?: {
     id: number;
@@ -53,14 +51,12 @@ export function CreateNotificationForm({ onNotificationSent }: CreateNotificatio
   }, []);  const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
-      const serviceUsers = await notificationService.getAllUsersForNotification();
-      // Convert ServiceUser to local User format
+      const serviceUsers = await notificationService.getAllUsersForNotification();      // Convert ServiceUser to local User format
       const convertedUsers: User[] = (serviceUsers || []).map(user => ({
         id: user.id,
         email: user.email,
         first_name: user.first_name || null,
         last_name: user.last_name || null,
-        role: user.role || null,
         category: user.category || null,
         userRole: (user as any).userRole || null
       }));
@@ -75,10 +71,9 @@ export function CreateNotificationForm({ onNotificationSent }: CreateNotificatio
     } finally {
       setLoadingUsers(false);
     }
-  };
-  // Helper function to get user's role name
+  };  // Helper function to get user's role name
   const getUserRole = useCallback((user: User): string => {
-    return user.userRole?.name || user.role || user.category || 'No Role';
+    return user.userRole?.name || user.category || 'No Role';
   }, []);
 
   // Memoized filtered users computation

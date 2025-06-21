@@ -13,7 +13,7 @@ class ReportGenerator {
       const excelData = data.map((record, index) => ({
         'Sr No': index + 1,
         'Employee ID': record.employee_id,
-        'Employee Name': record.employee?.username || 'N/A',
+        'Employee Name': `${record.employee?.first_name || ''} ${record.employee?.last_name || ''}`.trim() || 'N/A',
         'Email': record.employee?.email || 'N/A',
         'Department/Role': record.employee?.role || 'N/A',
         'Date': record.date,
@@ -91,7 +91,7 @@ class ReportGenerator {
       
       const tableData = data.map((record, index) => [
         index + 1,
-        record.employee?.username || 'N/A',
+        `${record.employee?.first_name || ''} ${record.employee?.last_name || ''}`.trim() || 'N/A',
         record.date,
         record.check_in_time || 'N/A',
         record.check_out_time || 'N/A',

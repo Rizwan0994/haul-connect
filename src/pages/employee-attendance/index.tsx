@@ -255,10 +255,9 @@ export default function EmployeeAttendance() {
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {employees.map((emp) => (
+                    <SelectContent>                      {employees.map((emp) => (
                         <SelectItem key={emp.id} value={emp.id.toString()}>
-                          {emp.username} ({emp.email})
+                          {emp.first_name} {emp.last_name} ({emp.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -438,10 +437,9 @@ export default function EmployeeAttendance() {
                     <SelectValue placeholder="All employees" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All employees</SelectItem>
-                    {employees.map((emp) => (
+                    <SelectItem value="all">All employees</SelectItem>                    {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id.toString()}>
-                        {emp.username}
+                        {emp.first_name} {emp.last_name}
                       </SelectItem>
                     ))}
                   </SelectContent>

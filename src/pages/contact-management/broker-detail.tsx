@@ -172,17 +172,16 @@ export default function BrokerDetail() {
               <p className="text-sm text-muted-foreground">
                 {format(new Date(broker.updated_at), "MMM dd, yyyy 'at' HH:mm")}
               </p>
-            </div>
-            {broker.createdBy && (
+            </div>            {broker.createdBy && (
               <div>
                 <Label>Created By</Label>
-                <p className="text-sm text-muted-foreground">{broker.createdBy.username}</p>
+                <p className="text-sm text-muted-foreground">{`${broker.createdBy.first_name} ${broker.createdBy.last_name}`}</p>
               </div>
             )}
             {broker.updatedBy && (
               <div>
                 <Label>Updated By</Label>
-                <p className="text-sm text-muted-foreground">{broker.updatedBy.username}</p>
+                <p className="text-sm text-muted-foreground">{`${broker.updatedBy.first_name} ${broker.updatedBy.last_name}`}</p>
               </div>
             )}
           </div>

@@ -27,17 +27,16 @@ exports.getAllShippers = async (req, res) => {
     }
 
     const shippers = await Shipper.findAndCountAll({
-      where: whereConditions,
-      include: [
+      where: whereConditions,      include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ],
       order: [[sortBy, sortOrder]],
@@ -71,18 +70,17 @@ exports.getAllShippers = async (req, res) => {
 exports.getShipperById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const shipper = await Shipper.findByPk(id, {
+      const shipper = await Shipper.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -142,14 +140,12 @@ exports.createShipper = async (req, res) => {
       attachment_filename,
       created_by: userId,
       updated_by: userId
-    });
-
-    const createdShipper = await Shipper.findByPk(shipper.id, {
+    });    const createdShipper = await Shipper.findByPk(shipper.id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -206,19 +202,17 @@ exports.updateShipper = async (req, res) => {
       updateData.attachment_filename = req.file.originalname;
     }
 
-    await shipper.update(updateData);
-
-    const updatedShipper = await Shipper.findByPk(id, {
+    await shipper.update(updateData);    const updatedShipper = await Shipper.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });

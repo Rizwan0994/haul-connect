@@ -53,9 +53,12 @@ const ATTENDANCE_STATUS_OPTIONS = [
 
 interface Employee {
   id: string;
-  username: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
+  userRole?: {
+    name: string;
+  };
   department?: string;
   currentAttendance?: {
     id: string;
@@ -435,10 +438,9 @@ export default function BulkAttendance() {
                   const statusOption = getStatusOption(currentStatus);
                   
                   return (
-                    <TableRow key={employee.id}>
-                      <TableCell className="font-medium">{employee.id}</TableCell>
-                      <TableCell>{employee.username}</TableCell>
-                      <TableCell>{employee.department || employee.role}</TableCell>
+                    <TableRow key={employee.id}>                      <TableCell className="font-medium">{employee.id}</TableCell>
+                      <TableCell>{employee.first_name} {employee.last_name}</TableCell>
+                      <TableCell>{employee.department || employee.userRole?.name || 'Unknown'}</TableCell>
                       <TableCell>
                         <Select
                           value={currentStatus}

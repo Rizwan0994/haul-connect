@@ -21,12 +21,14 @@ export interface AttendanceRecord {
   check_in_time?: string;
   check_out_time?: string;
   status: 'present' | 'absent' | 'late' | 'half_day' | 'late_present' | 'not_marked' | 'late_without_notice' | 'leave_without_notice';
-  notes?: string;
-  employee: {
+  notes?: string;  employee: {
     id: string;
-    username: string;
+    first_name: string;
+    last_name: string;
     email: string;
-    role: string;
+    userRole?: {
+      name: string;
+    };
     department?: string;
   };
   created_at: string;
@@ -47,9 +49,8 @@ export function createAttendanceColumns(
         return <div className="font-medium">{row.index + 1}</div>;
       },
       enableSorting: false,
-    },
-    {
-      accessorKey: "employee.username",
+    },    {
+      accessorKey: "employee.first_name",
       header: ({ column }) => {
         return (
           <Button
@@ -63,13 +64,13 @@ export function createAttendanceColumns(
       },
       cell: ({ row }) => {
         const employee = row.original.employee;
+        const fullName = `${employee.first_name} ${employee.last_name}`.trim();
         return (
           <div>
-            <div className="font-medium">{employee.username}</div>
-            <div className="text-sm text-muted-foreground">{employee.email}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="font-medium">{fullName}</div>
+            <div className="text-sm text-muted-foreground">{employee.email}</div>            <div className="text-xs text-muted-foreground">
               <Badge variant="outline" className="text-xs">
-                {employee.role}
+                {employee.userRole?.name || 'Unknown'}
               </Badge>
             </div>
           </div>

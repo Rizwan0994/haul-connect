@@ -24,17 +24,16 @@ exports.getAllBrokers = async (req, res) => {
     }
 
     const brokers = await Broker.findAndCountAll({
-      where: whereConditions,
-      include: [
+      where: whereConditions,      include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ],
       order: [[sortBy, sortOrder]],
@@ -68,18 +67,17 @@ exports.getAllBrokers = async (req, res) => {
 exports.getBrokerById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const broker = await Broker.findByPk(id, {
+      const broker = await Broker.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -125,14 +123,12 @@ exports.createBroker = async (req, res) => {
       agent_email,
       created_by: userId,
       updated_by: userId
-    });
-
-    const createdBroker = await Broker.findByPk(broker.id, {
+    });    const createdBroker = await Broker.findByPk(broker.id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });
@@ -173,19 +169,17 @@ exports.updateBroker = async (req, res) => {
       agent_phone,
       agent_email,
       updated_by: userId
-    });
-
-    const updatedBroker = await Broker.findByPk(id, {
+    });    const updatedBroker = await Broker.findByPk(id, {
       include: [
         {
           model: User,
           as: 'createdBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         },
         {
           model: User,
           as: 'updatedBy',
-          attributes: ['id', 'username', 'email']
+          attributes: ['id', 'first_name', 'last_name', 'email']
         }
       ]
     });

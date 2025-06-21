@@ -123,9 +123,8 @@ export const brokerColumns = ({ onDelete }: BrokerColumnsProps): ColumnDef<Broke
     header: "Created By",
     cell: ({ row }) => {
       const broker = row.original
-      return (
-        <div className="text-muted-foreground">
-          {broker.createdBy?.username || "N/A"}
+      return (        <div className="text-muted-foreground">
+          {broker.createdBy ? `${broker.createdBy.first_name} ${broker.createdBy.last_name}` : "N/A"}
         </div>
       )
     },

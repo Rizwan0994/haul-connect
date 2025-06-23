@@ -109,11 +109,13 @@ module.exports = (sequelize) => {
       eld_provider: DataTypes.STRING,
       eld_site: DataTypes.STRING,
       eld_username: DataTypes.STRING,
-      eld_password: DataTypes.STRING,
-
-      // Admin only fields - MyCarrierPackets Information
+      eld_password: DataTypes.STRING,      // Admin only fields - MyCarrierPackets Information
       mycarrierpackets_username: DataTypes.STRING,
       mycarrierpackets_password: DataTypes.STRING,
+
+      // Admin only fields - Highway Information
+      highway_number: DataTypes.STRING,
+      highway_email: DataTypes.STRING,
 
       // Approval workflow fields
       approval_status: {

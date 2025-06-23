@@ -48,8 +48,7 @@ export interface Carrier {
   office_use_special_notes?: string;
   // Agent info
   agent_name?: string;
-  ein_number?: string;
-  // Admin only fields
+  ein_number?: string;  // Admin only fields
   dat_username?: string;
   dat_password?: string;
   truckstop_username?: string;
@@ -62,6 +61,8 @@ export interface Carrier {
   eld_password?: string;
   mycarrierpackets_username?: string;
   mycarrierpackets_password?: string;
+  highway_number?: string;
+  highway_email?: string;
 }
 
 export const createCarrier = async (

@@ -26,6 +26,7 @@ import { Carrier } from "@/lib/carriers-data";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/components/auth/auth-context";
+import { Eye, EyeOff } from "lucide-react";
 
 // Define form schema with Zod
 const carrierFormSchema = z.object({
@@ -93,8 +94,7 @@ const carrierFormSchema = z.object({
   office_use_carrier_no: z.string().optional(),
   office_use_team_assigned: z.string().optional(),
   office_use_special_notes: z.string().optional(),
-  
-  // Admin only fields
+    // Admin only fields
   dat_username: z.string().optional(),
   dat_password: z.string().optional(),
   truckstop_username: z.string().optional(),
@@ -107,6 +107,8 @@ const carrierFormSchema = z.object({
   eld_password: z.string().optional(),
   mycarrierpackets_username: z.string().optional(),
   mycarrierpackets_password: z.string().optional(),
+  highway_number: z.string().optional(),
+  highway_email: z.string().email("Valid email is required").optional().or(z.literal("")),
 });
 
 export type CarrierFormValues = z.infer<typeof carrierFormSchema>;
@@ -123,9 +125,18 @@ export function CarrierForm({
   isLoading = false,
 }: CarrierFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
+  const [passwordVisibility, setPasswordVisibility] = useState<Record<string, boolean>>({});
   const { hasPermission } = useAuth();
-    // Check if user is admin
+  // Check if user is admin
   const isAdmin = hasPermission(['admin', 'super admin']);
+  
+  // Toggle password visibility
+  const togglePasswordVisibility = (field: string) => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
   
   // Reset tab to basic if trying to access admin tab without permissions
   React.useEffect(() => {
@@ -201,10 +212,11 @@ export function CarrierForm({
       truckstop_carrier_zip: initialData?.truckstop_carrier_zip || "",
       eld_provider: initialData?.eld_provider || "",
       eld_site: initialData?.eld_site || "",
-      eld_username: initialData?.eld_username || "",
-      eld_password: initialData?.eld_password || "",
+      eld_username: initialData?.eld_username || "",      eld_password: initialData?.eld_password || "",
       mycarrierpackets_username: initialData?.mycarrierpackets_username || "",
       mycarrierpackets_password: initialData?.mycarrierpackets_password || "",
+      highway_number: initialData?.highway_number || "",
+      highway_email: initialData?.highway_email || "",
     },
   });
 
@@ -921,15 +933,37 @@ export function CarrierForm({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
-                      <FormField
+                      />                      <FormField
                         control={form.control}
                         name="dat_password"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>DAT Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="DAT password" {...field} />
+                              <div className="relative">
+                                <Input 
+                                  type={passwordVisibility.dat_password ? "text" : "password"} 
+                                  placeholder="DAT password" 
+                                  {...field} 
+                                  className="pr-10"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => togglePasswordVisibility('dat_password')}
+                                >
+                                  {passwordVisibility.dat_password ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">
+                                    {passwordVisibility.dat_password ? "Hide password" : "Show password"}
+                                  </span>
+                                </Button>
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -956,15 +990,37 @@ export function CarrierForm({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
-                      <FormField
+                      />                      <FormField
                         control={form.control}
                         name="truckstop_password"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Truckstop Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="Truckstop password" {...field} />
+                              <div className="relative">
+                                <Input 
+                                  type={passwordVisibility.truckstop_password ? "text" : "password"} 
+                                  placeholder="Truckstop password" 
+                                  {...field} 
+                                  className="pr-10"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => togglePasswordVisibility('truckstop_password')}
+                                >
+                                  {passwordVisibility.truckstop_password ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">
+                                    {passwordVisibility.truckstop_password ? "Hide password" : "Show password"}
+                                  </span>
+                                </Button>
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1043,15 +1099,37 @@ export function CarrierForm({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
-                      <FormField
+                      />                      <FormField
                         control={form.control}
                         name="eld_password"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>ELD Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="ELD password" {...field} />
+                              <div className="relative">
+                                <Input 
+                                  type={passwordVisibility.eld_password ? "text" : "password"} 
+                                  placeholder="ELD password" 
+                                  {...field} 
+                                  className="pr-10"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => togglePasswordVisibility('eld_password')}
+                                >
+                                  {passwordVisibility.eld_password ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">
+                                    {passwordVisibility.eld_password ? "Hide password" : "Show password"}
+                                  </span>
+                                </Button>
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1078,15 +1156,71 @@ export function CarrierForm({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
-                      <FormField
+                      />                      <FormField
                         control={form.control}
                         name="mycarrierpackets_password"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>MyCarrierPackets Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="MyCarrierPackets password" {...field} />
+                              <div className="relative">
+                                <Input 
+                                  type={passwordVisibility.mycarrierpackets_password ? "text" : "password"} 
+                                  placeholder="MyCarrierPackets password" 
+                                  {...field} 
+                                  className="pr-10"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => togglePasswordVisibility('mycarrierpackets_password')}
+                                >
+                                  {passwordVisibility.mycarrierpackets_password ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">
+                                    {passwordVisibility.mycarrierpackets_password ? "Hide password" : "Show password"}
+                                  </span>
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Highway Information */}
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">Highway Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="highway_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Highway Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Highway number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="highway_email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Highway Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Highway email address" type="email" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

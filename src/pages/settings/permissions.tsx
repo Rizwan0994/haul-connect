@@ -53,6 +53,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 // Ensure we're importing the latest version of the APIs
 import { roleAPI, permissionAPI, Role, Permission } from '@/lib/permission-api';
 
@@ -68,13 +69,13 @@ export default function PermissionManagement() {
     module: 'all',
     type: 'all',
     search: ''
-  });
-  const [showNewRoleDialog, setShowNewRoleDialog] = useState(false);
+  });  const [showNewRoleDialog, setShowNewRoleDialog] = useState(false);
   const [newRole, setNewRole] = useState({
     name: '',
     guard_name: 'api',
     description: ''
-  });  // Fetch all data when component mounts
+  });
+  const [loadingOperations, setLoadingOperations] = useState<Record<string, boolean>>({});// Fetch all data when component mounts
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -155,8 +156,7 @@ export default function PermissionManagement() {
   // Check if role has permission
   const hasPermission = (permissionId: number) => {
     return selectedRole?.permissions.some(p => p.id === permissionId) || false;
-  };
-  // Toggle permission for a role
+  };  // Toggle permission for a role
   const togglePermission = async (permissionId: number) => {
     if (!selectedRole) return;
 
@@ -175,16 +175,160 @@ export default function PermissionManagement() {
         }
         await roleAPI.addPermissionToRole(selectedRole.id, permissionId);
       }
-      
-      // Refresh role data
+        // Refresh role data
       const updatedRole = await roleAPI.getRoleById(selectedRole.id);
       setSelectedRole(updatedRole);
     } catch (error) {
       console.error('Error updating permission:', error);
-      // Show error to user
-      alert('Error updating permission. Please check the console for details.');
+      toast.error('Error updating permission. Please try again.');
+    }
+  };  // Enable all permissions for a specific module
+  const enableAllModulePermissions = async (module: string, modulePermissions: Permission[]) => {
+    if (!selectedRole) return;
+
+    const operationKey = `enable-${module}`;
+    setLoadingOperations(prev => ({ ...prev, [operationKey]: true }));
+
+    try {
+      // Get permissions that are not already enabled for this role
+      const permissionsToEnable = modulePermissions.filter(permission => 
+        !hasPermission(permission.id)
+      );
+
+      if (permissionsToEnable.length === 0) {
+        // All permissions are already enabled
+        return;
+      }
+
+      // Add all missing permissions to the role
+      for (const permission of permissionsToEnable) {
+        if (typeof roleAPI.addPermissionToRole !== 'function') {
+          console.error('addPermissionToRole function is not available');
+          return;
+        }
+        await roleAPI.addPermissionToRole(selectedRole.id, permission.id);
+      }
+        // Refresh role data
+      const updatedRole = await roleAPI.getRoleById(selectedRole.id);
+      setSelectedRole(updatedRole);
+      
+      toast.success(`Enabled ${permissionsToEnable.length} permissions for ${module} module`);
+    } catch (error) {
+      console.error('Error enabling all module permissions:', error);
+      toast.error('Error enabling all permissions. Please try again.');
+    } finally {
+      setLoadingOperations(prev => ({ ...prev, [operationKey]: false }));
     }
   };
+
+  // Disable all permissions for a specific module
+  const disableAllModulePermissions = async (module: string, modulePermissions: Permission[]) => {
+    if (!selectedRole) return;
+
+    const operationKey = `disable-${module}`;
+    setLoadingOperations(prev => ({ ...prev, [operationKey]: true }));
+
+    try {
+      // Get permissions that are currently enabled for this role
+      const permissionsToDisable = modulePermissions.filter(permission => 
+        hasPermission(permission.id)
+      );
+
+      if (permissionsToDisable.length === 0) {
+        // All permissions are already disabled
+        return;
+      }
+
+      // Remove all enabled permissions from the role
+      for (const permission of permissionsToDisable) {
+        await roleAPI.removePermissionFromRole(selectedRole.id, permission.id);
+      }
+        // Refresh role data
+      const updatedRole = await roleAPI.getRoleById(selectedRole.id);
+      setSelectedRole(updatedRole);
+      
+      toast.success(`Disabled ${permissionsToDisable.length} permissions for ${module} module`);
+    } catch (error) {
+      console.error('Error disabling all module permissions:', error);
+      toast.error('Error disabling all permissions. Please try again.');
+    } finally {
+      setLoadingOperations(prev => ({ ...prev, [operationKey]: false }));
+    }
+  };
+  // Enable all permissions for the selected role
+  const enableAllPermissions = async () => {
+    if (!selectedRole) return;
+
+    setLoadingOperations(prev => ({ ...prev, 'enable-all': true }));
+
+    try {
+      // Get all permissions that are not already enabled for this role
+      const permissionsToEnable = filteredPermissions.filter(permission => 
+        !hasPermission(permission.id)
+      );
+
+      if (permissionsToEnable.length === 0) {
+        toast.info('All permissions are already enabled for this role');
+        return;
+      }
+
+      // Add all missing permissions to the role
+      for (const permission of permissionsToEnable) {
+        if (typeof roleAPI.addPermissionToRole !== 'function') {
+          console.error('addPermissionToRole function is not available');
+          return;
+        }
+        await roleAPI.addPermissionToRole(selectedRole.id, permission.id);
+      }
+      
+      // Refresh role data
+      const updatedRole = await roleAPI.getRoleById(selectedRole.id);
+      setSelectedRole(updatedRole);
+      
+      toast.success(`Enabled ${permissionsToEnable.length} permissions for ${selectedRole.name}`);
+    } catch (error) {
+      console.error('Error enabling all permissions:', error);
+      toast.error('Error enabling all permissions. Please try again.');
+    } finally {
+      setLoadingOperations(prev => ({ ...prev, 'enable-all': false }));
+    }
+  };
+
+  // Disable all permissions for the selected role
+  const disableAllPermissions = async () => {
+    if (!selectedRole) return;
+
+    setLoadingOperations(prev => ({ ...prev, 'disable-all': true }));
+
+    try {
+      // Get all permissions that are currently enabled for this role
+      const permissionsToDisable = filteredPermissions.filter(permission => 
+        hasPermission(permission.id)
+      );
+
+      if (permissionsToDisable.length === 0) {
+        toast.info('All permissions are already disabled for this role');
+        return;
+      }
+
+      // Remove all enabled permissions from the role
+      for (const permission of permissionsToDisable) {
+        await roleAPI.removePermissionFromRole(selectedRole.id, permission.id);
+      }
+      
+      // Refresh role data
+      const updatedRole = await roleAPI.getRoleById(selectedRole.id);
+      setSelectedRole(updatedRole);
+      
+      toast.success(`Disabled ${permissionsToDisable.length} permissions for ${selectedRole.name}`);
+    } catch (error) {
+      console.error('Error disabling all permissions:', error);
+      toast.error('Error disabling all permissions. Please try again.');
+    } finally {
+      setLoadingOperations(prev => ({ ...prev, 'disable-all': false }));
+    }
+  };
+
   // Create new role
   const handleCreateRole = async () => {
     try {
@@ -197,12 +341,14 @@ export default function PermissionManagement() {
         guard_name: 'api',
         description: ''
       });
-      
-      // Reload roles
+        // Reload roles
       const rolesData = await roleAPI.getAllRoles();
       setRoles(rolesData);
+      
+      toast.success(`Role "${newRole.name}" created successfully`);
     } catch (error) {
       console.error('Error creating role:', error);
+      toast.error('Error creating role. Please try again.');
     }
   };
 
@@ -219,14 +365,15 @@ export default function PermissionManagement() {
       // Reload roles
       const rolesData = await roleAPI.getAllRoles();
       setRoles(rolesData);
-      
-      // Set first role as selected if none selected
+        // Set first role as selected if none selected
       if (rolesData.length > 0 && (!selectedRole || selectedRole.id === roleId)) {
         setSelectedRole(rolesData[0]);
       }
+      
+      toast.success('Role deleted successfully');
     } catch (error) {
       console.error('Error deleting role:', error);
-      alert('Error deleting role. Please check the console for details.');
+      toast.error('Error deleting role. Please try again.');
     }
   };
 
@@ -349,7 +496,53 @@ export default function PermissionManagement() {
             </div>
           </div>
           <div className="col-span-3">
-            <div className="space-y-6">              <div className="flex flex-col gap-4">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-medium">
+                    Permissions for {selectedRole?.name || 'No Role Selected'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage access permissions for this role
+                  </p>
+                </div>
+                {selectedRole && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={enableAllPermissions}
+                      disabled={!selectedRole || 
+                               (selectedRole?.is_system_role && selectedRole.name === 'admin') ||
+                               loadingOperations['enable-all'] ||
+                               loadingOperations['disable-all']}
+                      className="h-8 px-3 text-xs"
+                    >
+                      {loadingOperations['enable-all'] ? (
+                        <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full mr-2" />
+                      ) : null}
+                      Enable All Permissions
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={disableAllPermissions}
+                      disabled={!selectedRole || 
+                               (selectedRole?.is_system_role && selectedRole.name === 'admin') ||
+                               loadingOperations['enable-all'] ||
+                               loadingOperations['disable-all']}
+                      className="h-8 px-3 text-xs"
+                    >
+                      {loadingOperations['disable-all'] ? (
+                        <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full mr-2" />
+                      ) : null}
+                      Disable All Permissions
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="moduleFilter">Module</Label>
@@ -441,12 +634,52 @@ export default function PermissionManagement() {
                       <TableHead className="w-[100px]">Access</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {Object.entries(groupedByModule).map(([module, modulePermissions]) => (
-                      <React.Fragment key={module}>
-                        <TableRow className="bg-muted/30">
-                          <TableCell colSpan={4} className="font-medium py-2">
+                  <TableBody>                    {Object.entries(groupedByModule).map(([module, modulePermissions]) => (
+                      <React.Fragment key={module}>                        <TableRow className="bg-muted/30">
+                          <TableCell colSpan={2} className="font-medium py-2">
                             {module}
+                          </TableCell>
+                          <TableCell className="py-2 text-center">
+                            <span className="text-xs text-muted-foreground">
+                              {modulePermissions.filter(p => hasPermission(p.id)).length}/{modulePermissions.length} enabled
+                            </span>
+                          </TableCell>                          <TableCell className="py-2">
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => enableAllModulePermissions(module, modulePermissions)}
+                                disabled={!selectedRole || 
+                                         (selectedRole?.is_system_role && selectedRole.name === 'admin') || 
+                                         modulePermissions.every(p => hasPermission(p.id)) ||
+                                         loadingOperations[`enable-${module}`] ||
+                                         loadingOperations[`disable-${module}`]}
+                                className="h-7 px-2 text-xs"
+                              >
+                                {loadingOperations[`enable-${module}`] ? (
+                                  <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
+                                ) : (
+                                  'Enable All'
+                                )}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => disableAllModulePermissions(module, modulePermissions)}
+                                disabled={!selectedRole || 
+                                         (selectedRole?.is_system_role && selectedRole.name === 'admin') || 
+                                         modulePermissions.every(p => !hasPermission(p.id)) ||
+                                         loadingOperations[`enable-${module}`] ||
+                                         loadingOperations[`disable-${module}`]}
+                                className="h-7 px-2 text-xs"
+                              >
+                                {loadingOperations[`disable-${module}`] ? (
+                                  <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
+                                ) : (
+                                  'Disable All'
+                                )}
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                         {modulePermissions.map(permission => (

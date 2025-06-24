@@ -62,13 +62,12 @@ const carrierApprovalController = {
         error: error.message
       });
     }
-  },
-
-  // Approve carrier as manager
+  },  // Approve carrier as manager
   approveAsManager: async (req, res) => {
     try {
       const { carrierId } = req.params;
       const userId = req.user.id;
+      const { notes } = req.body || {}; // Handle undefined req.body
 
       const carrierProfile = await carrier_profile.findByPk(carrierId);
       if (!carrierProfile) {
@@ -89,6 +88,16 @@ const carrierApprovalController = {
         approval_status: 'manager_approved',
         approved_by_manager: userId,
         manager_approved_at: new Date()
+      });
+
+      // Create approval history record
+      const { CarrierApprovalHistory } = require('../models');
+      await CarrierApprovalHistory.create({
+        carrier_id: carrierId,
+        action: 'manager_approved',
+        action_by_user_id: userId,
+        action_at: new Date(),
+        notes: notes || `Carrier approved by manager`
       });
 
       // Create notification for accounts team
@@ -115,13 +124,12 @@ const carrierApprovalController = {
         error: error.message
       });
     }
-  },
-
-  // Approve carrier as accounts (final approval)
+  },  // Approve carrier as accounts (final approval)
   approveAsAccounts: async (req, res) => {
     try {
       const { carrierId } = req.params;
       const userId = req.user.id;
+      const { notes } = req.body || {}; // Handle undefined req.body
 
       const carrierProfile = await carrier_profile.findByPk(carrierId);
       if (!carrierProfile) {
@@ -143,7 +151,19 @@ const carrierApprovalController = {
         approved_by_accounts: userId,
         accounts_approved_at: new Date(),
         status: 'active' // Update the main status to active
-      });      // Create notification for the creator
+      });
+
+      // Create approval history record
+      const { CarrierApprovalHistory } = require('../models');
+      await CarrierApprovalHistory.create({
+        carrier_id: carrierId,
+        action: 'accounts_approved',
+        action_by_user_id: userId,
+        action_at: new Date(),
+        notes: notes || `Carrier fully approved by accounts team`
+      });
+
+      // Create notification for the creator
       await notification.create({
         user_id: carrierProfile.created_by, // Use created_by field
         title: 'Carrier Profile Approved',
@@ -163,17 +183,15 @@ const carrierApprovalController = {
       console.error('Error approving carrier as accounts:', error);
       res.status(500).json({
         success: false,
-        message: 'Error approving carrier',
-        error: error.message
+        message: 'Error approving carrier',        error: error.message
       });
     }
   },
-
   // Reject carrier
   rejectCarrier: async (req, res) => {
     try {
       const { carrierId } = req.params;
-      const { reason } = req.body;
+      const { reason } = req.body || {}; // Handle undefined req.body
       const userId = req.user.id;
 
       if (!reason || reason.trim() === '') {
@@ -181,9 +199,7 @@ const carrierApprovalController = {
           success: false,
           message: 'Rejection reason is required'
         });
-      }
-
-      const carrierProfile = await carrier_profile.findByPk(carrierId);
+      }      const carrierProfile = await carrier_profile.findByPk(carrierId);
       if (!carrierProfile) {
         return res.status(404).json({
           success: false,
@@ -204,7 +220,20 @@ const carrierApprovalController = {
         rejected_at: new Date(),
         rejection_reason: reason,
         status: 'suspended' // Update main status to suspended
-      });      // Create notification for the creator/assigned users
+      });
+
+      // Create approval history record
+      const { CarrierApprovalHistory } = require('../models');
+      await CarrierApprovalHistory.create({
+        carrier_id: carrierId,
+        action: 'rejected',
+        action_by_user_id: userId,
+        action_at: new Date(),
+        notes: `Carrier rejected`,
+        rejection_reason: reason
+      });
+
+      // Create notification for the creator/assigned users
       try {
         // Try to find users assigned to this carrier
         const { carrier_user_assignment } = require('../models');
@@ -252,10 +281,11 @@ const carrierApprovalController = {
                 carrier_id: carrierId,
                 action: 'rejected',
                 reason: reason
-              }
-            });
+              }              });
           }
-        }      } catch (notifError) {
+        }
+
+      } catch (notifError) {
         console.error('Error creating rejection notification:', notifError);
       }
 
@@ -280,8 +310,7 @@ const carrierApprovalController = {
       const userId = req.user.id;
 
       const carrierProfile = await carrier_profile.findByPk(carrierId);
-      if (!carrierProfile) {
-        return res.status(404).json({
+      if (!carrierProfile) {        return res.status(404).json({
           success: false,
           message: 'Carrier not found'
         });
@@ -292,7 +321,19 @@ const carrierApprovalController = {
         disabled_by: userId,
         disabled_at: new Date(),
         status: 'suspended' // Update main status to suspended
-      });      // Create notification for the creator
+      });
+
+      // Create approval history record
+      const { CarrierApprovalHistory } = require('../models');
+      await CarrierApprovalHistory.create({
+        carrier_id: carrierId,
+        action: 'disabled',
+        action_by_user_id: userId,
+        action_at: new Date(),
+        notes: `Carrier profile disabled`
+      });
+
+      // Create notification for the creator
       await notification.create({
         user_id: carrierProfile.created_by, // Use created_by field
         title: 'Carrier Profile Disabled',
@@ -379,9 +420,7 @@ const carrierApprovalController = {
         error: error.message
       });
     }
-  },
-
-  // Get approval history for all carriers
+  },  // Get approval history for all carriers
   getApprovalHistory: async (req, res) => {
     try {
       const { CarrierApprovalHistory } = require('../models');

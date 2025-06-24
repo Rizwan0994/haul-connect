@@ -15,16 +15,12 @@ app.use(express.json());
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
 app.use(
   require("morgan")(
     ':remote-addr - :remote-user - [:date[clf]] - ":method :url HTTP/:http-version" - :status - :res[content-length] B -  :response-time ms',
   ),
 );
 
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running!" });
-});
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -64,5 +60,14 @@ app.use('/api/brokers', authenticateToken, brokerRoutes);
 app.use('/api/shippers', authenticateToken, shipperRoutes);
 app.use('/api/consignees', authenticateToken, consigneeRoutes);
 app.use('/api/smtp-settings', smtpRoutes);
-app.use('/api', profileRoutes); // Profile routes
+app.use('/api/profile', profileRoutes); // Profile routes
+
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, '../../dist')));
+
+// Catch-all handler: send back React's index.html file for any non-API routes
+// Use Express 5.x compatible syntax - avoid /api routes
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'));
+});
 module.exports = app;

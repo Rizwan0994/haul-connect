@@ -11,6 +11,16 @@ const createDispatch = async (req, res) => {
       approval_status: 'pending', // New dispatches start as pending
     });
 
+    // Create initial approval history record
+    const { DispatchApprovalHistory } = require('../models');
+    await DispatchApprovalHistory.create({
+      dispatch_id: dispatch.id,
+      action: 'created',
+      action_by_user_id: req.user.id,
+      action_at: new Date(),
+      notes: `Dispatch created by ${req.user.first_name || 'User'} ${req.user.last_name || ''}`
+    });
+
     // Fetch the created dispatch with associations
     const createdDispatch = await Dispatch.findByPk(dispatch.id, {
       include: [

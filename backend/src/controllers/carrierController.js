@@ -14,7 +14,18 @@ exports.createCarrier = async (req, res) => {
     };
     
     const carrier = await CarrierProfile.create(carrierData);
-      // Create comprehensive notifications for carrier creation
+
+    // Create initial approval history record
+    const { CarrierApprovalHistory } = require('../models');
+    await CarrierApprovalHistory.create({
+      carrier_id: carrier.id,
+      action: 'created',
+      action_by_user_id: req.user?.id || null,
+      action_at: new Date(),
+      notes: `Carrier profile created by ${req.user?.first_name || 'System'} ${req.user?.last_name || ''}`
+    });
+
+    // Create comprehensive notifications for carrier creation
     try {
       const carrierName = req.body.company_name || `Carrier ID: ${carrier.id}`;
       

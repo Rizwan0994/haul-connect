@@ -97,13 +97,21 @@ const dispatchApprovalController = {
 
       if (dispatch.is_disabled) {
         return res.status(400).json(errorResponse('Cannot approve disabled dispatch'));
-      }
-
-      // Update dispatch with manager approval
+      }      // Update dispatch with manager approval
       await dispatch.update({
         approval_status: 'manager_approved',
         approved_by_manager: req.user.id,
         manager_approved_at: new Date()
+      });
+
+      // Create approval history record
+      const { DispatchApprovalHistory } = require('../models');
+      await DispatchApprovalHistory.create({
+        dispatch_id: id,
+        action: 'manager_approved',
+        action_by_user_id: req.user.id,
+        action_at: new Date(),
+        notes: `Dispatch approved by manager ${req.user.first_name || 'Unknown'} ${req.user.last_name || ''}`
       });
 
       // Create notifications
@@ -193,13 +201,21 @@ const dispatchApprovalController = {
 
       if (dispatch.is_disabled) {
         return res.status(400).json(errorResponse('Cannot approve disabled dispatch'));
-      }
-
-      // Update dispatch with accounts approval
+      }      // Update dispatch with accounts approval
       await dispatch.update({
         approval_status: 'accounts_approved',
         approved_by_accounts: req.user.id,
         accounts_approved_at: new Date()
+      });
+
+      // Create approval history record
+      const { DispatchApprovalHistory } = require('../models');
+      await DispatchApprovalHistory.create({
+        dispatch_id: id,
+        action: 'accounts_approved',
+        action_by_user_id: req.user.id,
+        action_at: new Date(),
+        notes: `Dispatch fully approved by accounts team member ${req.user.first_name || 'Unknown'} ${req.user.last_name || ''}`
       });
 
       // Create notifications
@@ -300,13 +316,22 @@ const dispatchApprovalController = {
 
       if (dispatch.is_disabled) {
         return res.status(400).json(errorResponse('Cannot reject disabled dispatch'));
-      }
-
-      // Update dispatch with rejection
+      }      // Update dispatch with rejection
       await dispatch.update({
         approval_status: 'rejected',
         rejected_by: req.user.id,
         rejected_at: new Date(),
+        rejection_reason: reason.trim()
+      });
+
+      // Create approval history record
+      const { DispatchApprovalHistory } = require('../models');
+      await DispatchApprovalHistory.create({
+        dispatch_id: id,
+        action: 'rejected',
+        action_by_user_id: req.user.id,
+        action_at: new Date(),
+        notes: `Dispatch rejected by ${req.user.first_name || 'Unknown'} ${req.user.last_name || ''}`,
         rejection_reason: reason.trim()
       });
 
@@ -388,14 +413,22 @@ const dispatchApprovalController = {
 
       if (dispatch.is_disabled) {
         return res.status(400).json(errorResponse('Dispatch is already disabled'));
-      }
-
-      // Update dispatch to disabled
+      }      // Update dispatch to disabled
       await dispatch.update({
         approval_status: 'disabled',
         is_disabled: true,
         disabled_by: req.user.id,
         disabled_at: new Date()
+      });
+
+      // Create approval history record
+      const { DispatchApprovalHistory } = require('../models');
+      await DispatchApprovalHistory.create({
+        dispatch_id: id,
+        action: 'disabled',
+        action_by_user_id: req.user.id,
+        action_at: new Date(),
+        notes: `Dispatch disabled by administrator ${req.user.first_name || 'Unknown'} ${req.user.last_name || ''}`
       });
 
       // Create notifications

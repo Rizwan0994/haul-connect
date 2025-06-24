@@ -123,3 +123,39 @@ exports.consigneeModel = (db) => {
   db.consignee.belongsTo(db.user, { foreignKey: 'created_by', as: 'createdBy' });
   db.consignee.belongsTo(db.user, { foreignKey: 'updated_by', as: 'updatedBy' });
 };
+
+// Carrier Approval History associations
+exports['carrier-approval-historyModel'] = (db) => {
+  db.CarrierApprovalHistory.belongsTo(db.carrier_profile, { 
+    foreignKey: 'carrier_id', 
+    as: 'carrier' 
+  });
+  db.CarrierApprovalHistory.belongsTo(db.user, { 
+    foreignKey: 'action_by_user_id', 
+    as: 'action_by' 
+  });
+  
+  // Add reverse association to carrier_profile
+  db.carrier_profile.hasMany(db.CarrierApprovalHistory, { 
+    foreignKey: 'carrier_id', 
+    as: 'approval_history' 
+  });
+};
+
+// Dispatch Approval History associations
+exports['dispatch-approval-historyModel'] = (db) => {
+  db.DispatchApprovalHistory.belongsTo(db.dispatch, { 
+    foreignKey: 'dispatch_id', 
+    as: 'dispatch' 
+  });
+  db.DispatchApprovalHistory.belongsTo(db.user, { 
+    foreignKey: 'action_by_user_id', 
+    as: 'action_by' 
+  });
+  
+  // Add reverse association to dispatch
+  db.dispatch.hasMany(db.DispatchApprovalHistory, { 
+    foreignKey: 'dispatch_id', 
+    as: 'approval_history' 
+  });
+};

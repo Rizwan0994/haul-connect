@@ -46,7 +46,7 @@ const router = express.Router();
 
 // Update profile information
 // Get profile information
-router.get('/api/profile', authenticateToken, async (req, res) => {
+router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
       // Find user with all profile details
@@ -90,7 +90,7 @@ router.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/api/profile', authenticateToken, upload.single('photo'), async (req, res) => {
+router.put('/profile', authenticateToken, upload.single('photo'), async (req, res) => {
   try {
     const { firstName, lastName, fatherName, address, contact, cnic, experience } = req.body;
     const userId = req.user.id;    // Update user profile in database - map camelCase to database fields
@@ -141,7 +141,7 @@ router.put('/api/profile', authenticateToken, upload.single('photo'), async (req
 });
 
 // Update password
-router.put('/api/profile/password', authenticateToken, async (req, res) => {
+router.put('/password', authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.user.id;
@@ -182,7 +182,7 @@ router.put('/api/profile/password', authenticateToken, async (req, res) => {
 });
 
 // Get all user documents
-router.get('/api/profile/documents', authenticateToken, async (req, res) => {
+router.get('/documents', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
       // Find all documents for the current user
@@ -209,7 +209,7 @@ router.get('/api/profile/documents', authenticateToken, async (req, res) => {
 });
 
 // Upload documents
-router.post('/api/profile/documents', authenticateToken, upload.single('document'), async (req, res) => {
+router.post('/documents', authenticateToken, upload.single('document'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -244,7 +244,7 @@ router.post('/api/profile/documents', authenticateToken, upload.single('document
 });
 
 // Delete document
-router.delete('/api/profile/documents/:id', authenticateToken, async (req, res) => {
+router.delete('/documents/:id', authenticateToken, async (req, res) => {
   try {
     const documentId = req.params.id;
     const userId = req.user.id;

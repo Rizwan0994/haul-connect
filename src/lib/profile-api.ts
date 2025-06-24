@@ -33,7 +33,7 @@ export type Document = DocumentInfo;
 
 export const profileApi = {
   async getProfile() {
-    const response = await apiClient.get("/api/profile");
+    const response = await apiClient.get("/profile");
     return response.data;
   },
   async updateProfile(data: ProfileUpdateData, photo?: File) {
@@ -50,7 +50,7 @@ export const profileApi = {
       formData.append('photo', photoFile);
     }
 
-    const response = await apiClient.put("/api/profile", formData, {
+    const response = await apiClient.put("/profile", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -59,12 +59,12 @@ export const profileApi = {
   },
 
   async updatePassword(data: PasswordUpdateData) {
-    const response = await apiClient.put("/api/profile/password", data);
+    const response = await apiClient.put("/profile/password", data);
     return response.data;
   },
 
   async getDocuments() {
-    const response = await apiClient.get("/api/profile/documents");
+    const response = await apiClient.get("/profile/documents");
     return response.data;
   },
 
@@ -73,7 +73,7 @@ export const profileApi = {
     formData.append("document", file);
     formData.append("documentName", documentName);
 
-    const response = await apiClient.post("/api/profile/documents", formData, {
+    const response = await apiClient.post("/profile/documents", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -83,7 +83,7 @@ export const profileApi = {
 
   async deleteDocument(documentId: number) {
     const response = await apiClient.delete(
-      `/api/profile/documents/${documentId}`
+      `/profile/documents/${documentId}`
     );
     return response.data;
   },

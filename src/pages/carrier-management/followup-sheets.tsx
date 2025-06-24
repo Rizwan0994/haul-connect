@@ -48,6 +48,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { useAuth } from '@/components/auth/auth-context';
 import { 
   Plus, 
   Search, 
@@ -70,7 +72,7 @@ import followupSheetApi, { FollowupSheet, FollowupSheetFormData } from '@/servic
 
 const initialFormData: FollowupSheetFormData = {
   agent_name: '',
-  date: new Date().toISOString().slice(0, 16), // Include time in ISO format
+  date: new Date().toISOString(), // Current date/time in ISO format
   name: '',
   mc_no: '',
   contact: '',
@@ -97,7 +99,8 @@ const FormDialog = React.memo(({
   onSubmit, 
   submitting, 
   editingSheet, 
-  onCancel 
+  onCancel,
+  currentUser
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -109,7 +112,49 @@ const FormDialog = React.memo(({
   submitting: boolean;
   editingSheet: FollowupSheet | null;
   onCancel: () => void;
-}) => (
+  currentUser: any;
+}) => {
+  
+  // Auto-populate agent name from current user on component mount or when currentUser changes
+  React.useEffect(() => {
+    if (currentUser && !formData.agent_name) {
+      const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
+      if (fullName) {
+        onInputChange('agent_name', fullName);
+      }
+    }
+  }, [currentUser, formData.agent_name, onInputChange]);
+  
+  const handleDateTimeChange = (date: Date | undefined) => {
+    if (date) {
+      onInputChange('date', date.toISOString());
+    }
+  };
+  
+  const handleFollowupDateChange = (date: Date | undefined) => {
+    if (date) {
+      onInputChange('followup_scheduled_date', format(date, 'yyyy-MM-dd'));
+      onInputChange('followup_scheduled_time', format(date, 'HH:mm'));
+    } else {
+      onInputChange('followup_scheduled_date', '');
+      onInputChange('followup_scheduled_time', '');
+    }
+  };
+
+  const getFollowupDateTime = () => {
+    if (formData.followup_scheduled_date && formData.followup_scheduled_time) {
+      try {
+        const dateTime = new Date(`${formData.followup_scheduled_date}T${formData.followup_scheduled_time}`);
+        if (isNaN(dateTime.getTime())) return undefined;
+        return dateTime;
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  };
+
+  return (
   <Dialog open={isOpen} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -118,40 +163,28 @@ const FormDialog = React.memo(({
       </DialogHeader>
       
       <form onSubmit={onSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">          <div className="space-y-2">
             <Label htmlFor="agent_name">Agent Name</Label>
             <Input
               id="agent_name"
               value={formData.agent_name}
               onChange={(e) => onInputChange('agent_name', e.target.value)}
+              placeholder="Agent Name"
+              // disabled={!!currentUser}
               required
             />
           </div>
-            <div className="space-y-2">
-            <Label htmlFor="date">Date Created</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <Input
-                id="date"
-                type="date"
-                value={formData.date.split('T')[0]}
-                onChange={(e) => {
-                  const currentTime = formData.date.includes('T') ? formData.date.split('T')[1] : '00:00';
-                  onInputChange('date', `${e.target.value}T${currentTime}`);
-                }}
-                required
-              />
-              <Input
-                id="time"
-                type="time"
-                value={formData.date.includes('T') ? formData.date.split('T')[1].substring(0, 5) : '00:00'}
-                onChange={(e) => {
-                  const currentDate = formData.date.split('T')[0];
-                  onInputChange('date', `${currentDate}T${e.target.value}`);
-                }}
-                required
-              />
-            </div>
+          
+          <div>
+            <DateTimePicker
+              date={formData.date ? new Date(formData.date) : new Date()}
+              onDateChange={handleDateTimeChange}
+              showTime={true}
+              placeholder="Select date and time"
+              label="Date Created"
+              required
+              clearable={false}
+            />
           </div>
           
           <div className="space-y-2">
@@ -296,28 +329,17 @@ const FormDialog = React.memo(({
                 Follow-up Complete
               </Button>
             </div>
-          </div>
-          
-          {/* Follow-up Scheduling */}
-          {(formData.followup_status === 'required' || formData.followup_status === 'rescheduled') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="followup_scheduled_date">Follow-up Date</Label>
-                <Input
-                  id="followup_scheduled_date"
-                  type="date"
-                  value={formData.followup_scheduled_date || ''}
-                  onChange={(e) => onInputChange('followup_scheduled_date', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="followup_scheduled_time">Follow-up Time</Label>
-                <Input
-                  id="followup_scheduled_time"
-                  type="time"
-                  value={formData.followup_scheduled_time || ''}
-                  onChange={(e) => onInputChange('followup_scheduled_time', e.target.value)}
+          </div>          {/* Follow-up Scheduling */}          {(formData.followup_status === 'required' || formData.followup_status === 'rescheduled') && (
+            <div className="space-y-4 mt-4">
+              <div>
+                <DateTimePicker
+                  date={getFollowupDateTime()}
+                  onDateChange={handleFollowupDateChange}
+                  showTime={true}
+                  placeholder="Select follow-up date and time"
+                  label="Follow-up Date & Time"
+                  required={true}
+                  error={!getFollowupDateTime() ? "Please set a follow-up date and time" : undefined}
                 />
               </div>
             </div>
@@ -351,12 +373,11 @@ const FormDialog = React.memo(({
             ) : (
               editingSheet ? 'Update' : 'Create'
             )}
-          </Button>
-        </DialogFooter>
+          </Button>        </DialogFooter>
       </form>
     </DialogContent>
   </Dialog>
-));
+)});
 
 export default function FollowupSheets() {
   const [followupSheets, setFollowupSheets] = useState<FollowupSheet[]>([]);
@@ -365,10 +386,38 @@ export default function FollowupSheets() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingSheet, setEditingSheet] = useState<FollowupSheet | null>(null);
-  const [formData, setFormData] = useState<FollowupSheetFormData>(initialFormData);
+  const [editingSheet, setEditingSheet] = useState<FollowupSheet | null>(null);  const { toast } = useToast();
+  const { currentUser } = useAuth();
+  
+  // Create initial form data with current user's name
+  const getInitialFormData = useCallback((): FollowupSheetFormData => ({
+    agent_name: currentUser ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : '',
+    date: new Date().toISOString(), // Current date/time in ISO format
+    name: '',
+    mc_no: '',
+    contact: '',
+    email: '',
+    truck_type: '',
+    preferred_lanes: '',
+    equipment: '',
+    zip_code: '',
+    percentage: 0,
+    comments: '',
+    followup_status: 'required',
+    followup_scheduled_date: null,
+    followup_scheduled_time: null
+  }), [currentUser]);
+  
+  const [formData, setFormData] = useState<FollowupSheetFormData>(getInitialFormData);
   const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
+  
+  // Update formData when currentUser changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      agent_name: currentUser ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : prev.agent_name
+    }));
+  }, [currentUser]);
 
   useEffect(() => {
     fetchFollowupSheets();
@@ -455,10 +504,11 @@ export default function FollowupSheets() {
       comments: sheet.comments,
       followup_status: sheet.followup_status || 'required',
       followup_scheduled_date: sheet.followup_scheduled_date || null,
-      followup_scheduled_time: sheet.followup_scheduled_time || null
-    });
+      followup_scheduled_time: sheet.followup_scheduled_time || null    });
     setIsEditDialogOpen(true);
-  };const handleDelete = async (id: number) => {
+  };
+  
+  const handleDelete = async (id: number) => {
     try {
       await followupSheetApi.delete(id);
       setFollowupSheets(prev => prev.filter(sheet => sheet.id !== id));
@@ -474,22 +524,19 @@ export default function FollowupSheets() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleCancel = useCallback(() => {
+  };  const handleCancel = useCallback(() => {
     setIsCreateDialogOpen(false);
     setIsEditDialogOpen(false);
-    setFormData(initialFormData);
+    setFormData(getInitialFormData());
     setEditingSheet(null);
-  }, []);
-
+  }, [getInitialFormData]);
   // Memoize filtered sheets to prevent unnecessary re-calculations
   const filteredSheets = useMemo(() => 
     followupSheets.filter(sheet =>
       sheet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sheet.mc_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sheet.agent_name.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [followupSheets, searchTerm]  );
+    ), [followupSheets, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -500,8 +547,12 @@ export default function FollowupSheets() {
           <p className="text-muted-foreground">
             Manage carrier followup sheets and contact information
           </p>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        </div>        <Button onClick={() => {
+          // Reset form with fresh data including current timestamp
+          const freshData = getInitialFormData();
+          setFormData(freshData);
+          setIsCreateDialogOpen(true);
+        }}>
           <Plus className="mr-2 h-4 w-4" />
           New Followup Sheet
         </Button>
@@ -558,8 +609,10 @@ export default function FollowupSheets() {
                 {searchTerm ? 'No sheets match your search.' : 'Get started by creating a new followup sheet.'}
               </p>
               {!searchTerm && (
-                <div className="mt-6">
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <div className="mt-6">                  <Button onClick={() => {
+                    setFormData(getInitialFormData());
+                    setIsCreateDialogOpen(true);
+                  }}>
                     <Plus className="mr-2 h-4 w-4" />
                     New Followup Sheet
                   </Button>
@@ -731,6 +784,7 @@ export default function FollowupSheets() {
         submitting={submitting}
         editingSheet={editingSheet}
         onCancel={handleCancel}
+        currentUser={currentUser}
       />
 
       <FormDialog
@@ -744,6 +798,7 @@ export default function FollowupSheets() {
         submitting={submitting}
         editingSheet={editingSheet}
         onCancel={handleCancel}
+        currentUser={currentUser}
       />
     </div>
   );

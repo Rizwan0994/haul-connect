@@ -14,6 +14,7 @@ import { useCarrierModal } from "@/hooks/use-carrier-modal";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/components/auth/permission-gate";
+import { useAuth } from "@/components/auth/auth-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +59,9 @@ export type Carrier = {
   };
 };
 
-export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
+export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => {
+  // Create all possible columns
+  const allColumns: ColumnDef<Carrier>[] = [
   {
     accessorKey: "mc_number",
     header: "MC Number",
@@ -398,6 +401,31 @@ export const createColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => [
     },
   },
 ];
+
+  // Return all columns - permission filtering will be handled by the component that uses these
+  return allColumns;
+};
+
+// Hook to get permission-filtered columns
+export const useCarrierColumns = (onRefresh?: () => void): ColumnDef<Carrier>[] => {
+  const { hasSpecificPermission } = useAuth();
+  
+  const allColumns = createColumns(onRefresh);
+  
+  // Filter columns based on permissions
+  return allColumns.filter(column => {
+    // Check for "Created By" column using id or by checking header
+    const isCreatorColumn = (column as any).accessorKey === 'creator';
+    const isCreatedAtColumn = (column as any).accessorKey === 'created_at';
+    
+    if (isCreatorColumn || isCreatedAtColumn) {
+      return hasSpecificPermission('carriers.view_creation_details');
+    }
+    
+    // All other columns are visible by default
+    return true;
+  });
+};
 
 // Default columns export for backward compatibility
 export const columns = createColumns();

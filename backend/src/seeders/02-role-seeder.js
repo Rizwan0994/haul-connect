@@ -51,9 +51,9 @@ const systemRoles = [
 // Role permission assignments - define permissions for each role
 const rolePermissions = {
   // Admin has all permissions (will be assigned separately)
-    // Manager permissions
+  // Manager permissions
   'manager': [    // Feature permissions    'users.view', 'users.create', 'users.edit', 'users.status',
-    'carriers.view', 'carriers.create', 'carriers.edit',
+    'carriers.view', 'carriers.create', 'carriers.edit', 'carriers.view_creation_details',
     'carrier.approve.manager', 'carrier.reject', 'carrier.view.pending',
     'dispatch.view', 'dispatch.create', 'dispatch.edit',
     'dispatch.approve.manager', 'dispatch.reject', 'dispatch.view.pending',

@@ -67,17 +67,40 @@ exports.createCarrier = async (req, res) => {
 
 exports.getAllCarriers = async (req, res) => {
   try {
+    // Check if user has permission to view creation details
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const canViewCreationDetails = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole) || 
+                                   req.userPermissions?.includes('carriers.view_creation_details');
+
+    const includeOptions = [];
+    
+    // Only include creator details if user has permission
+    if (canViewCreationDetails) {
+      includeOptions.push({
+        model: User,
+        as: 'creator',
+        attributes: ['id', 'email', 'first_name', 'last_name'],
+        required: false // LEFT JOIN to include carriers without creators
+      });
+    }
+
     const carriers = await CarrierProfile.findAll({
-      include: [        {
-          model: User,
-          as: 'creator',
-          attributes: ['id', 'email', 'first_name', 'last_name'],
-          required: false // LEFT JOIN to include carriers without creators
-        }
-      ],
+      include: includeOptions,
       order: [['created_at', 'DESC']]
     });
-    res.json({ status: "success", data: carriers });
+
+    // Filter out creation timestamp if user doesn't have permission
+    let responseData = carriers;
+    if (!canViewCreationDetails) {
+      responseData = carriers.map(carrier => {
+        const carrierData = carrier.toJSON();
+        delete carrierData.created_at;
+        delete carrierData.created_by;
+        return carrierData;
+      });
+    }
+
+    res.json({ status: "success", data: responseData });
   } catch (error) {
     console.log("error",error)
     res.status(500).json({ status: "error", message: error.message });
@@ -86,13 +109,42 @@ exports.getAllCarriers = async (req, res) => {
 
 exports.getCarrierById = async (req, res) => {
   try {
-    const carrier = await CarrierProfile.findByPk(req.params.id);
+    // Check if user has permission to view creation details
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const canViewCreationDetails = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole) || 
+                                   req.userPermissions?.includes('carriers.view_creation_details');
+
+    const includeOptions = [];
+    
+    // Only include creator details if user has permission
+    if (canViewCreationDetails) {
+      includeOptions.push({
+        model: User,
+        as: 'creator',
+        attributes: ['id', 'email', 'first_name', 'last_name'],
+        required: false
+      });
+    }
+
+    const carrier = await CarrierProfile.findByPk(req.params.id, {
+      include: includeOptions
+    });
+
     if (!carrier) {
       return res
         .status(404)
         .json({ status: "error", message: "Carrier not found" });
     }
-    res.json({ status: "success", data: carrier });
+
+    // Filter out creation details if user doesn't have permission
+    let responseData = carrier;
+    if (!canViewCreationDetails) {
+      responseData = carrier.toJSON();
+      delete responseData.created_at;
+      delete responseData.created_by;
+    }
+
+    res.json({ status: "success", data: responseData });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
   }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { DataTable } from '@/components/ui/data-table'
-import { createColumns } from '@/components/carrier-management/columns'
+import { createColumns, useCarrierColumns } from '@/components/carrier-management/columns'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2 } from 'lucide-react'
 import { carrierApiService, CarrierProfile } from '@/services/carrierApi'
@@ -67,9 +67,8 @@ export default function CarrierManagement() {
       setLoading(false)
     }
   }
-
-  // Create columns with refresh function
-  const columns = useMemo(() => createColumns(fetchCarriers), [])
+  // Create columns with refresh function and permission filtering
+  const columns = useCarrierColumns(fetchCarriers);
 
   // Load carriers on component mount
   useEffect(() => {

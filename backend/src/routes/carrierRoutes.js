@@ -2,27 +2,31 @@
 const express = require('express');
 const router = express.Router();
 const carrierController = require('../controllers/carrierController');
+const { authenticateToken, requirePermission, requireRole } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const db = require('../models');
 
-router.post('/', carrierController.createCarrier);
-router.get('/', carrierController.getAllCarriers);
-router.get('/:id', carrierController.getCarrierById);
-router.put('/:id', carrierController.updateCarrier);
-router.delete('/:id', carrierController.deleteCarrier);
+// Apply authentication to all carrier routes
+router.use(authenticateToken);
+
+router.post('/', requirePermission('carriers.create'), carrierController.createCarrier);
+router.get('/', requirePermission('carriers.view'), carrierController.getAllCarriers);
+router.get('/:id', requirePermission('carriers.view'), carrierController.getCarrierById);
+router.put('/:id', requirePermission('carriers.edit'), carrierController.updateCarrier);
+router.delete('/:id', requirePermission('carriers.delete'), carrierController.deleteCarrier);
 
 // User assignment routes
-router.get('/:id/users', carrierController.getCarrierUsers);
-router.post('/:id/users', carrierController.assignUsersToCarrier);
-router.delete('/:id/users/:userId', carrierController.removeUserFromCarrier);
+router.get('/:id/users', requirePermission('carriers.manage_assignments'), carrierController.getCarrierUsers);
+router.post('/:id/users', requirePermission('carriers.manage_assignments'), carrierController.assignUsersToCarrier);
+router.delete('/:id/users/:userId', requirePermission('carriers.manage_assignments'), carrierController.removeUserFromCarrier);
 
 // Commission management routes
-router.put('/:id/commission', carrierController.updateCarrierCommissionStatus);
-router.post('/:id/load-completed', carrierController.markLoadCompleted);
-router.get('/commission/summary', carrierController.getCommissionSummary);
+router.put('/:id/commission', requirePermission('carriers.edit'), carrierController.updateCarrierCommissionStatus);
+router.post('/:id/load-completed', requirePermission('carriers.edit'), carrierController.markLoadCompleted);
+router.get('/commission/summary', requirePermission('carriers.view'), carrierController.getCommissionSummary);
 
 // Address suggestion routes
-router.get('/suggestions/insurance-addresses', async (req, res) => {
+router.get('/suggestions/insurance-addresses', requirePermission('carriers.view'), async (req, res) => {
   try {
     const { search } = req.query;
 
@@ -62,7 +66,7 @@ router.get('/suggestions/insurance-addresses', async (req, res) => {
   }
 });
 
-router.get('/suggestions/factoring-addresses', async (req, res) => {
+router.get('/suggestions/factoring-addresses', requirePermission('carriers.view'), async (req, res) => {
   try {
     const { search } = req.query;
 

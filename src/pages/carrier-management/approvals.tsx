@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DataTable } from '@/components/ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
-import { carrierApprovalApi, CarrierApprovalItem } from '@/services/carrierApprovalApi';
+import { carrierApprovalApi, CarrierApprovalItem, CarrierApprovalHistoryItem } from '@/services/carrierApprovalApi';
 import { useAuth } from '@/components/auth/auth-context';
 import { useSocket } from '@/contexts/SocketContext';
 
@@ -30,10 +30,11 @@ interface ActionDialogState {
 
 export default function CarrierApprovals() {
   const { toast } = useToast();
-  const { currentUser, hasPermission, hasSpecificPermission } = useAuth();
-  const { socket, isConnected } = useSocket();
+  const { currentUser, hasPermission, hasSpecificPermission } = useAuth();  const { socket, isConnected } = useSocket();
   const [carriers, setCarriers] = useState<CarrierApprovalItem[]>([]);
+  const [approvalHistory, setApprovalHistory] = useState<CarrierApprovalHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [actionDialog, setActionDialog] = useState<ActionDialogState>({
@@ -45,11 +46,10 @@ export default function CarrierApprovals() {
 
   // Check user permissions
   const hasManagerApprovePermission = hasPermission(['manager', 'admin', 'Manager', 'Admin', 'Super Admin']) || hasSpecificPermission('carrier.approve.manager');
-  const hasAccountsApprovePermission = hasPermission(['account', 'admin', 'Account', 'Admin', 'Super Admin']) || hasSpecificPermission('carrier.approve.accounts');
-  const hasRejectPermission = hasPermission(['manager', 'admin', 'account', 'Manager', 'Admin', 'Account', 'Super Admin']) || hasSpecificPermission('carrier.reject');
+  const hasAccountsApprovePermission = hasPermission(['account', 'admin', 'Account', 'Admin', 'Super Admin']) || hasSpecificPermission('carrier.approve.accounts');  const hasRejectPermission = hasPermission(['manager', 'admin', 'account', 'Manager', 'Admin', 'Account', 'Super Admin']) || hasSpecificPermission('carrier.reject');
   const hasDisablePermission = hasPermission(['admin', 'Admin', 'Super Admin']) || hasSpecificPermission('carrier.disable');
   const hasViewPendingPermission = hasPermission(['manager', 'admin', 'account', 'Manager', 'Admin', 'Account', 'Super Admin']) || hasSpecificPermission('carrier.view.pending');
-
+  const hasViewHistoryPermission = hasPermission(['admin', 'manager', 'Admin', 'Manager', 'Super Admin']) || hasSpecificPermission('carrier.view.history');
   // Fetch carriers based on status
   const fetchCarriers = useCallback(async (status?: 'pending' | 'manager_approved' | 'approved' | 'rejected' | 'disabled') => {
     if (!hasViewPendingPermission) {
@@ -72,6 +72,27 @@ export default function CarrierApprovals() {
     }
   }, [hasViewPendingPermission]);
 
+  // Fetch approval history
+  const fetchApprovalHistory = useCallback(async () => {
+    if (!hasViewHistoryPermission) {
+      return;
+    }
+
+    try {
+      setHistoryLoading(true);
+      const data = await carrierApprovalApi.getApprovalHistory();
+      setApprovalHistory(data);
+    } catch (error: any) {
+      console.error('Error fetching approval history:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to fetch approval history',
+        variant: 'destructive',
+      });
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [hasViewHistoryPermission]);
   // Initial load and tab change handler
   useEffect(() => {
     const statusMap: Record<string, 'pending' | 'manager_approved' | 'approved' | 'rejected' | 'disabled' | undefined> = {
@@ -83,8 +104,12 @@ export default function CarrierApprovals() {
       'all': undefined
     };
     
-    fetchCarriers(statusMap[activeTab]);
-  }, [activeTab, fetchCarriers]);
+    if (activeTab === 'history') {
+      fetchApprovalHistory();
+    } else {
+      fetchCarriers(statusMap[activeTab]);
+    }
+  }, [activeTab, fetchCarriers, fetchApprovalHistory]);
   // Socket event handlers for real-time updates
   useEffect(() => {
     if (!socket || !isConnected) return;
@@ -167,9 +192,13 @@ export default function CarrierApprovals() {
         'disabled': 'disabled',
         'all': undefined
       };
-      
-      fetchCarriers(statusMap[activeTab]);
+        fetchCarriers(statusMap[activeTab]);
       closeActionDialog();
+      
+      // Also refresh history if it's the active tab
+      if (activeTab === 'history') {
+        fetchApprovalHistory();
+      }
     } catch (error: any) {
       console.error('Error performing action:', error);
       toast({
@@ -328,11 +357,94 @@ export default function CarrierApprovals() {
             </Button>
           </div>
         );
+      },    },
+  ];
+
+  // Approval history table columns
+  const historyColumns: ColumnDef<CarrierApprovalHistoryItem>[] = [
+    {
+      accessorKey: 'carrier.mc_number',
+      header: 'MC Number',
+      cell: ({ row }) => (
+        <div className="font-medium">{row.original.carrier.mc_number}</div>
+      ),
+    },
+    {
+      accessorKey: 'carrier.company_name',
+      header: 'Company Name',
+      cell: ({ row }) => (
+        <div className="font-medium">{row.original.carrier.company_name}</div>
+      ),
+    },
+    {
+      accessorKey: 'action',
+      header: 'Action',
+      cell: ({ row }) => {
+        const action = row.getValue('action') as string;
+        const getActionBadge = (action: string) => {
+          switch (action) {
+            case 'created':
+              return <Badge variant="outline" className="bg-blue-50 text-blue-800">Created</Badge>;
+            case 'manager_approved':
+              return <Badge variant="outline" className="bg-green-50 text-green-800">Manager Approved</Badge>;
+            case 'accounts_approved':
+              return <Badge variant="outline" className="bg-emerald-50 text-emerald-800">Accounts Approved</Badge>;
+            case 'rejected':
+              return <Badge variant="destructive">Rejected</Badge>;
+            case 'disabled':
+              return <Badge variant="secondary">Disabled</Badge>;
+            case 'enabled':
+              return <Badge variant="outline" className="bg-green-50 text-green-800">Enabled</Badge>;
+            default:
+              return <Badge variant="outline">{action}</Badge>;
+          }
+        };
+        return getActionBadge(action);
       },
+    },
+    {
+      accessorKey: 'action_by',
+      header: 'Approved/Rejected By',
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium">
+            {row.original.action_by.first_name} {row.original.action_by.last_name}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {row.original.action_by.role}
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'action_at',
+      header: 'Date',
+      cell: ({ row }) => (
+        <div className="text-sm">
+          {new Date(row.getValue('action_at')).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'notes',
+      header: 'Notes/Reason',
+      cell: ({ row }) => (
+        <div className="max-w-xs">
+          <div className="text-sm text-muted-foreground truncate">
+            {row.original.rejection_reason || row.original.notes || '-'}
+          </div>
+        </div>
+      ),
     },
   ];
 
-  if (!hasViewPendingPermission) {
+  if (!hasViewPendingPermission && !hasViewHistoryPermission) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -353,48 +465,72 @@ export default function CarrierApprovals() {
         <p className="text-muted-foreground">
           Manage carrier profile approvals and status changes
         </p>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+      </div>      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className={`grid w-full ${hasViewHistoryPermission ? 'grid-cols-7' : 'grid-cols-6'}`}>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="manager-approved">Manager Approved</TabsTrigger>
           <TabsTrigger value="approved">Approved</TabsTrigger>
           <TabsTrigger value="rejected">Rejected</TabsTrigger>
           <TabsTrigger value="disabled">Disabled</TabsTrigger>
           <TabsTrigger value="all">All</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')} Carriers
-              </CardTitle>
-              <CardDescription>
-                {activeTab === 'pending' && 'Carriers awaiting manager approval'}
-                {activeTab === 'manager-approved' && 'Carriers approved by manager, awaiting accounts approval'}
-                {activeTab === 'approved' && 'Fully approved and active carriers'}
-                {activeTab === 'rejected' && 'Rejected carrier profiles'}
-                {activeTab === 'disabled' && 'Disabled carrier profiles'}
-                {activeTab === 'all' && 'All carriers in the approval system'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading carriers...</span>
-                </div>
-              ) : (
-                <DataTable
-                  columns={columns}
-                  data={carriers}
-                  searchPlaceholder="Search by MC number, company name, or owner..."
-                />
-              )}
-            </CardContent>
-          </Card>
+          {hasViewHistoryPermission && (
+            <TabsTrigger value="history">Approval History</TabsTrigger>
+          )}
+        </TabsList><TabsContent value={activeTab} className="mt-6">
+          {activeTab === 'history' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Approval History</CardTitle>
+                <CardDescription>
+                  Complete history of all carrier approval actions and decisions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {historyLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="ml-2">Loading approval history...</span>
+                  </div>
+                ) : (
+                  <DataTable
+                    columns={historyColumns}
+                    data={approvalHistory}
+                    searchPlaceholder="Search by MC number, company name, or action..."
+                  />
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')} Carriers
+                </CardTitle>
+                <CardDescription>
+                  {activeTab === 'pending' && 'Carriers awaiting manager approval'}
+                  {activeTab === 'manager-approved' && 'Carriers approved by manager, awaiting accounts approval'}
+                  {activeTab === 'approved' && 'Fully approved and active carriers'}
+                  {activeTab === 'rejected' && 'Rejected carrier profiles'}
+                  {activeTab === 'disabled' && 'Disabled carrier profiles'}
+                  {activeTab === 'all' && 'All carriers in the approval system'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="ml-2">Loading carriers...</span>
+                  </div>
+                ) : (
+                  <DataTable
+                    columns={columns}
+                    data={carriers}
+                    searchPlaceholder="Search by MC number, company name, or owner..."
+                  />
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 

@@ -467,6 +467,42 @@ const dispatchApprovalController = {
       console.error('Error fetching approval status:', error);
       res.status(500).json(errorResponse('Failed to fetch approval status', error.message));
     }
+  },
+
+  // Get approval history for all dispatches
+  getApprovalHistory: async (req, res) => {
+    try {
+      const { DispatchApprovalHistory } = require('../models');
+      
+      const history = await DispatchApprovalHistory.findAll({
+        include: [
+          {
+            model: Dispatch,
+            as: 'dispatch',
+            attributes: ['id', 'load_no'],
+            include: [
+              {
+                model: Carrier,
+                as: 'carrier',
+                attributes: ['id', 'company_name', 'mc_number']
+              }
+            ]
+          },
+          {
+            model: User,
+            as: 'action_by',
+            attributes: ['id', 'first_name', 'last_name', 'email', 'role']
+          }
+        ],
+        order: [['action_at', 'DESC']],
+        limit: 500 // Limit to recent 500 records to avoid performance issues
+      });
+
+      res.json(successResponse('Approval history retrieved successfully', history));
+    } catch (error) {
+      console.error('Error fetching approval history:', error);
+      res.status(500).json(errorResponse('Failed to fetch approval history', error.message));
+    }
   }
 };
 

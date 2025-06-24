@@ -379,6 +379,42 @@ const carrierApprovalController = {
         error: error.message
       });
     }
+  },
+
+  // Get approval history for all carriers
+  getApprovalHistory: async (req, res) => {
+    try {
+      const { CarrierApprovalHistory } = require('../models');
+      
+      const history = await CarrierApprovalHistory.findAll({
+        include: [
+          {
+            model: carrier_profile,
+            as: 'carrier',
+            attributes: ['id', 'mc_number', 'company_name', 'owner_name']
+          },
+          {
+            model: user,
+            as: 'action_by',
+            attributes: ['id', 'first_name', 'last_name', 'email', 'role']
+          }
+        ],
+        order: [['action_at', 'DESC']],
+        limit: 500 // Limit to recent 500 records to avoid performance issues
+      });
+
+      res.json({
+        success: true,
+        data: history
+      });
+    } catch (error) {
+      console.error('Error fetching approval history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching approval history',
+        error: error.message
+      });
+    }
   }
 };
 

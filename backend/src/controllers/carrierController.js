@@ -67,12 +67,40 @@ exports.createCarrier = async (req, res) => {
 
 exports.getAllCarriers = async (req, res) => {
   try {
-    // Check if user has permission to view creation details
+    // Check user role and permissions
     const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userId = req.user?.id;
     const canViewCreationDetails = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole) || 
                                    req.userPermissions?.includes('carriers.view_creation_details');
+    
+    // Check if user can view all carriers or only their own
+    const canViewAllCarriers = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
 
-    const includeOptions = [];
+    // Build query conditions
+    let whereClause = {};
+    
+    // If user cannot view all carriers, restrict to their own data
+    if (!canViewAllCarriers) {
+      whereClause = {
+        [Op.or]: [
+          { created_by: userId }, // Carriers they created
+          { sales_agent_id: userId }, // Carriers they are assigned as sales agent
+          // Also include carriers they are assigned to via carrier_user_assignment
+          { '$assignedUsers.id$': userId }
+        ]
+      };
+    }
+
+    const includeOptions = [
+      // Always include assigned users to check assignments
+      {
+        model: User,
+        as: 'assignedUsers',
+        attributes: ['id'],
+        required: false,
+        through: { attributes: [] } // Don't include join table data
+      }
+    ];
     
     // Only include creator details if user has permission
     if (canViewCreationDetails) {
@@ -85,6 +113,7 @@ exports.getAllCarriers = async (req, res) => {
     }
 
     const carriers = await CarrierProfile.findAll({
+      where: whereClause,
       include: includeOptions,
       order: [['created_at', 'DESC']]
     });
@@ -96,9 +125,17 @@ exports.getAllCarriers = async (req, res) => {
         const carrierData = carrier.toJSON();
         delete carrierData.created_at;
         delete carrierData.created_by;
+        delete carrierData.creator;
         return carrierData;
       });
     }
+
+    // Remove assignedUsers from response as it was only used for filtering
+    responseData = responseData.map(carrier => {
+      const carrierData = typeof carrier.toJSON === 'function' ? carrier.toJSON() : carrier;
+      delete carrierData.assignedUsers;
+      return carrierData;
+    });
 
     res.json({ status: "success", data: responseData });
   } catch (error) {
@@ -109,12 +146,25 @@ exports.getAllCarriers = async (req, res) => {
 
 exports.getCarrierById = async (req, res) => {
   try {
-    // Check if user has permission to view creation details
+    // Check user role and permissions
     const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userId = req.user?.id;
     const canViewCreationDetails = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole) || 
                                    req.userPermissions?.includes('carriers.view_creation_details');
+    
+    // Check if user can view all carriers or only their own
+    const canViewAllCarriers = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
 
-    const includeOptions = [];
+    const includeOptions = [
+      // Always include assigned users to check assignments
+      {
+        model: User,
+        as: 'assignedUsers',
+        attributes: ['id'],
+        required: false,
+        through: { attributes: [] }
+      }
+    ];
     
     // Only include creator details if user has permission
     if (canViewCreationDetails) {
@@ -136,13 +186,33 @@ exports.getCarrierById = async (req, res) => {
         .json({ status: "error", message: "Carrier not found" });
     }
 
+    // Check if user has access to this carrier
+    if (!canViewAllCarriers) {
+      const hasAccess = carrier.created_by === userId || 
+                       carrier.sales_agent_id === userId ||
+                       (carrier.assignedUsers && carrier.assignedUsers.some(user => user.id === userId));
+      
+      if (!hasAccess) {
+        return res
+          .status(403)
+          .json({ status: "error", message: "Access denied: You don't have permission to view this carrier" });
+      }
+    }
+
     // Filter out creation details if user doesn't have permission
     let responseData = carrier;
     if (!canViewCreationDetails) {
       responseData = carrier.toJSON();
       delete responseData.created_at;
       delete responseData.created_by;
+      delete responseData.creator;
     }
+
+    // Remove assignedUsers from response
+    if (typeof responseData.toJSON === 'function') {
+      responseData = responseData.toJSON();
+    }
+    delete responseData.assignedUsers;
 
     res.json({ status: "success", data: responseData });
   } catch (error) {

@@ -142,8 +142,7 @@ const invoiceController = {
     } catch (error) {
       console.error('Error creating invoice:', error);
       res.status(500).json(errorResponse('Error creating invoice', error.message));
-    }
-  },
+    }  },
 
   // Get all invoices
   getAllInvoices: async (req, res) => {
@@ -151,31 +150,47 @@ const invoiceController = {
       const { status, page = 1, limit = 10 } = req.query;
       const offset = (page - 1) * limit;
 
+      // Check user role and permissions
+      const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+      const userId = req.user?.id;
+      
+      // Check if user can view all invoices or only their own
+      const canViewAllInvoices = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+
       const whereClause = {};
       if (status) {
         whereClause.status = status;
       }
 
+      // Build include with user filtering
+      const includeOptions = [
+        {
+          model: Dispatch,
+          as: 'dispatch',
+          include: [
+            {
+              model: Carrier,
+              as: 'carrier',
+              attributes: ['id', 'company_name', 'mc_number', 'owner_name', 'phone_number', 'email_address']
+            },
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'first_name', 'last_name', 'email']
+            }
+          ]
+        }
+      ];
+
+      // If user cannot view all invoices, filter by dispatch user_id
+      if (!canViewAllInvoices) {
+        includeOptions[0].where = { user_id: userId };
+        includeOptions[0].required = true; // INNER JOIN to ensure only user's dispatches
+      }
+
       const invoices = await Invoice.findAndCountAll({
         where: whereClause,
-        include: [
-          {
-            model: Dispatch,
-            as: 'dispatch',
-            include: [
-              {
-                model: Carrier,
-                as: 'carrier',
-                attributes: ['id', 'company_name', 'mc_number', 'owner_name', 'phone_number', 'email_address']
-              },
-              {
-                model: User,
-                as: 'user',
-                attributes: ['id', 'first_name', 'last_name', 'email']
-              }
-            ]
-          }
-        ],
+        include: includeOptions,
         order: [['created_at', 'DESC']],
         limit: parseInt(limit),
         offset: parseInt(offset)
@@ -201,6 +216,13 @@ const invoiceController = {
     try {
       const { id } = req.params;
 
+      // Check user role and permissions
+      const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+      const userId = req.user?.id;
+      
+      // Check if user can view all invoices or only their own
+      const canViewAllInvoices = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+
       const invoice = await Invoice.findByPk(id, {
         include: [
           {
@@ -224,6 +246,15 @@ const invoiceController = {
 
       if (!invoice) {
         return res.status(404).json(errorResponse('Invoice not found'));
+      }
+
+      // Check if user has access to this invoice
+      if (!canViewAllInvoices) {
+        if (invoice.dispatch && invoice.dispatch.user_id !== userId) {
+          return res
+            .status(403)
+            .json(errorResponse('Access denied: You don\'t have permission to view this invoice'));
+        }
       }
 
       res.json(successResponse('Invoice retrieved successfully', invoice));

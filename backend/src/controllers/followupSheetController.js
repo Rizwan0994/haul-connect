@@ -52,6 +52,13 @@ exports.getAllFollowupSheets = async (req, res) => {
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     
+    // Check user role and permissions
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userName = req.user ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() : '';
+    
+    // Check if user can view all followup sheets or only their own
+    const canViewAllSheets = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+    
     const whereClause = search ? {
       [Op.or]: [
         { agent_name: { [Op.iLike]: `%${search}%` } },
@@ -62,6 +69,25 @@ exports.getAllFollowupSheets = async (req, res) => {
         { equipment: { [Op.iLike]: `%${search}%` } }
       ]
     } : {};
+
+    // If user cannot view all sheets, filter by agent_name
+    if (!canViewAllSheets && userName) {
+      // Add agent_name filter to existing where clause
+      const userFilter = { agent_name: { [Op.iLike]: `%${userName}%` } };
+      
+      if (whereClause[Op.or]) {
+        // If there's already a search filter, combine them with AND
+        whereClause = {
+          [Op.and]: [
+            { [Op.or]: whereClause[Op.or] },
+            userFilter
+          ]
+        };
+      } else {
+        // If no search filter, just use user filter
+        Object.assign(whereClause, userFilter);
+      }
+    }
 
     const { count, rows } = await FollowupSheet.findAndCountAll({
       where: whereClause,
@@ -92,6 +118,13 @@ exports.getAllFollowupSheets = async (req, res) => {
 
 exports.getFollowupSheetById = async (req, res) => {
   try {
+    // Check user role and permissions
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userName = req.user ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() : '';
+    
+    // Check if user can view all followup sheets or only their own
+    const canViewAllSheets = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+
     const followupSheet = await FollowupSheet.findByPk(req.params.id);
     
     if (!followupSheet) {
@@ -99,6 +132,17 @@ exports.getFollowupSheetById = async (req, res) => {
         success: false,
         message: "Followup sheet not found"
       });
+    }
+
+    // Check if user has access to this followup sheet
+    if (!canViewAllSheets) {
+      const agentName = followupSheet.agent_name || '';
+      if (!agentName.toLowerCase().includes(userName.toLowerCase()) && userName) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You don't have permission to view this followup sheet"
+        });
+      }
     }
 
     res.json({

@@ -83,7 +83,25 @@ const createDispatch = async (req, res) => {
 
 const getAllDispatches = async (req, res) => {
   try {
+    // Check user role and permissions
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userId = req.user?.id;
+    
+    // Check if user can view all dispatches or only their own
+    const canViewAllDispatches = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+
+    // Build query conditions
+    let whereClause = {};
+    
+    // If user cannot view all dispatches, restrict to their own data
+    if (!canViewAllDispatches) {
+      whereClause = {
+        user_id: userId // Only dispatches they created
+      };
+    }
+
     const dispatches = await Dispatch.findAll({
+      where: whereClause,
       include: [
         {
           model: Carrier,
@@ -110,6 +128,13 @@ const getAllDispatches = async (req, res) => {
 
 const getDispatchById = async (req, res) => {
   try {
+    // Check user role and permissions
+    const userRole = req.user?.userRole?.name || req.user?.category || req.user?.role;
+    const userId = req.user?.id;
+    
+    // Check if user can view all dispatches or only their own
+    const canViewAllDispatches = ['admin', 'Admin', 'Super Admin', 'manager', 'Manager'].includes(userRole);
+
     const dispatch = await Dispatch.findByPk(req.params.id, {
       include: [
         {
@@ -127,6 +152,15 @@ const getDispatchById = async (req, res) => {
 
     if (!dispatch) {
       return res.status(404).json(errorResponse("Dispatch not found"));
+    }
+
+    // Check if user has access to this dispatch
+    if (!canViewAllDispatches) {
+      if (dispatch.user_id !== userId) {
+        return res
+          .status(403)
+          .json(errorResponse("Access denied: You don't have permission to view this dispatch"));
+      }
     }
 
     res.json(successResponse("Dispatch retrieved successfully", dispatch));

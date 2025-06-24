@@ -77,6 +77,28 @@ export interface CarrierApprovalItem {
   };
 }
 
+export interface CarrierApprovalHistoryItem {
+  id: number;
+  carrier_id: number;
+  action: 'created' | 'manager_approved' | 'accounts_approved' | 'rejected' | 'disabled' | 'enabled';
+  action_by: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+  };
+  action_at: string;
+  notes?: string;
+  rejection_reason?: string;
+  carrier: {
+    id: number;
+    mc_number: string;
+    company_name: string;
+    owner_name: string;
+  };
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -166,6 +188,17 @@ export const carrierApprovalApi = {
     } catch (error: any) {
       console.error('Error fetching approval status:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch approval status');
+    }
+  },
+
+  // Get approval history for all carriers
+  getApprovalHistory: async (): Promise<CarrierApprovalHistoryItem[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<CarrierApprovalHistoryItem[]>>('/carrier-approvals/history');
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching approval history:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch approval history');
     }
   }
 };

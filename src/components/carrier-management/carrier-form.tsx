@@ -27,10 +27,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/components/auth/auth-context";
 import { Eye, EyeOff } from "lucide-react";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
+import { useAutocomplete } from "@/hooks/use-autocomplete";
+import { addressSuggestionsApi } from "@/services/address-suggestions";
 
 // Define form schema with Zod
 const carrierFormSchema = z.object({
   company_name: z.string().min(2, "Company name is required").max(100, "Company name is too long"),
+  dba: z.string().optional().refine(val => !val || val.length <= 100, "DBA name is too long"),
   mc_number: z.string().min(2, "MC number is required")
     .regex(/^[0-9]+$/, "MC number should contain only numbers"),
   us_dot_number: z.string().optional()
@@ -126,30 +130,56 @@ export function CarrierForm({
 }: CarrierFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const [passwordVisibility, setPasswordVisibility] = useState<Record<string, boolean>>({});
+  const [insuranceAddressValue, setInsuranceAddressValue] = useState("");
+  const [factoringAddressValue, setFactoringAddressValue] = useState("");
   const { hasPermission } = useAuth();
   // Check if user is admin
   const isAdmin = hasPermission(['admin', 'super admin']);
-  
-  // Toggle password visibility
+    // Toggle password visibility
   const togglePasswordVisibility = (field: string) => {
     setPasswordVisibility(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
   };
-  
-  // Reset tab to basic if trying to access admin tab without permissions
+
+  // Autocomplete for insurance addresses
+  const insuranceAutocomplete = useAutocomplete({
+    searchTerm: insuranceAddressValue,
+    fetchSuggestions: addressSuggestionsApi.getInsuranceAddressSuggestions,
+    debounceMs: 300,
+    minSearchLength: 2,
+  });
+
+  // Autocomplete for factoring addresses
+  const factoringAutocomplete = useAutocomplete({
+    searchTerm: factoringAddressValue,
+    fetchSuggestions: addressSuggestionsApi.getFactoringAddressSuggestions,
+    debounceMs: 300,
+    minSearchLength: 2,
+  });
+    // Reset tab to basic if trying to access admin tab without permissions
   React.useEffect(() => {
     if (activeTab === "admin" && !isAdmin) {
       setActiveTab("basic");
     }
   }, [activeTab, isAdmin]);
+
+  // Sync autocomplete values with form data
+  React.useEffect(() => {
+    if (initialData?.insurance_company_address) {
+      setInsuranceAddressValue(initialData.insurance_company_address);
+    }
+    if (initialData?.factoring_company_address) {
+      setFactoringAddressValue(initialData.factoring_company_address);
+    }
+  }, [initialData]);
   
   // Initialize the form with default values
   const form = useForm<CarrierFormValues>({
-    resolver: zodResolver(carrierFormSchema),
-    defaultValues: {
+    resolver: zodResolver(carrierFormSchema),    defaultValues: {
       company_name: initialData?.company_name || "",
+      dba: initialData?.dba || "",
       mc_number: initialData?.mc_number || "",
       us_dot_number: initialData?.us_dot_number || "",
       owner_name: initialData?.owner_name || "",
@@ -239,8 +269,7 @@ export function CarrierForm({
 
           {/* Basic Information Tab */}
           <TabsContent value="basic" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">              <FormField
                 control={form.control}
                 name="company_name"
                 render={({ field }) => (
@@ -248,6 +277,19 @@ export function CarrierForm({
                     <FormLabel>Company Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter company name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dba"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>DBA (Doing Business As)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter DBA name (optional)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -633,15 +675,24 @@ export function CarrierForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-              <FormField
+              />              <FormField
                 control={form.control}
                 name="insurance_company_address"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Insurance Company Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Address" {...field} />
+                      <AutocompleteInput
+                        value={field.value || ""}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          setInsuranceAddressValue(value);
+                        }}
+                        onBlur={field.onBlur}
+                        placeholder="Start typing address..."
+                        suggestions={insuranceAutocomplete.suggestions}
+                        isLoading={insuranceAutocomplete.isLoading}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -704,15 +755,24 @@ export function CarrierForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-              <FormField
+              />              <FormField
                 control={form.control}
                 name="factoring_company_address"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Factoring Company Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Address" {...field} />
+                      <AutocompleteInput
+                        value={field.value || ""}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          setFactoringAddressValue(value);
+                        }}
+                        onBlur={field.onBlur}
+                        placeholder="Start typing address..."
+                        suggestions={factoringAutocomplete.suggestions}
+                        isLoading={factoringAutocomplete.isLoading}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

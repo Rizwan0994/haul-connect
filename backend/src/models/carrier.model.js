@@ -27,10 +27,14 @@ module.exports = (sequelize) => {
       us_dot_number: {
         type: DataTypes.STRING,
         // unique: true,
-      },
-      company_name: {
+      },      company_name: {
         type: DataTypes.STRING,
         //  allowNull: false
+      },
+      dba: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: 'Doing Business As name'
       },
       owner_name: {
         type: DataTypes.STRING,

@@ -2,10 +2,10 @@ import apiClient from "./api-client";
 
 export interface Carrier {
   id: string;
-  status: "active" | "inactive" | "pending" | "suspended";
-  mc_number: string;
+  status: "active" | "inactive" | "pending" | "suspended";  mc_number: string;
   us_dot_number?: string;
   company_name: string;
+  dba?: string;
   owner_name: string;
   // Driver details
   driver_name?: string;

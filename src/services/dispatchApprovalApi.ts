@@ -1,4 +1,30 @@
 import api from '../lib/api-client';
+
+export interface DispatchApprovalHistoryItem {
+  id: number;
+  dispatch_id: number;
+  action: 'created' | 'manager_approved' | 'accounts_approved' | 'rejected' | 'disabled' | 'enabled';
+  action_by: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+  };
+  action_at: string;
+  notes?: string;
+  rejection_reason?: string;
+  dispatch: {
+    id: number;
+    load_no: string;
+    carrier?: {
+      id: number;
+      company_name: string;
+      mc_number: string;
+    };
+  };
+}
+
 export interface DispatchApproval {
   id: number;
   load_no: string;
@@ -77,6 +103,12 @@ export const dispatchApprovalAPI = {
   // Get approval status for a specific dispatch
   getApprovalStatus: async (dispatchId: number): Promise<DispatchApproval> => {
     const response = await api.get(`/dispatch-approvals/${dispatchId}/status`);
+    return response.data.data;
+  },
+
+  // Get approval history for all dispatches
+  getApprovalHistory: async (): Promise<DispatchApprovalHistoryItem[]> => {
+    const response = await api.get('/dispatch-approvals/history');
     return response.data.data;
   },
 };

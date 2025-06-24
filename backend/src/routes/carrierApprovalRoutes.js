@@ -67,4 +67,14 @@ router.get('/:carrierId/status',
   carrierApprovalController.getApprovalStatus
 );
 
+/**
+ * @route GET /api/carrier-approvals/history
+ * @desc Get approval history for all carriers
+ * @access Admin, Manager roles
+ */
+router.get('/history',
+//   permissionMiddleware(['carrier.view.history']),
+  carrierApprovalController.getApprovalHistory
+);
+
 module.exports = router;

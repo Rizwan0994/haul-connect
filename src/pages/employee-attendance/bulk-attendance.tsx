@@ -314,13 +314,7 @@ export default function BulkAttendance() {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button
-                    onClick={() => generateCustomReport('pdf')}
-                    variant="outline"
-                  >
-                    <FileDown className="w-4 h-4 mr-2" />
-                    PDF Report
-                  </Button>
+      
                   <Button
                     onClick={() => generateCustomReport('excel')}
                   >

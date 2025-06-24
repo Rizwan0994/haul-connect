@@ -24,4 +24,7 @@ router.post('/:id/disable', requirePermission('dispatch.disable'), dispatchAppro
 // Get approval status for a specific dispatch
 router.get('/:id/status', requirePermission('dispatch.view'), dispatchApprovalController.getApprovalStatus);
 
+// Get approval history for all dispatches
+router.get('/history', requirePermission('dispatch.view.history'), dispatchApprovalController.getApprovalHistory);
+
 module.exports = router;
